@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#17130f" />
+  <title>CLIO Radar de Acervo</title>
+  <style>
+    :root{
+      --bg:#f4f0e8; --paper:#fffdf8; --ink:#201a14; --muted:#776d62;
+      --line:#ded6c9; --accent:#7a3426; --accent2:#a75d45; --gold:#9c762f;
+      --good:#35634a; --bad:#8a392f; --soft:#ede6da; --shadow:0 14px 35px rgba(42,28,14,.10);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{min-height:100vh}
+    button,input,select{font:inherit}
+    input,select,textarea{font-size:16px}
+    button{cursor:pointer}
+    .shell{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}
+    aside{position:sticky;top:0;height:100vh;padding:26px 18px;border-right:1px solid var(--line);background:#191510;color:#f7f1e8}
+    .brand{font-family:Georgia,serif;font-size:28px;letter-spacing:.08em;margin:0 10px 5px}
+    .brand-sub{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#bfb3a6;margin:0 10px 28px}
+    nav button{width:100%;border:0;background:transparent;color:#cabfb3;padding:12px 13px;border-radius:12px;text-align:left;margin:3px 0}
+    nav button.active, nav button:hover{background:#2a241e;color:#fff}
+    nav .ico{display:inline-block;width:25px}
+    .sync{position:absolute;left:18px;right:18px;bottom:22px;padding:12px;border:1px solid #3d352d;border-radius:14px;color:#bfb3a6;font-size:12px}
+    .sync b{color:#fff;display:block;margin-bottom:4px}
+    main{padding:30px 36px 70px;max-width:1500px;width:100%;margin:auto}
+    .topbar{display:flex;gap:14px;align-items:center;margin-bottom:22px}
+    .search-wrap{position:relative;flex:1}
+    .search{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:15px 18px 15px 45px;outline:none;box-shadow:0 3px 10px rgba(42,28,14,.04)}
+    .search:focus{border-color:#bca990;box-shadow:0 0 0 4px rgba(122,52,38,.08)}
+    .mag{position:absolute;left:17px;top:15px;color:var(--muted)}
+    .iconbtn{border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:13px 15px}
+    .hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin:16px 0 24px}
+    h1,h2,h3{font-family:Georgia,serif;font-weight:600}
+    h1{font-size:36px;margin:0 0 7px}
+    .subtitle{color:var(--muted);margin:0}
+    .date{color:var(--muted);font-size:13px}
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin:22px 0}
+    .metric{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 3px 12px rgba(42,28,14,.04)}
+    .metric .label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .metric strong{font-family:Georgia,serif;font-size:31px;display:block;margin-top:8px}
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+    .chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:9px 12px;color:#554c43}
+    .chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
+    .section-head{display:flex;justify-content:space-between;align-items:center;margin:28px 0 12px;gap:15px}
+    .section-head h2{margin:0;font-size:25px}
+    .small{font-size:12px;color:var(--muted)}
+    .table-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+    table{width:100%;border-collapse:collapse}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:13px 15px;background:#f8f4ed;border-bottom:1px solid var(--line)}
+    td{padding:15px;border-bottom:1px solid #eee7dc;vertical-align:top}
+    tr:last-child td{border-bottom:0}
+    tbody tr{transition:.15s}
+    tbody tr:hover{background:#fbf7f0}
+    .score{display:inline-grid;place-items:center;min-width:43px;height:30px;border-radius:9px;font-weight:700;font-size:13px;background:#ece5da}
+    .score.hot{background:#f2ddd5;color:#7a291f}
+    .score.mid{background:#efe5cf;color:#745721}
+    .title{font-family:Georgia,serif;font-weight:600;font-size:16px}
+    .meta{color:var(--muted);font-size:12px;margin-top:4px}
+    .tag{display:inline-block;border-radius:999px;padding:5px 8px;font-size:11px;background:var(--soft);color:#5a5147}
+    .tag.good{background:#dfece3;color:var(--good)}
+    .tag.bad{background:#f2dfdb;color:var(--bad)}
+    .tag.gold{background:#efe5ca;color:#765922}
+    .money{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:650}
+    .rowbtn{border:0;background:transparent;color:var(--accent);font-weight:650;padding:5px 0}
+    .empty{padding:48px;text-align:center;color:var(--muted)}
+    .page{display:none}.page.active{display:block}
+    .two{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+    .panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+    .panel h3{margin:0 0 13px;font-size:21px}
+    .author-list{display:grid;gap:8px}
+    .author-item{display:flex;justify-content:space-between;gap:12px;padding:12px 10px;border-bottom:1px solid #eee7dc;cursor:pointer;border-radius:10px;transition:.12s}
+    .author-item:hover,.author-item:active{background:#f8f4ed}
+    .author-item:last-child{border:0}
+    .author-name{font-weight:700;color:var(--accent)}
+    .author-name::after{content:" ›";color:var(--muted);font-weight:400}
+    .sort-select{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;color:var(--ink);max-width:210px}
+    .results-toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+    .results-toolbar select,.results-toolbar input{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px;color:var(--ink)}
+    .year-filter{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+    .year-filter input{width:92px}
+    .result-title{font-weight:750;line-height:1.25}.result-desc{font-size:11px;color:var(--muted);margin-top:4px;max-width:420px}
+    .top-book{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #eee7dc}
+    .top-book:last-child{border:0}
+    .top-rank{font-family:Georgia,serif;font-size:20px;color:var(--gold);text-align:center}
+    .top-title{font-weight:750}
+    .top-meta{font-size:11px;color:var(--muted);margin-top:4px}
+    .top-value{font-weight:800;white-space:nowrap}
+    .author-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0}
+    .author-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
+    .author-toolbar input,.author-toolbar select{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px}
+    .author-toolbar input{flex:1;min-width:180px}
+    .author-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:16px}
+    .author-chart{height:220px;display:flex;align-items:flex-end;gap:6px;overflow-x:auto;padding-top:16px}
+    .author-book{padding:13px 0;border-bottom:1px solid #eee7dc}
+    .author-book:last-child{border:0}
+    .author-book-title{font-weight:750;line-height:1.25}
+    .author-book-meta{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45}
+    .author-comment{font-size:12px;margin-top:6px;background:#f8f4ed;border-radius:9px;padding:8px 10px}
+    .author-market-card{padding:12px;border:1px solid #ebe2d5;border-radius:12px;background:#fff;margin-bottom:9px}
+    .author-market-card .t{font-weight:750}
+    .author-market-card .m{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45}
+    @media(max-width:700px){.author-grid{grid-template-columns:1fr}.sort-select{max-width:100%;width:100%}}
+    .author-main{min-width:0}.author-name{font-weight:700}.author-sub{font-size:11px;color:var(--muted);margin-top:3px}
+    .author-stats{text-align:right;white-space:nowrap}.author-pct{font-weight:800}.author-money{font-size:11px;color:var(--muted);margin-top:3px}
+    .mini-chart{height:230px;display:flex;align-items:flex-end;gap:7px;padding-top:18px;overflow-x:auto}
+    .chart-col{height:100%;min-width:42px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+    .chart-value{font-size:9px;color:var(--muted);margin-bottom:5px;white-space:nowrap}
+    .chart-bar{width:28px;min-height:3px;background:var(--gold);border-radius:6px 6px 2px 2px}
+    .chart-year{font-size:9px;color:var(--muted);margin-top:6px}
+    .author-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+    .author-summary>div{background:#f8f4ed;border:1px solid #ebe2d5;border-radius:12px;padding:12px}
+    .author-summary span{display:block;font-size:10px;text-transform:uppercase;color:var(--muted)}
+    .author-summary b{display:block;font-size:20px;margin-top:5px}
+    .book-section{margin-top:20px}.book-row{padding:11px 0;border-bottom:1px solid #eee7dc}
+    .book-row-title{font-weight:700}.book-row-meta{font-size:11px;color:var(--muted);margin-top:4px}
+    .hunt-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid #eee7dc}
+    .hunt-item:last-child{border:0}
+    .gap-card{padding:15px 0;border-bottom:1px solid #eee7dc}
+    .gap-card:last-child{border-bottom:0}
+    .gap-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .gap-title{font-weight:750;font-size:16px;line-height:1.25}
+    .gap-meta{color:var(--muted);font-size:12px;margin-top:5px}
+    .gap-facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .gap-fact{background:#f8f4ed;border:1px solid #ebe2d5;border-radius:11px;padding:10px}
+    .gap-fact .k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+    .gap-fact .v{font-weight:700;margin-top:4px;font-size:13px}
+    .priority-badge{min-width:74px;border-radius:12px;padding:9px 10px;text-align:center;background:#efe5cf;color:#745721}
+    .priority-badge.hot{background:#f2ddd5;color:#7a291f}
+    .priority-badge .n{font-size:20px;font-weight:800;line-height:1}
+    .priority-badge .t{font-size:10px;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+    .hunt-add{display:flex;gap:8px;margin-bottom:15px}
+    .hunt-add input{flex:1;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+    .primary{border:0;background:var(--accent);color:#fff;border-radius:12px;padding:11px 14px;font-weight:700}
+    .secondary{border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:11px 14px}
+    .settings-grid{display:grid;gap:18px;max-width:850px}
+    .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
+    .field input{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px}
+    .note{font-size:13px;color:var(--muted);line-height:1.5}
+    .statusbox{padding:14px;border-radius:12px;background:#f4eee4;color:#5a4d40;font-size:13px}
+    dialog{border:0;border-radius:22px;padding:0;max-width:760px;width:calc(100% - 28px);box-shadow:0 30px 90px rgba(0,0,0,.28);background:var(--paper)}
+    dialog::backdrop{background:rgba(22,18,14,.52);backdrop-filter:blur(3px)}
+    .modal-head{padding:25px 27px 18px;border-bottom:1px solid var(--line)}
+    .modal-head h2{margin:0 0 7px;font-size:29px}
+    .modal-body{padding:23px 27px 28px}
+    .modal-close{position:absolute;right:16px;top:14px;border:0;background:#eee7dc;border-radius:999px;width:36px;height:36px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .detail-top{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:6px}
+    .detail-top>.detail-main{flex:1;min-width:260px}
+    .detailbox{border:1px solid var(--line);border-radius:14px;padding:15px}
+    .detailbox .k{font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.08em}
+    .detailbox .v{margin-top:6px;font-weight:650}
+    .why{background:#f1e9dc;border-left:4px solid var(--gold);padding:14px 16px;margin:16px 0;border-radius:0 12px 12px 0}
+    .history{margin-top:18px}
+    .history-row{display:grid;grid-template-columns:100px 1fr 110px;gap:8px;padding:9px 0;border-bottom:1px solid #eee7dc;font-size:13px}
+    .link{color:var(--accent);font-weight:700;text-decoration:none}
+    .mobile-nav{display:none}
+    .loading{animation:pulse 1.1s infinite alternate}
+    @keyframes pulse{from{opacity:.45}to{opacity:1}}
+    @media(max-width:900px){
+      .shell{display:block}
+      aside{display:none}
+      main{padding:18px 16px 90px}
+      .cards{grid-template-columns:1fr 1fr}
+      .two{grid-template-columns:1fr}
+      .table-card{overflow-x:auto}
+      table{min-width:760px}
+      .hero{align-items:flex-start;flex-direction:column}
+      h1{font-size:31px}
+      .mobile-nav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;z-index:30;bottom:0;left:0;right:0;background:rgba(25,21,16,.96);padding:8px 5px calc(8px + env(safe-area-inset-bottom));border-top:1px solid #40372e}
+      .mobile-nav button{border:0;background:transparent;color:#bfb3a6;font-size:10px;padding:7px 2px}
+      .mobile-nav button.active{color:#fff}
+      .mobile-nav span{display:block;font-size:18px;margin-bottom:3px}
+      .detail-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:550px){
+      .cards{gap:8px}.metric{padding:14px}.metric strong{font-size:27px}
+      .topbar{gap:7px}.iconbtn{padding:13px}
+      td{padding:12px}
+    }
+    .item-cell{display:flex;gap:12px;align-items:flex-start}
+    .thumb{width:44px;height:60px;border-radius:6px;object-fit:cover;flex:none;background:#ece5d8;border:1px solid #e4dbcb}
+    .thumb-ph{width:44px;height:60px;border-radius:6px;flex:none;background:linear-gradient(160deg,#efe8da,#e6dcc9);border:1px solid #e4dbcb;display:grid;place-items:center;color:#b8ab97;font-size:17px}
+    .thumb-lg{width:100%;max-width:220px;border-radius:12px;object-fit:cover;border:1px solid var(--line);box-shadow:0 8px 20px rgba(42,28,14,.12)}
+    .thumb-lg-ph{width:100%;max-width:220px;height:280px;border-radius:12px;background:linear-gradient(160deg,#efe8da,#e6dcc9);border:1px solid var(--line);display:grid;place-items:center;color:#b8ab97;font-size:34px}
+    .gap-thumb{width:52px;height:70px;border-radius:7px;object-fit:cover;flex:none;background:#ece5d8;border:1px solid #e4dbcb}
+    .search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);border:0;background:#e9e1d3;color:#7a6f60;width:26px;height:26px;border-radius:999px;display:none;place-items:center;font-size:13px;line-height:1}
+    .search-clear.show{display:grid}
+    .search-hint{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#a89b89;font-size:11px;border:1px solid var(--line);border-radius:6px;padding:2px 6px;pointer-events:none}
+    .quick-results{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 45px rgba(30,20,10,.16);z-index:40;overflow:hidden;display:none;max-height:min(60vh,520px);overflow-y:auto}
+    .quick-results.show{display:block}
+    .quick-item{display:flex;gap:11px;align-items:center;padding:10px 14px;cursor:pointer;border-bottom:1px solid #f0ead0}
+    .quick-item:hover,.quick-item.sel{background:#f8f4ed}
+    .quick-item .qt{font-weight:700;font-size:13.5px;line-height:1.25}
+    .quick-item .qm{font-size:11px;color:var(--muted);margin-top:2px}
+    .quick-foot{padding:10px 14px;font-size:12px;color:var(--muted);background:#f8f4ed;cursor:pointer}
+    .quick-foot:hover{color:var(--ink)}
+    .view-toggle{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper)}
+    .view-toggle button{border:0;background:transparent;padding:10px 14px;color:var(--muted);font-size:13px}
+    .view-toggle button.active{background:var(--ink);color:#fff}
+    .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;padding:16px}
+    .gallery-card{background:#fff;border:1px solid #ebe2d5;border-radius:14px;overflow:hidden;cursor:pointer;transition:.15s;display:flex;flex-direction:column}
+    .gallery-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(42,28,14,.14)}
+    .gallery-cover{width:100%;aspect-ratio:3/4;object-fit:cover;background:#ece5d8}
+    .gallery-cover-ph{width:100%;aspect-ratio:3/4;background:linear-gradient(160deg,#efe8da,#e6dcc9);display:grid;place-items:center;color:#b8ab97;font-size:30px}
+    .gallery-info{padding:10px 11px 12px}
+    .gallery-title{font-weight:700;font-size:12.5px;line-height:1.3;max-height:2.6em;overflow:hidden}
+    .gallery-meta{font-size:10.5px;color:var(--muted);margin-top:5px}
+    .gallery-price{font-weight:800;font-size:12.5px;margin-top:6px}
+    .gallery-score{position:absolute;margin:8px;padding:3px 7px;border-radius:8px;background:rgba(23,19,15,.72);color:#fff;font-size:11px;font-weight:700}
+    .gallery-cover-wrap{position:relative}
+    .analysis-two{display:grid;grid-template-columns:1.3fr .7fr;gap:16px;margin:18px 0}
+    .decade-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1ebdf}
+    .decade-row:last-child{border:0}
+    .decade-label{width:56px;font-weight:700;font-size:13px;flex:none}
+    .decade-bar-track{flex:1;background:#f1ebdd;border-radius:999px;height:9px;overflow:hidden}
+    .decade-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--accent2))}
+    .decade-count{width:74px;text-align:right;font-size:11px;color:var(--muted);flex:none}
+    .pub-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #f1ebdf;font-size:13px}
+    .pub-row:last-child{border:0}
+    .pub-name{font-weight:650}
+    .pub-count{color:var(--muted);font-size:11px}
+    .load-more-wrap{display:flex;justify-content:center;padding:20px}
+    .load-more{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:11px 22px;font-weight:650}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <div class="brand">CLIO</div>
+    <div class="brand-sub">Radar de acervo</div>
+    <nav id="desktopNav">
+      <button class="active" data-page="radar"><span class="ico">◉</span>Radar</button>
+      <button data-page="pesquisa"><span class="ico">⌕</span>Pesquisa</button>
+      <button data-page="resultados"><span class="ico">◷</span>Leilões passados</button>
+      <button data-page="colecao"><span class="ico">▤</span>Minha coleção</button>
+      <button data-page="caca"><span class="ico">◎</span>Caça</button>
+      <button data-page="config"><span class="ico">⚙</span>Configurações</button>
+    </nav>
+    <div class="sync"><b id="syncText">Aguardando dados</b><span id="syncSub">Configure o CSV do mercado</span></div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="search-wrap">
+        <span class="mag">⌕</span>
+        <input id="globalSearch" class="search" placeholder="Buscar autor, obra, ano, editora ou descrição…" autocomplete="off" />
+        <button class="search-clear" id="searchClear" title="Limpar">×</button>
+        <span class="search-hint" id="searchHint">/</span>
+        <div class="quick-results" id="quickResults"></div>
+      </div>
+      <button class="iconbtn" id="refreshBtn" title="Atualizar">↻</button>
+    </div>
+
+    <section class="page active" id="page-radar">
+      <div class="hero"><div><h1>Radar de Acervo</h1><p class="subtitle" id="radarSubtitle">O que merece sua atenção no mercado.</p></div><div class="date" id="today"></div></div>
+      <div class="cards">
+        <div class="metric"><span class="label">Novos hoje</span><strong id="mToday">—</strong></div>
+        <div class="metric"><span class="label">Encerra em 72h</span><strong id="m72">—</strong></div>
+        <div class="metric"><span class="label">Não tenho</span><strong id="mMissing">—</strong></div>
+        <div class="metric"><span class="label">Alta prioridade</span><strong id="mHot">—</strong></div>
+      </div>
+      <div class="filters" id="filters">
+        <button class="chip active" data-filter="relevantes">⭐ Relevantes</button><button class="chip" data-filter="livro">📚 Livros</button><button class="chip" data-filter="documento">📜 Documentos</button><button class="chip" data-filter="naoTenho">Não tenho</button><button class="chip" data-filter="primeira">1ª edição</button><button class="chip" data-filter="assinado">✒ Assinado</button><button class="chip" data-filter="ate1900">Até 1900</button><button class="chip" data-filter="comPreco">Com preço</button>
+      </div>
+      <div class="section-head"><h2>Oportunidades</h2><span class="small" id="oppCount"></span></div>
+      <div class="table-card"><table><thead><tr><th>Interesse</th><th>Item</th><th>Ano</th><th>Coleção</th><th>Leilão</th><th>Preço</th><th></th></tr></thead><tbody id="radarBody"></tbody></table><div class="empty" id="radarEmpty" style="display:none"></div></div>
+    </section>
+
+    <section class="page" id="page-pesquisa">
+      <div class="hero"><div><h1>Pesquisa</h1><p class="subtitle">Obras e edições agrupadas. Pesquise como colecionador.</p></div></div>
+      <div class="section-head"><h2>Resultados</h2><span class="small" id="searchCount"></span></div>
+      <div class="table-card"><table><thead><tr><th>Obra / edição</th><th>Autor</th><th>Ano</th><th>Ocorrências</th><th>Faixa observada</th><th>Coleção</th><th></th></tr></thead><tbody id="searchBody"></tbody></table><div class="empty" id="searchEmpty">Digite um autor, título, ano ou termo na busca acima.</div></div>
+    </section>
+
+    <section class="page" id="page-resultados">
+      <div class="hero"><div><h1>Leilões Passados</h1><p class="subtitle">Histórico do mercado observado e oportunidades que já passaram.</p></div></div>
+      <div class="cards"><div class="metric"><span class="label">Resultados históricos</span><strong id="rTotal">—</strong></div><div class="metric"><span class="label">Com valor final</span><strong id="rSold">—</strong></div><div class="metric"><span class="label">Valor mediano</span><strong id="rMedian">—</strong></div><div class="metric"><span class="label">Eu não tinha</span><strong id="rMissed">—</strong></div></div>
+      <div class="cards"><div class="metric"><span class="label">Volume negociado</span><strong id="rVolume">—</strong></div><div class="metric"><span class="label">Ticket médio</span><strong id="rAvg">—</strong></div><div class="metric"><span class="label">1ª edição / assinados</span><strong id="rSpecial">—</strong></div><div class="metric"><span class="label">Leiloeiro mais ativo</span><strong id="rTopHouse" style="font-size:17px">—</strong></div></div>
+      <div class="analysis-two"><div class="panel"><h3>Por década</h3><p class="note">Quantidade de resultados e valor mediano por década de edição.</p><div id="decadeBreakdown"></div></div><div class="panel"><h3>Editoras mais recorrentes</h3><p class="note">Entre os itens com editora identificada.</p><div id="publisherBreakdown"></div></div></div>
+      <div class="panel" style="margin-bottom:18px"><div class="results-toolbar"><select id="resultsType"><option value="all">Livros e documentos</option><option value="livro">Somente livros</option><option value="documento">Somente documentos</option></select><select id="resultsOwnership"><option value="all">Todos</option><option value="missing">Eu não tinha</option><option value="same">Já tinha mesma edição</option><option value="other">Tinha outra edição</option></select><select id="resultsSort"><option value="date_desc">Mais recentes</option><option value="date_asc">Mais antigos</option><option value="value_desc">Maior valor</option><option value="value_asc">Menor valor</option><option value="score_desc">Maior Felipe Score</option></select><label class="year-filter">De <input id="resultsYearFrom" type="number" placeholder="1500"></label><label class="year-filter">Até <input id="resultsYearTo" type="number" placeholder="2026"></label><span style="flex:1"></span><div class="view-toggle" id="resultsView"><button class="active" data-view="list">☰ Lista</button><button data-view="gallery">▦ Galeria</button></div></div></div>
+      <div class="section-head"><h2>Leilões passados</h2><span class="small" id="resultsCount"></span></div>
+      <div class="table-card" id="resultsListWrap"><table><thead><tr><th>Interesse</th><th>Item</th><th>Ano</th><th>Data</th><th>Leiloeiro</th><th>Inicial</th><th>Final</th><th>Coleção</th><th></th></tr></thead><tbody id="resultsBody"></tbody></table><div class="empty" id="resultsEmpty" style="display:none"></div></div>
+      <div class="table-card" id="resultsGalleryWrap" style="display:none"><div class="gallery-grid" id="resultsGallery"></div></div>
+      <div class="load-more-wrap" id="resultsLoadMoreWrap" style="display:none"><button class="load-more" id="resultsLoadMore">Carregar mais resultados</button></div>
+    </section>
+
+    <section class="page" id="page-colecao">
+      <div class="hero"><div><h1>Minha coleção</h1><p class="subtitle">A planilha pública é a fonte da verdade do seu acervo.</p></div></div>
+      <div class="cards"><div class="metric"><span class="label">Exemplares no acervo</span><strong id="cTotal">—</strong></div><div class="metric"><span class="label">Valor investido</span><strong id="cInvested">—</strong></div><div class="metric"><span class="label">Completude catalogada</span><strong id="cComplete">—</strong></div><div class="metric"><span class="label">Autores do recorte</span><strong id="cAuthors">—</strong><div class="meta" id="cAuthorGroups"></div></div></div>
+      <div class="section-head"><h2>Visão financeira</h2></div>
+      <div class="two collection-charts"><div class="panel"><h3>Valor investido acumulado</h3><p class="note">Com base em VALOR PAGO e DATA DE AQUISIÇÃO.</p><div class="mini-chart" id="valueGrowth"></div></div><div class="panel"><h3>Crescimento do acervo</h3><p class="note">Exemplares adquiridos acumulados ao longo dos anos.</p><div class="mini-chart" id="itemGrowth"></div></div></div>
+      <div class="panel" style="margin-bottom:18px"><h3>Top 10 livros da coleção por valor pago</h3><p class="note">Ranking dos exemplares físicos com maior valor investido.</p><div id="topBooksList"></div></div>
+      <div class="section-head"><h2>Autores e completude</h2></div>
+      <div class="panel"><div class="section-head" style="margin:0 0 12px"><p class="note" style="margin:0">Toque em um autor para abrir a análise detalhada.</p><select id="authorSort" class="sort-select"><option value="complete_desc">Maior completude</option><option value="complete_asc">Menor completude</option><option value="count_desc">Maior nº de livros</option><option value="count_asc">Menor nº de livros</option><option value="value_desc">Maior valor investido</option><option value="value_asc">Menor valor investido</option></select></div><div class="view-toggle" id="authorGroupToggle" style="margin-bottom:14px"><button class="active" data-group="all">Todos</button><button data-group="patrons">Patronos</button><button data-group="founders">Fundadores</button></div><div class="author-list" id="authorsList"></div></div>
+      <div class="section-head"><h2>Diversos / coautorias</h2></div><div class="panel"><p class="note">Obras com vários autores ou antologias, registradas como "Diversos" na planilha — ainda sem um autor específico cadastrado.</p><div id="diversosList"></div></div>
+    </section>
+
+    <section class="page" id="page-caca"><div class="hero"><div><h1>Minha Caça</h1><p class="subtitle">Termos prioritários que sobem automaticamente no Radar.</p></div></div><div class="panel"><div class="hunt-add"><input id="huntInput" placeholder="Ex.: Crisálidas 1864, José de Alencar carta, Júlia Lopes…" /><button class="primary" id="huntAdd">Adicionar</button></div><div id="huntList"></div></div></section>
+
+    <section class="page" id="page-config"><div class="hero"><div><h1>Configurações</h1><p class="subtitle">Conecte o mercado e controle as fontes de dados.</p></div></div><div class="settings-grid"><div class="panel"><h3>CSV do mercado no GitHub</h3><div class="field"><label>URL RAW do arquivo CSV</label><input id="marketUrl" placeholder="https://raw.githubusercontent.com/usuario/repositorio/main/data/leiloes.csv" /></div><p class="note">Use a URL do botão <b>Raw</b> do arquivo CSV. O painel abre a base local imediatamente e só baixa o CSV novamente quando o arquivo no GitHub muda.</p><button class="primary" id="saveMarket">Salvar e carregar</button></div><div class="panel"><h3>Coleção</h3><div class="field"><label>CSV público do Google Sheets</label><input id="collectionUrl" /></div><button class="secondary" id="saveCollection">Salvar e carregar</button></div><div class="panel"><h3>Teste manual</h3><p class="note">Você também pode abrir um CSV diretamente no painel.</p><input type="file" id="fileInput" accept=".csv,text/csv" /></div><div class="statusbox" id="statusBox">Aguardando carregamento.</div></div></section>
+  </main>
+</div>
+
+<div class="mobile-nav" id="mobileNav"><button class="active" data-page="radar"><span>◉</span>Radar</button><button data-page="pesquisa"><span>⌕</span>Pesquisa</button><button data-page="resultados"><span>◷</span>Leilões</button><button data-page="colecao"><span>▤</span>Coleção</button><button data-page="caca"><span>◎</span>Caça</button><button data-page="config"><span>⚙</span>Ajustes</button></div>
+
+<dialog id="detailDialog"><button class="modal-close" id="modalClose">×</button><div class="modal-head"><h2 id="dTitle"></h2><div class="meta" id="dMeta"></div></div><div class="modal-body" id="dBody"></div></dialog>
+
+<script>
+const DEFAULT_MARKET_URL = "https://raw.githubusercontent.com/feliperibeirobittencourt/monitor-leiloes/refs/heads/main/leiloes.csv";
+const DEFAULT_COLLECTION_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTy71HxXBO-cXNMpbsoSa-GwSDPPaVAzqh7hXMNUEpWsThdGyj7KYtzrGQalsYGMg/pub?gid=416493939&single=true&output=csv";
+const PATRONS = ["Adelino Fontoura", "Álvares de Azevedo", "Araújo Porto-Alegre", "Artur de Oliveira", "Basílio da Gama", "Bernardo Guimarães", "Casimiro de Abreu", "Castro Alves", "Cláudio Manoel da Costa", "Evaristo da Veiga", "Fagundes Varela", "França Júnior", "Francisco Adolfo de Varnhagen", "Francisco Otaviano", "Franklin Távora", "Gonçalves de Magalhães", "Gonçalves Dias", "Gregório de Matos", "Hipólito da Costa", "João Francisco Lisboa", "Joaquim Caetano da Silva", "Joaquim Manuel de Macedo", "Joaquim Serra", "José Bonifácio", "José de Alencar", "Júlio Ribeiro", "Junqueira Freire", "Laurindo Rabelo", "Maciel Monteiro", "Manuel Antônio de Almeida", "Martins Pena", "Pardal Mallet", "Pedro Luís", "Raul Pompeia", "Sousa Caldas", "Tavares Bastos", "Teófilo Dias", "Tobias Barreto", "Tomás Antônio Gonzaga", "Visconde do Rio Branco"];
+const state = { market:[], collection:[], page:"radar", query:"", filter:"relevantes", authorSort:"complete_desc", authorGroup:"all", resultsType:"all", resultsOwnership:"all", resultsSort:"date_desc", resultsView:"list", resultsPage:1, activeAuthor:null, authorView:"owned", hunt:JSON.parse(localStorage.getItem("clio_hunt")||"[]"), marketCacheMeta:null };
+const RESULTS_PAGE_SIZE=60;
+
+let scoreCache=new WeakMap();
+let collectionMatchCache=new WeakMap();
+let itemTextCache=new WeakMap();
+let fastHistoryIndex=new Map();
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const norm = v => String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").trim();
+const col = (row, names) => { const entries=Object.entries(row); for (const n of names) { const nn=norm(n); const hit=entries.find(([k])=>norm(k)===nn || norm(k).includes(nn)); if(hit && String(hit[1]??"").trim()!=="") return String(hit[1]).trim(); } return ""; };
+function parseDelimitedRows(text, delim){ text=String(text||"").replace(/^\uFEFF/,""); const rows=[]; let row=[], field="", quote=false; for(let i=0;i<text.length;i++){ const c=text[i], n=text[i+1]; if(c==='"' && quote && n==='"'){ field+='"'; i++; } else if(c==='"'){ quote=!quote; } else if(c===delim && !quote){ row.push(field); field=""; } else if((c==="\n"||c==="\r") && !quote){ if(c==="\r" && n==="\n") i++; row.push(field); field=""; if(row.some(x=>String(x).trim()!=="")) rows.push(row); row=[]; }else field+=c; } row.push(field); if(row.some(x=>String(x).trim()!=="")) rows.push(row); return rows; }
+function rowsToObjects(rows, headerIndex){ const headers=rows[headerIndex].map((x,i)=>String(x).trim()||`col_${i}`); return rows.slice(headerIndex+1).filter(r=>r.some(x=>String(x).trim()!=="")).map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]??"").trim()]))); }
+function parseCSV(text){ text=String(text||"").replace(/^\uFEFF/,""); const firstLines=text.split(/\r?\n/).filter(x=>x.trim()).slice(0,10); const delimiters=[";",",","\t"]; const score=d=>firstLines.reduce((s,line)=>s+(line.split(d).length-1),0); const delim=[...delimiters].sort((a,b)=>score(b)-score(a))[0]; const rows=parseDelimitedRows(text,delim); if(rows.length<2) return []; return rowsToObjects(rows,0); }
+function parseCollectionCSV(text){ text=String(text||"").replace(/^\uFEFF/,""); const rows=parseDelimitedRows(text,","); let headerIndex=-1; for(let i=0;i<Math.min(rows.length,50);i++){ const cells=rows[i].map(norm); const hasAuthors=cells.includes("autores")||cells.includes("autor"); const hasTitle=cells.includes("titulo"); const hasOwned=cells.includes("tenho"); if(hasAuthors && hasTitle && hasOwned){ headerIndex=i; break; } } if(headerIndex>=0) return rowsToObjects(rows,headerIndex); for(let i=0;i<Math.min(rows.length,50);i++){ const cells=rows[i].map(norm); const iCadeira=cells.indexOf("cadeira"); if(iCadeira>=0 && cells.includes("titulo") && cells.includes("tenho")){ const objetos=rowsToObjects(rows,i); const idxAutor=iCadeira+1; const chaveOriginal=(rows[i][idxAutor]||"").trim() || `col_${idxAutor}`; return objetos.map(o=>({...o, AUTORES:o[chaveOriginal]})); } } const semicolonRows=parseDelimitedRows(text,";"); for(let i=0;i<Math.min(semicolonRows.length,50);i++){ const cells=semicolonRows[i].map(norm); if((cells.includes("autores")||cells.includes("autor")) && cells.includes("titulo") && cells.includes("tenho")) return rowsToObjects(semicolonRows,i); } throw new Error("Coleção: cabeçalho AUTORES / TITULO / TENHO não encontrado"); }
+function price(v){ if(v==null||v==="") return null; let s=String(v).trim().replace(/[R$\s]/g,"").replace(/[^\d,.\-]/g,""); if(!s) return null; const lastComma=s.lastIndexOf(","), lastDot=s.lastIndexOf("."); if(lastComma>=0 && lastDot>=0){ if(lastDot>lastComma) s=s.replace(/,/g,""); else s=s.replace(/\./g,"").replace(",","."); }else if(lastComma>=0){ const decimals=s.length-lastComma-1; s=decimals===2?s.replace(/\./g,"").replace(",","."):s.replace(/,/g,""); }else if(lastDot>=0){ const decimals=s.length-lastDot-1; if(decimals!==2) s=s.replace(/\./g,""); } const n=Number(s); return Number.isFinite(n)?n:null; }
+function brl(n){ return n==null?"—":new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}).format(n); }
+function parseDate(s){ if(!s) return null; const iso=new Date(s); if(!isNaN(iso)) return iso; const m=String(s).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2})(?::(\d{2}))?h?)?/); if(!m) return null; return new Date(+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0)); }
+function rowAuthor(r){ return col(r,["Autor","Author"]); }
+function rowTitle(r){ return col(r,["Título","Titulo","Obra","Title"]) || titleFromDescription(r); }
+function rowYear(r){ const v=col(r,["Ano da edição","Ano da edicao","Ano","Year"]); const m=v.match(/\b(1[5-9]\d{2}|20\d{2})\b/); return m?+m[1]:null; }
+function rowType(r){ const explicit=norm(col(r,["Tipo","Tipo do item","Categoria"])); if(explicit.includes("document")) return "documento"; if(explicit.includes("livr")) return "livro"; if(explicit && !["desconhecido","outro"].includes(explicit)) return explicit; const t=norm([rowTitle(r),col(r,["Descrição completa","Descricao completa","Comentários","Comentarios"])].join(" ")); if(/\b(carta|documento|manuscrito|autografo|correspondencia|oficio)\b/.test(t)) return "documento"; if(/\b(livro|edicao|editora|livraria|tomo|volume|brochura|garnier|laemmert)\b/.test(t)) return "livro"; return "outro"; }
+function rowStatus(r){ return norm(col(r,["Status"])); }
+function rowDetected(r){ return parseDate(col(r,["Detectado em","Detectado","Found at"])); }
+function rowAuctionDate(r){ return parseDate(col(r,["Data do pregão","Data do pregao","Pregão","Pregao","Data"])); }
+function rowFinal(r){ return price(col(r,["Valor final (R$)","Valor final","Preço final","Preco final"])); }
+function rowInitial(r){ return price(col(r,["Lance inicial (R$)","Lance inicial","Preço","Preco"])); }
+function rowAuctioneer(r){ return col(r,["Leiloeiro","Casa de leilão","Casa de leilao"]); }
+function rowLink(r){ const raw=col(r,["Link","URL"]); if(!raw) return ""; const parts=raw.split("|").map(x=>x.trim()).filter(Boolean); const urls=parts.filter(x=>/^https?:\/\//i.test(x)); const ids=parts.filter(x=>/^\d+$/.test(x)); const auctioneerUrl=urls.find(u=>!norm(u).includes("leiloesbr com br")); const pieceId=ids.length?ids[ids.length-1]:""; if(auctioneerUrl&&pieceId){ try{ const u=new URL(auctioneerUrl); return `${u.protocol}//${u.host}/peca.asp?ID=${encodeURIComponent(pieceId)}`; }catch(e){} } const specific=urls.find(u=>/\b(peca|lote)\.asp|\b\/lote\b/i.test(u)); if(specific) return specific; return auctioneerUrl||urls[0]||""; }
+function rowCollectionSituation(r){ return norm(col(r,["Situação na coleção","Situacao na colecao"])); }
+function rowImage(r){ return col(r,["Imagem","URL da imagem","Image"]); }
+function rowEdition(r){ return col(r,["Edição","Edicao"]); }
+function rowPublisher(r){ return col(r,["Editora"]); }
+function rowCity(r){ return col(r,["Cidade"]); }
+function rowSigned(r){ return norm(col(r,["Assinado?","Assinado"]))==="sim"; }
+function titleFromDescription(r){ let d=col(r,["Descrição completa","Descricao completa","Comentários","Comentarios"]); d=d.replace(/^(livro|documento)\s*[-:.]\s*/i,"").replace(/\s*\.\.\.$/,""); return d.slice(0,120)||"Item sem título identificado"; }
+function itemText(r){ if(itemTextCache.has(r)) return itemTextCache.get(r); const text=norm([rowAuthor(r),rowTitle(r),rowYear(r),col(r,["Descrição completa","Descricao completa","Comentários","Comentarios"]),rowAuctioneer(r),rowPublisher(r),rowCity(r)].join(" ")); itemTextCache.set(r,text); return text; }
+function firstEdition(r){ const explicit=norm(col(r,["1ª edição?","1a edicao?","1a edicao"])); if(explicit) return explicit==="sim"; return /\b(1a edicao|1 edicao|primeira edicao|1a ed|1 ed)\b/.test(itemText(r)); }
+function thumbHTML(r,size){ const src=rowImage(r); const cls=size==="lg"?"thumb-lg":(size==="gap"?"gap-thumb":"thumb"); const phCls=size==="lg"?"thumb-lg-ph":(size==="gap"?"gap-thumb thumb-ph":"thumb-ph"); if(!src) return `<div class="${phCls}">📖</div>`; return `<img class="${cls}" src="${escAttr(src)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;${phCls}&quot;>📖</div>'" />`; }
+function collectionRowsFor(r){ if(collectionMatchCache.has(r)) return collectionMatchCache.get(r); const a=norm(rowAuthor(r)),t=norm(rowTitle(r)),y=rowYear(r); if(!a&&!t){ collectionMatchCache.set(r,[]); return []; } const titleTokens=t.split(" ").filter(x=>x.length>3).slice(0,6); const matches=state.collection.filter(c=>{ const ca=norm(rowAuthor(c)||col(c,["Nome do Autor","Escritor"])); const ct=norm(rowTitle(c)||col(c,["Nome da obra","Livro","Título da obra","Titulo da obra"])); const cy=rowYear(c); const authorOK=!a||!ca||ca.includes(a)||a.includes(ca); const titleMatches=titleTokens.filter(x=>ct.includes(x)).length; const titleOK=!t||!ct||titleMatches>=Math.min(2,titleTokens.length); const yearOK=!y||!cy||y===cy; return authorOK&&titleOK&&yearOK; }); collectionMatchCache.set(r,matches); return matches; }
+function collectionOwned(c){ return col(c,["TENHO","Tenho"])!==""; }
+function collectionAuthor(c){ return col(c,["AUTORES","Autores","AUTOR","Autor"])||"Autor não identificado"; }
+function canonicalAuthorName(name){ return norm(name).replace(/\b(dr|dra|prof|professor|poeta)\b/g," ").replace(/\s+/g," ").trim(); }
+const PATRON_KEYS=new Set(PATRONS.map(canonicalAuthorName));
+function authorGroupOf(name){ return PATRON_KEYS.has(canonicalAuthorName(name))?"patrons":"founders"; }
+function isDiversosAuthor(name){ return canonicalAuthorName(name)==="diversos"; }
+function isValidCollectionAuthor(name){ const n=canonicalAuthorName(name); return n&&n!=="autor nao identificado"&&n!=="autores"&&n!=="autor"&&n!=="diversos"; }
+function collectionTitle(c){ return col(c,["TITULO","TÍTULO","Título","Titulo"])||"Item sem título"; }
+function collectionValue(c){ return price(col(c,["VALOR PAGO","Valor Pago","Valor pago"])); }
+function collectionAcquired(c){ return parseDate(col(c,["DATA DE AQUISIÇÃO","DATA DE AQUISICAO","Data de Aquisição","Data de Aquisicao"])); }
+function collectionComment(c){ return col(c,["COMENTARIO","COMENTÁRIO","Comentario","Comentário"]); }
+function collectionReferenceAuthor(c){ const comment=collectionComment(c); const m=comment.match(/\bver\s+em\s+(.+)/i); return m?m[1].trim().replace(/[.;,:]+$/,""):""; }
+function isReferenceAlias(c){ return collectionOwned(c)&&collectionValue(c)==null&&collectionReferenceAuthor(c)!==""; }
+function uniqueOwnedRows(rows=state.collection){ return rows.filter(collectionOwned).filter(r=>!isReferenceAlias(r)); }
+function ownedCollectionRowsFor(r){ return collectionRowsFor(r).filter(collectionOwned); }
+function hasSameEdition(r){ const sit=rowCollectionSituation(r); if(sit.includes("ja tenho mesma edicao")) return true; return ownedCollectionRowsFor(r).length>0; }
+function hasOtherEdition(r){ const sit=rowCollectionSituation(r); if(sit.includes("ja tenho outra edicao")) return true; const a=norm(rowAuthor(r)),t=norm(rowTitle(r)); return state.collection.filter(collectionOwned).some(c=>{ const ca=norm(rowAuthor(c)),ct=norm(rowTitle(c)); return a&&ca.includes(a)&&t.split(" ").filter(x=>x.length>3).some(x=>ct.includes(x)); }); }
+function huntMatch(r){ return state.hunt.some(h=>itemText(r).includes(norm(h))); }
+function isCurrent(r){ const s=rowStatus(r); if(s.includes("encerrado")||s.includes("vendido")||s.includes("historico")) return false; const d=rowAuctionDate(r); return !d||d>=new Date(Date.now()-24*3600*1000); }
+function fastHistoryKey(r){ const author=norm(rowAuthor(r)); const year=rowYear(r)||""; const title=norm(rowTitle(r)).split(" ").filter(x=>x.length>3).slice(0,6).join(" "); return `${author}|${year}|${title}`; }
+function rebuildFastHistoryIndex(){ fastHistoryIndex=new Map(); state.market.forEach(r=>{ const final=rowFinal(r); if(final==null) return; const key=fastHistoryKey(r); if(!key) return; if(!fastHistoryIndex.has(key)) fastHistoryIndex.set(key,[]); fastHistoryIndex.get(key).push(final); }); fastHistoryIndex.forEach(v=>v.sort((a,b)=>a-b)); }
+function fastHistoryValues(r){ return fastHistoryIndex.get(fastHistoryKey(r))||[]; }
+function resetComputedCaches(){ scoreCache=new WeakMap(); collectionMatchCache=new WeakMap(); itemTextCache=new WeakMap(); rebuildFastHistoryIndex(); }
+function score(r){ if(scoreCache.has(r)) return scoreCache.get(r); let s=0; const same=hasSameEdition(r); const other=!same&&hasOtherEdition(r); if(!same&&!other)s+=35; else if(other)s+=18; else s-=30; if(firstEdition(r))s+=25; if(rowSigned(r))s+=18; if(rowType(r)==="documento")s+=20; if(rowYear(r)&&rowYear(r)<=1900)s+=10; if(huntMatch(r))s+=30; const a=norm(rowAuthor(r)); if(["machado de assis","jose de alencar","olavo bilac","julia lopes"].some(x=>a.includes(x)))s+=12; const p=rowInitial(r)??rowFinal(r); const hist=fastHistoryValues(r); if(p!=null&&hist.length>=2){ const med=hist[Math.floor(hist.length/2)]; if(p<med*.8)s+=10; } if(rowType(r)==="outro")s-=55; const result=Math.max(0,Math.min(100,s)); scoreCache.set(r,result); return result; }
+function collectionLabel(r){ if(hasSameEdition(r)) return `<span class="tag good">✓ Mesma edição</span>`; if(hasOtherEdition(r)) return `<span class="tag gold">Outra edição</span>`; return `<span class="tag bad">✕ Não identificado</span>`; }
+function sameKey(a,b){ const aa=norm(rowAuthor(a)),ba=norm(rowAuthor(b)); const ay=rowYear(a),by=rowYear(b); const at=norm(rowTitle(a)),bt=norm(rowTitle(b)); const ta=at.split(" ").filter(x=>x.length>3).slice(0,6); const overlap=ta.filter(x=>bt.includes(x)).length; return aa&&ba&&(aa.includes(ba)||ba.includes(aa))&&(!ay||!by||ay===by)&&overlap>=Math.min(2,ta.length); }
+function historyFor(r){ return state.market.filter(x=>x!==r&&sameKey(r,x)&&rowFinal(x)!=null); }
+function scoreClass(n){ return n>=85?"hot":n>=60?"mid":""; }
+function sortByScoreDesc(rows,tiebreak){ const m=new Map(); rows.forEach(r=>m.set(r,score(r))); return rows.sort((a,b)=>(m.get(b)-m.get(a))||(tiebreak?tiebreak(a,b):0)); }
+function scoreReason(r){ const arr=[]; if(huntMatch(r))arr.push("corresponde à sua lista de Caça"); if(!hasSameEdition(r)&&!hasOtherEdition(r))arr.push("não foi identificado no acervo"); if(firstEdition(r))arr.push("há indicação de primeira edição"); if(rowSigned(r))arr.push("é um exemplar assinado ou com autógrafo"); if(rowType(r)==="documento")arr.push("é um documento ou manuscrito"); if(rowYear(r)&&rowYear(r)<=1900)arr.push("é anterior ou igual a 1900"); return arr.length?arr.join("; "):"relevância calculada a partir do item e do cruzamento com o acervo"; }
+function matchesQuery(r,q){ const nq=norm(q); if(!nq)return true; return nq.split(" ").every(tok=>itemText(r).includes(tok)); }
+function renderRadar(){ const now=new Date(),end72=new Date(now.getTime()+72*3600*1000); const current=state.market.filter(isCurrent); $("#mToday").textContent=current.filter(r=>{const d=rowDetected(r);return d&&d.toDateString()===now.toDateString()}).length; $("#m72").textContent=current.filter(r=>{const d=rowAuctionDate(r);return d&&d>=now&&d<=end72}).length; $("#mMissing").textContent=current.filter(r=>!hasSameEdition(r)&&!hasOtherEdition(r)&&rowType(r)!=="outro").length; $("#mHot").textContent=current.filter(r=>score(r)>=85).length; let rows=current.filter(r=>matchesQuery(r,state.query)); const f=state.filter; if(f==="relevantes")rows=rows.filter(r=>score(r)>=55&&rowType(r)!=="outro"); if(f==="livro")rows=rows.filter(r=>rowType(r)==="livro"); if(f==="documento")rows=rows.filter(r=>rowType(r)==="documento"); if(f==="naoTenho")rows=rows.filter(r=>!hasSameEdition(r)&&!hasOtherEdition(r)); if(f==="primeira")rows=rows.filter(firstEdition); if(f==="assinado")rows=rows.filter(rowSigned); if(f==="ate1900")rows=rows.filter(r=>rowYear(r)&&rowYear(r)<=1900); if(f==="comPreco")rows=rows.filter(r=>(rowInitial(r)??rowFinal(r))!=null); rows=sortByScoreDesc(rows,(a,b)=>(rowAuctionDate(a)||0)-(rowAuctionDate(b)||0)); $("#oppCount").textContent=`${rows.length} oportunidade${rows.length===1?"":"s"}`; $("#radarBody").innerHTML=rows.slice(0,250).map(r=>{ const sc=score(r),p=rowInitial(r)??rowFinal(r),d=rowAuctionDate(r); return `<tr><td><span class="score ${scoreClass(sc)}">${sc}</span></td><td><div class="item-cell">${thumbHTML(r)}<div><div class="title">${esc(rowTitle(r))}</div><div class="meta">${esc(rowAuthor(r))} · ${rowType(r)}${rowSigned(r)?" · assinado":""}</div></div></div></td><td>${rowYear(r)??"—"}${firstEdition(r)?'<div class="meta">1ª edição?</div>':""}</td><td>${collectionLabel(r)}</td><td>${esc(rowAuctioneer(r)||"—")}<div class="meta">${d?d.toLocaleDateString("pt-BR"):""}</div></td><td class="money">${brl(p)}</td><td><button class="rowbtn" onclick="openDetail(${state.market.indexOf(r)})">Ver →</button></td></tr>`; }).join(""); $("#radarEmpty").style.display=rows.length?"none":"block"; $("#radarEmpty").textContent=state.market.length?"Nenhuma oportunidade encontrada com estes filtros.":"Conecte o CSV do mercado em Configurações ou abra um CSV manualmente."; }
+function groupMarket(rows){ const groups=[]; for(const r of rows){ let g=groups.find(x=>sameKey(x.rep,r)); if(!g){g={rep:r,rows:[]};groups.push(g)} g.rows.push(r); } return groups; }
+let quickSelIndex=-1;
+function renderQuickResults(){ const q=state.query.trim(),box=$("#quickResults"); quickSelIndex=-1; if(!q){box.classList.remove("show");box.innerHTML="";return} const groups=groupMarket(state.market.filter(r=>matchesQuery(r,q)&&rowType(r)!=="outro")).slice(0,6); if(!groups.length){box.innerHTML=`<div class="quick-item" style="cursor:default"><div class="qm">Nenhum resultado para "${esc(q)}"</div></div>`;box.classList.add("show");return} box.innerHTML=groups.map(g=>{const r=g.rep;return `<div class="quick-item" data-idx="${state.market.indexOf(r)}">${thumbHTML(r)}<div><div class="qt">${esc(rowTitle(r))}</div><div class="qm">${esc(rowAuthor(r)||"—")}${rowYear(r)?" · "+rowYear(r):""} · ${g.rows.length} ocorrência${g.rows.length===1?"":"s"}</div></div></div>`}).join("")+`<div class="quick-foot" id="quickSeeAll">Ver todos os resultados em Pesquisa →</div>`; box.classList.add("show"); }
+function renderSearch(){ const q=state.query.trim(); if(!q){$("#searchBody").innerHTML="";$("#searchEmpty").style.display="block";$("#searchCount").textContent="";return} const groups=groupMarket(state.market.filter(r=>matchesQuery(r,q)&&rowType(r)!=="outro")).sort((a,b)=>b.rows.length-a.rows.length); $("#searchEmpty").style.display=groups.length?"none":"block"; $("#searchEmpty").textContent="Nenhum resultado encontrado."; $("#searchCount").textContent=`${groups.length} grupo${groups.length===1?"":"s"}`; $("#searchBody").innerHTML=groups.slice(0,200).map(g=>{ const vals=g.rows.map(rowFinal).filter(x=>x!=null).sort((a,b)=>a-b); const range=vals.length?(vals.length===1?brl(vals[0]):`${brl(vals[0])}–${brl(vals.at(-1))}`):"Sem preço observado"; return `<tr><td><div class="item-cell">${thumbHTML(g.rep)}<div><div class="title">${esc(rowTitle(g.rep))}</div><div class="meta">${firstEdition(g.rep)?"Indicação de 1ª edição":rowType(g.rep)}</div></div></div></td><td>${esc(rowAuthor(g.rep)||"—")}</td><td>${rowYear(g.rep)??"—"}</td><td>${g.rows.length}</td><td class="money">${range}</td><td>${collectionLabel(g.rep)}</td><td><button class="rowbtn" onclick="openDetail(${state.market.indexOf(g.rep)})">Ver →</button></td></tr>`; }).join(""); }
+function renderCollectionGrowth(owned){ const dated=owned.map(r=>({d:collectionAcquired(r),v:collectionValue(r)||0})).filter(x=>x.d); const years=[...new Set(dated.map(x=>x.d.getFullYear()))].sort((a,b)=>a-b); let count=0,value=0; const series=years.map(y=>{const rows=dated.filter(x=>x.d.getFullYear()===y);count+=rows.length;value+=rows.reduce((s,x)=>s+x.v,0);return{y,count,value}}); const draw=(sel,key,fmt)=>{const max=Math.max(...series.map(x=>x[key]),1);$(sel).innerHTML=series.map(x=>`<div class="chart-col" title="${x.y}: ${fmt(x[key])}"><div class="chart-value">${fmt(x[key])}</div><div class="chart-bar" style="height:${Math.max(3,x[key]/max*170)}px"></div><div class="chart-year">${x.y}</div></div>`).join("")||`<div class="empty">Sem datas de aquisição para montar a evolução.</div>`}; draw("#valueGrowth","value",v=>v>=1000000?(v/1000000).toFixed(1)+" mi":v>=1000?Math.round(v/1000)+" mil":brl(v)); draw("#itemGrowth","count",v=>String(v)); }
+function authorStatsMap(){ const catalog=state.collection.filter(r=>collectionTitle(r)!=="Item sem título"||collectionAuthor(r)!=="Autor não identificado"); const authors=new Map(); catalog.forEach(r=>{const a=collectionAuthor(r);if(!isValidCollectionAuthor(a))return;if(!authors.has(a))authors.set(a,{all:[],owned:[],group:authorGroupOf(a)});authors.get(a).all.push(r);if(collectionOwned(r))authors.get(a).owned.push(r)}); return authors; }
+function renderTopBooks(owned){ const top=owned.filter(r=>collectionValue(r)!=null).sort((a,b)=>(collectionValue(b)||0)-(collectionValue(a)||0)).slice(0,10); $("#topBooksList").innerHTML=top.map((r,i)=>`<div class="top-book"><div class="top-rank">${i+1}</div><div><div class="top-title">${esc(collectionTitle(r))}</div><div class="top-meta">${esc(collectionAuthor(r))} · ${rowYear(r)??"s/ ano"}${collectionAcquired(r)?" · adquirido em "+collectionAcquired(r).toLocaleDateString("pt-BR"):""}</div></div><div class="top-value">${brl(collectionValue(r))}</div></div>`).join("")||`<div class="empty">Sem valores pagos para montar o ranking.</div>`; }
+function sortedAuthors(authors){ let rows=[...authors.entries()].map(([a,x])=>{const pct=x.all.length?x.owned.length/x.all.length:0;const val=x.owned.filter(r=>!isReferenceAlias(r)).reduce((s,r)=>s+(collectionValue(r)||0),0);return{a,x,pct,val,count:x.owned.filter(r=>!isReferenceAlias(r)).length,group:x.group}}); if(state.authorGroup!=="all")rows=rows.filter(r=>r.group===state.authorGroup); const dir=state.authorSort.endsWith("_asc")?1:-1; if(state.authorSort.startsWith("complete"))rows.sort((a,b)=>(a.pct-b.pct)*dir||b.count-a.count); else if(state.authorSort.startsWith("count"))rows.sort((a,b)=>(a.count-b.count)*dir||b.pct-a.pct); else rows.sort((a,b)=>(a.val-b.val)*dir||b.count-a.count); return rows; }
+function renderCollection(){ const catalog=state.collection.filter(r=>collectionTitle(r)!=="Item sem título"||collectionAuthor(r)!=="Autor não identificado"); const owned=uniqueOwnedRows(catalog); const invested=owned.filter(r=>!isReferenceAlias(r)).reduce((s,r)=>s+(collectionValue(r)||0),0); $("#cTotal").textContent=owned.length||"—"; $("#cInvested").textContent=brl(invested); $("#cComplete").textContent=catalog.length?Math.round(owned.length/catalog.length*100)+"%":"—"; const authors=authorStatsMap(); const authorRows=[...authors.entries()]; const patronCount=authorRows.filter(([,x])=>x.group==="patrons").length; const founderCount=authorRows.filter(([,x])=>x.group==="founders").length; $("#cAuthors").textContent=authors.size||"—"; $("#cAuthorGroups").textContent=`${patronCount} patronos · ${founderCount} fundadores`; renderCollectionGrowth(owned);renderTopBooks(owned);$("#authorSort").value=state.authorSort; $$("#authorGroupToggle [data-group]").forEach(b=>b.classList.toggle("active",b.dataset.group===state.authorGroup)); $("#authorsList").innerHTML=sortedAuthors(authors).slice(0,100).map(({a,x,pct,val,count,group})=>{const pctText=Math.round(pct*100),groupLabel=group==="patrons"?"Patrono":"Fundador";return `<div class="author-item" data-author="${esc(a)}"><div class="author-main"><div class="author-name">${esc(a)}</div><div class="author-sub">${groupLabel} · ${x.owned.length} tenho · ${x.all.length-x.owned.length} não tenho · ${x.all.length} catalogados</div></div><div class="author-stats"><div class="author-pct">${pctText}%</div><div class="author-money">${brl(val)} investidos</div></div></div>`}).join("")||`<div class="empty">A coleção ainda não foi carregada.</div>`; const diversos=catalog.filter(r=>isDiversosAuthor(collectionAuthor(r))); $("#diversosList").innerHTML=diversos.map(r=>{const comment=collectionComment(r);return `<div class="author-book"><div class="author-book-title">${collectionOwned(r)?"✓":"○"} ${esc(collectionTitle(r))}</div><div class="author-book-meta">${rowYear(r)??"s/ ano"}${collectionValue(r)!=null?" · "+brl(collectionValue(r)):""}${collectionAcquired(r)?" · adquirido em "+collectionAcquired(r).toLocaleDateString("pt-BR"):""}</div>${comment?`<div class="author-comment">${esc(comment)}</div>`:""}</div>`}).join("")||`<div class="empty">Nenhum item "Diversos" na coleção.</div>`; }
+function renderHunt(){ $("#huntList").innerHTML=state.hunt.map((h,i)=>{const n=state.market.filter(r=>itemText(r).includes(norm(h))&&isCurrent(r)).length;return `<div class="hunt-item"><div><b>${esc(h)}</b><div class="meta">${n} oportunidade${n===1?"":"s"} atual${n===1?"":"is"} encontrada${n===1?"":"s"}</div></div><button class="secondary" onclick="removeHunt(${i})">Remover</button></div>`}).join("")||`<div class="empty">Adicione obras, edições, autores ou tipos de documento que você está procurando.</div>`; }
+function decadeBreakdown(rows){ const withYear=rows.filter(r=>rowYear(r)); const buckets=new Map(); withYear.forEach(r=>{const dec=Math.floor(rowYear(r)/10)*10;if(!buckets.has(dec))buckets.set(dec,[]);buckets.get(dec).push(r)}); return [...buckets.entries()].sort((a,b)=>a[0]-b[0]).map(([dec,list])=>{const vals=list.map(rowFinal).filter(v=>v!=null).sort((a,b)=>a-b);const median=vals.length?vals[Math.floor(vals.length/2)]:null;return{dec,count:list.length,median}}); }
+function publisherBreakdown(rows,limit=8){ const map=new Map(); rows.forEach(r=>{const p=rowPublisher(r);if(!p)return;map.set(p,(map.get(p)||0)+1)}); return [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,limit); }
+function renderDecadeBreakdown(rows){ const data=decadeBreakdown(rows),max=Math.max(...data.map(d=>d.count),1); $("#decadeBreakdown").innerHTML=data.map(d=>`<div class="decade-row"><div class="decade-label">${d.dec}s</div><div class="decade-bar-track"><div class="decade-bar-fill" style="width:${Math.max(4,d.count/max*100)}%"></div></div><div class="decade-count">${d.count} · ${d.median!=null?brl(d.median):"s/ preço"}</div></div>`).join("")||`<div class="empty">Sem anos identificados para agrupar por década.</div>`; }
+function renderPublisherBreakdown(rows){ const data=publisherBreakdown(rows); $("#publisherBreakdown").innerHTML=data.map(([name,count])=>`<div class="pub-row"><div class="pub-name">${esc(name)}</div><div class="pub-count">${count} ${count===1?"item":"itens"}</div></div>`).join("")||`<div class="empty">Nenhuma editora identificada nos resultados atuais.</div>`; }
+function resultsGalleryCard(r){ const sc=score(r),d=rowAuctionDate(r),val=rowFinal(r)??rowInitial(r),src=rowImage(r); const cover=src?`<img class="gallery-cover" src="${escAttr(src)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;gallery-cover-ph&quot;>📖</div>'" />`:`<div class="gallery-cover-ph">📖</div>`; return `<div class="gallery-card" onclick="openDetail(${state.market.indexOf(r)})"><div class="gallery-cover-wrap"><span class="gallery-score">${sc}</span>${cover}</div><div class="gallery-info"><div class="gallery-title">${esc(rowTitle(r))}</div><div class="gallery-meta">${esc(rowAuthor(r)||"—")}${rowYear(r)?" · "+rowYear(r):""}${d?" · "+d.toLocaleDateString("pt-BR"):""}</div><div class="gallery-price">${brl(val)}</div></div></div>`; }
+function renderResults(){ let rows=state.market.filter(r=>!isCurrent(r)&&rowType(r)!=="outro"); const allHistorical=rows.slice(); const finalValues=allHistorical.map(rowFinal).filter(v=>v!=null).sort((a,b)=>a-b); const median=finalValues.length?finalValues[Math.floor(finalValues.length/2)]:null; $("#rTotal").textContent=allHistorical.length;$("#rSold").textContent=finalValues.length;$("#rMedian").textContent=brl(median);$("#rMissed").textContent=allHistorical.filter(r=>!hasSameEdition(r)&&!hasOtherEdition(r)).length; const volume=finalValues.reduce((s,v)=>s+v,0),avg=finalValues.length?volume/finalValues.length:null,specialCount=allHistorical.filter(r=>firstEdition(r)||rowSigned(r)).length; const houseCounts=new Map(); allHistorical.forEach(r=>{const h=rowAuctioneer(r);if(h)houseCounts.set(h,(houseCounts.get(h)||0)+1)}); const topHouse=[...houseCounts.entries()].sort((a,b)=>b[1]-a[1])[0]; $("#rVolume").textContent=brl(volume);$("#rAvg").textContent=brl(avg);$("#rSpecial").textContent=specialCount;$("#rTopHouse").textContent=topHouse?`${topHouse[0]} (${topHouse[1]})`:"—"; renderDecadeBreakdown(allHistorical);renderPublisherBreakdown(allHistorical); if(state.query)rows=rows.filter(r=>matchesQuery(r,state.query)); if(state.resultsType!=="all")rows=rows.filter(r=>rowType(r)===state.resultsType); if(state.resultsOwnership==="missing")rows=rows.filter(r=>!hasSameEdition(r)&&!hasOtherEdition(r)); if(state.resultsOwnership==="same")rows=rows.filter(hasSameEdition); if(state.resultsOwnership==="other")rows=rows.filter(r=>!hasSameEdition(r)&&hasOtherEdition(r)); const y1=Number($("#resultsYearFrom")?.value||0),y2=Number($("#resultsYearTo")?.value||0); if(y1)rows=rows.filter(r=>rowYear(r)&&rowYear(r)>=y1); if(y2)rows=rows.filter(r=>rowYear(r)&&rowYear(r)<=y2); if(state.resultsSort==="date_desc")rows.sort((a,b)=>(rowAuctionDate(b)||0)-(rowAuctionDate(a)||0)); if(state.resultsSort==="date_asc")rows.sort((a,b)=>(rowAuctionDate(a)||0)-(rowAuctionDate(b)||0)); if(state.resultsSort==="value_desc")rows.sort((a,b)=>(rowFinal(b)??-1)-(rowFinal(a)??-1)); if(state.resultsSort==="value_asc")rows.sort((a,b)=>(rowFinal(a)??Infinity)-(rowFinal(b)??Infinity)); if(state.resultsSort==="score_desc")rows=sortByScoreDesc(rows); $("#resultsCount").textContent=`${rows.length} resultado${rows.length===1?"":"s"}`; const visible=rows.slice(0,state.resultsPage*RESULTS_PAGE_SIZE),hasMore=rows.length>visible.length; $("#resultsLoadMoreWrap").style.display=hasMore?"flex":"none";$("#resultsLoadMore").textContent=`Carregar mais resultados (${visible.length} de ${rows.length})`; if(state.resultsView==="gallery"){ $("#resultsListWrap").style.display="none";$("#resultsGalleryWrap").style.display="block";$("#resultsGallery").innerHTML=visible.map(resultsGalleryCard).join("")||"";$("#resultsGalleryEmpty")?.remove();if(!rows.length)$("#resultsGalleryWrap").insertAdjacentHTML("beforeend",`<div class="empty" id="resultsGalleryEmpty">Nenhum resultado encontrado com estes filtros.</div>`); }else{ $("#resultsListWrap").style.display="block";$("#resultsGalleryWrap").style.display="none";$("#resultsBody").innerHTML=visible.map(r=>{const sc=score(r),d=rowAuctionDate(r),desc=col(r,["Descrição completa","Descricao completa","Comentários","Comentarios"]);return `<tr><td><span class="score ${scoreClass(sc)}">${sc}</span></td><td><div class="item-cell">${thumbHTML(r)}<div><div class="result-title">${esc(rowTitle(r))}</div><div class="result-desc">${esc(desc||rowAuthor(r))}</div></div></div></td><td>${rowYear(r)??"—"}</td><td>${d?d.toLocaleDateString("pt-BR"):"—"}</td><td>${esc(rowAuctioneer(r)||"—")}</td><td class="money">${brl(rowInitial(r))}</td><td class="money">${brl(rowFinal(r))}</td><td>${collectionLabel(r)}</td><td><button class="rowbtn" onclick="openDetail(${state.market.indexOf(r)})">Ver →</button></td></tr>`}).join("");$("#resultsEmpty").style.display=rows.length?"none":"block";$("#resultsEmpty").textContent="Nenhum resultado encontrado com estes filtros."; } }
+function openAuthor(author){ state.activeAuthor=author; const rows=state.collection.filter(r=>collectionAuthor(r)===author),owned=rows.filter(collectionOwned),missing=rows.filter(r=>!collectionOwned(r)); const invested=owned.filter(r=>!isReferenceAlias(r)).reduce((s,r)=>s+(collectionValue(r)||0),0),pct=rows.length?Math.round(owned.length/rows.length*100):0; $("#dTitle").textContent=author;$("#dMeta").textContent="Análise detalhada da coleção"; $("#dBody").innerHTML=`<div class="author-summary"><div><span>Tenho</span><b>${owned.length} / ${rows.length}</b></div><div><span>Completude</span><b>${pct}%</b></div><div><span>Investido</span><b>${brl(invested)}</b></div></div><div class="panel"><div id="authorListDetail">${owned.map(r=>`<div class="author-book"><div class="author-book-title">✓ ${esc(collectionTitle(r))}</div><div class="author-book-meta">${rowYear(r)??"s/ ano"}${collectionValue(r)!=null?" · "+brl(collectionValue(r)):""}</div></div>`).join("")||'<div class="empty">Nenhum item encontrado.</div>'}</div></div>`; $("#detailDialog").showModal(); }
+function openDetail(idx){ const r=state.market[idx];if(!r)return; const sc=score(r),hist=historyFor(r).sort((a,b)=>(rowAuctionDate(b)||0)-(rowAuctionDate(a)||0)); $("#dTitle").textContent=rowTitle(r);$("#dMeta").textContent=[rowAuthor(r),rowYear(r),rowType(r)].filter(Boolean).join(" · "); const vals=hist.map(rowFinal).filter(x=>x!=null).sort((a,b)=>a-b),median=vals.length?vals[Math.floor(vals.length/2)]:null; $("#dBody").innerHTML=`<div class="detail-top"><div>${thumbHTML(r,"lg")}</div><div class="detail-main"><div class="detail-grid"><div class="detailbox"><div class="k">Felipe Score</div><div class="v"><span class="score ${scoreClass(sc)}">${sc}</span></div></div><div class="detailbox"><div class="k">Situação no acervo</div><div class="v">${collectionLabel(r)}</div></div><div class="detailbox"><div class="k">Preço / lance</div><div class="v">${brl(rowInitial(r)??rowFinal(r))}</div></div><div class="detailbox"><div class="k">Mediana histórica observada</div><div class="v">${brl(median)}</div></div></div><div class="why"><b>Por que merece atenção</b><br>${esc(scoreReason(r))}.</div></div></div><div class="detailbox"><div class="k">Leilão atual / ocorrência</div><div class="v">${esc(rowAuctioneer(r)||"Leiloeiro não identificado")} · ${rowAuctionDate(r)?rowAuctionDate(r).toLocaleString("pt-BR"):"data não identificada"}</div>${rowLink(r)?`<div style="margin-top:10px"><a class="link" href="${escAttr(rowLink(r))}" target="_blank" rel="noopener">Abrir lote ↗</a></div>`:""}</div><div class="history"><h3>Histórico observado</h3>${hist.length?hist.slice(0,30).map(x=>`<div class="history-row"><span>${rowAuctionDate(x)?rowAuctionDate(x).toLocaleDateString("pt-BR"):"—"}</span><span>${esc(rowAuctioneer(x)||"—")}</span><b>${brl(rowFinal(x))}</b></div>`).join(""):`<p class="note">Nenhuma venda comparável com preço final foi encontrada no arquivo atual.</p>`}</div>`; $("#detailDialog").showModal(); }
+window.openDetail=openDetail;
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function escAttr(s){return esc(s)}
+function renderAll(){renderRadar();renderSearch();renderResults();renderCollection();renderHunt();renderSync()}
+
+const CLIO_DB_NAME="clio-radar";
+const CLIO_DB_VERSION=1;
+const CLIO_MARKET_STORE="market-cache";
+function openClioDB(){ return new Promise((resolve,reject)=>{ const request=indexedDB.open(CLIO_DB_NAME,CLIO_DB_VERSION); request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains(CLIO_MARKET_STORE))db.createObjectStore(CLIO_MARKET_STORE,{keyPath:"url"})}; request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error); }); }
+async function getMarketCache(url){ if(!url)return null; const db=await openClioDB(); return new Promise((resolve,reject)=>{const tx=db.transaction(CLIO_MARKET_STORE,"readonly"),request=tx.objectStore(CLIO_MARKET_STORE).get(url);request.onsuccess=()=>{db.close();resolve(request.result||null)};request.onerror=()=>{db.close();reject(request.error)}}); }
+async function saveMarketCache({url,rows,sha=null}){ const db=await openClioDB(); return new Promise((resolve,reject)=>{const tx=db.transaction(CLIO_MARKET_STORE,"readwrite");tx.objectStore(CLIO_MARKET_STORE).put({url,rows,sha,updatedAt:Date.now()});tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}}); }
+function githubRawInfo(rawUrl){ try{const u=new URL(rawUrl);if(u.hostname!=="raw.githubusercontent.com")return null;const parts=u.pathname.split("/").filter(Boolean);if(parts.length<4)return null;const owner=parts[0],repo=parts[1];let ref,pathParts;if(parts[2]==="refs"&&parts[3]==="heads"&&parts.length>=6){ref=parts[4];pathParts=parts.slice(5)}else{ref=parts[2];pathParts=parts.slice(3)}if(!owner||!repo||!ref||!pathParts.length)return null;return{owner,repo,ref,path:pathParts.join("/")}}catch(e){return null} }
+async function fetchGitHubFileMeta(rawUrl){ const info=githubRawInfo(rawUrl);if(!info)return null;const encodedPath=info.path.split("/").map(encodeURIComponent).join("/");const apiUrl=`https://api.github.com/repos/${encodeURIComponent(info.owner)}/${encodeURIComponent(info.repo)}/contents/${encodedPath}?ref=${encodeURIComponent(info.ref)}`;const res=await fetch(apiUrl,{headers:{"Accept":"application/vnd.github+json"},cache:"no-store"});if(!res.ok)throw new Error(`GitHub metadata: HTTP ${res.status}`);const data=await res.json();return{sha:data.sha||null,size:data.size||null}; }
+function formatCacheDate(ts){ if(!ts)return"";return new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(new Date(ts)); }
+function renderSync(){ $("#syncText").textContent=state.market.length?`${state.market.length.toLocaleString("pt-BR")} registros de mercado`:"Mercado não conectado"; if(state.marketCacheMeta?.updatedAt)$("#syncSub").textContent=`${state.collection.length.toLocaleString("pt-BR")} itens no acervo · base ${formatCacheDate(state.marketCacheMeta.updatedAt)}`; else $("#syncSub").textContent=state.collection.length?`${state.collection.length.toLocaleString("pt-BR")} itens no acervo`:"Coleção não carregada"; }
+function setStatus(msg){$("#statusBox").textContent=msg}
+async function fetchCSVText(url,label){ if(!url)return"";const res=await fetch(url,{cache:"no-store"});if(!res.ok)throw new Error(`${label}: HTTP ${res.status}`);return await res.text(); }
+async function loadCollection(collectionUrl){ if(!collectionUrl){state.collection=[];return null} try{const collectionText=await fetchCSVText(collectionUrl,"Coleção");state.collection=parseCollectionCSV(collectionText);const identified=state.collection.filter(r=>collectionAuthor(r)!=="Autor não identificado").length;const headers=Object.keys(state.collection[0]||{});if(state.collection.length&&identified===0)return "Coleção carregada, mas nenhum autor foi identificado. Cabeçalhos: "+headers.join(" | ");return null}catch(e){state.collection=[];return e.message} }
+async function downloadMarket(marketUrl,sha=null){ setStatus("Baixando nova versão da base de mercado…");const text=await fetchCSVText(marketUrl,"Mercado");setStatus("Processando nova versão do CSV…");const rows=parseCSV(text);state.market=rows;resetComputedCaches();const updatedAt=Date.now();state.marketCacheMeta={sha,updatedAt};setStatus("Salvando base local para as próximas aberturas…");try{await saveMarketCache({url:marketUrl,rows,sha})}catch(e){console.warn("CLIO: não foi possível salvar cache IndexedDB",e)}return rows; }
+async function loadData(options={}){ const force=options.force===true;const marketUrl=localStorage.getItem("clio_market_url")||DEFAULT_MARKET_URL;const collectionUrl=localStorage.getItem("clio_collection_url")||DEFAULT_COLLECTION_URL;$("#marketUrl").value=marketUrl;$("#collectionUrl").value=collectionUrl;const errors=[];setStatus("Abrindo CLIO Radar…");let cached=null;const [collectionError,cacheResult]=await Promise.all([loadCollection(collectionUrl),marketUrl?getMarketCache(marketUrl).catch(e=>{console.warn("CLIO: erro ao abrir IndexedDB",e);return null}):Promise.resolve(null)]);cached=cacheResult;if(collectionError)errors.push(collectionError);if(cached?.rows?.length){state.market=cached.rows;state.marketCacheMeta={sha:cached.sha||null,updatedAt:cached.updatedAt||null};resetComputedCaches();setStatus(`Base local aberta: ${state.market.length.toLocaleString("pt-BR")} registros.`);renderAll();await new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));} if(!marketUrl){renderAll();setStatus(errors.length?`Carregamento parcial: ${errors.join(" | ")}.`:"Mercado não configurado.");return} let remoteMeta=null;try{setStatus(cached?.rows?.length?"Base local aberta. Verificando atualização no GitHub…":"Verificando base no GitHub…");remoteMeta=await fetchGitHubFileMeta(marketUrl)}catch(e){console.warn("CLIO: não foi possível consultar SHA do GitHub",e);if(!cached?.rows?.length||force){try{await downloadMarket(marketUrl,null);renderAll()}catch(downloadError){errors.push(downloadError.message)}}setStatus(errors.length?`Carregamento parcial: ${errors.join(" | ")}.`:cached?.rows?.length?`Base local carregada. Não foi possível verificar a versão remota agora. Mercado: ${state.market.length.toLocaleString("pt-BR")} registros.`:`Dados carregados. Mercado: ${state.market.length.toLocaleString("pt-BR")} registros. Coleção: ${state.collection.length.toLocaleString("pt-BR")} linhas.`);renderAll();return} const sameVersion=!force&&cached?.rows?.length&&cached.sha&&remoteMeta?.sha&&cached.sha===remoteMeta.sha;if(sameVersion){setStatus(`Base local atualizada. Mercado: ${state.market.length.toLocaleString("pt-BR")} registros. Coleção: ${state.collection.length.toLocaleString("pt-BR")} linhas.`);renderSync();return} try{await downloadMarket(marketUrl,remoteMeta?.sha||null)}catch(e){errors.push(e.message)} setStatus(errors.length?`Carregamento parcial: ${errors.join(" | ")}.`:`Dados atualizados. Mercado: ${state.market.length.toLocaleString("pt-BR")} registros. Coleção: ${state.collection.length.toLocaleString("pt-BR")} linhas.`);renderAll(); }
+function go(page){ state.page=page;$$('.page').forEach(x=>x.classList.toggle('active',x.id===`page-${page}`));$$('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page)); }
+$$('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
+function onGlobalSearchInput(){ const v=$("#globalSearch").value;$("#searchClear").classList.toggle("show",v.length>0);$("#searchHint").style.display=v.length>0?"none":"";clearTimeout(window.__searchDebounce);window.__searchDebounce=setTimeout(()=>{state.query=v;state.resultsPage=1;renderRadar();renderSearch();renderResults();renderQuickResults()},150); }
+$("#globalSearch").addEventListener("input",onGlobalSearchInput);$("#globalSearch").addEventListener("focus",()=>{if(state.query)renderQuickResults()});$("#searchClear").addEventListener("click",()=>{$("#globalSearch").value="";state.query="";state.resultsPage=1;$("#searchClear").classList.remove("show");$("#searchHint").style.display="";$("#quickResults").classList.remove("show");$("#quickResults").innerHTML="";renderRadar();renderSearch();renderResults();$("#globalSearch").focus()});$("#quickResults").addEventListener("click",e=>{if(e.target.closest("#quickSeeAll")){go("pesquisa");$("#quickResults").classList.remove("show");return}const item=e.target.closest("[data-idx]");if(item){openDetail(+item.dataset.idx);$("#quickResults").classList.remove("show")}});document.addEventListener("click",e=>{if(!e.target.closest(".search-wrap"))$("#quickResults").classList.remove("show")});
+$("#filters").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;state.filter=b.dataset.filter;$$("#filters .chip").forEach(x=>x.classList.toggle("active",x===b));renderRadar()});
+$("#authorGroupToggle").addEventListener("click",e=>{const b=e.target.closest("[data-group]");if(!b)return;state.authorGroup=b.dataset.group;$$("#authorGroupToggle [data-group]").forEach(x=>x.classList.toggle("active",x===b));renderCollection()});$("#authorsList").addEventListener("click",e=>{const item=e.target.closest("[data-author]");if(item)openAuthor(item.dataset.author)});$("#authorSort").addEventListener("change",e=>{state.authorSort=e.target.value;renderCollection()});
+$("#resultsType").addEventListener("change",e=>{state.resultsType=e.target.value;state.resultsPage=1;renderResults()});$("#resultsOwnership").addEventListener("change",e=>{state.resultsOwnership=e.target.value;state.resultsPage=1;renderResults()});$("#resultsSort").addEventListener("change",e=>{state.resultsSort=e.target.value;state.resultsPage=1;renderResults()});$("#resultsYearFrom").addEventListener("input",()=>{state.resultsPage=1;renderResults()});$("#resultsYearTo").addEventListener("input",()=>{state.resultsPage=1;renderResults()});$("#resultsView").addEventListener("click",e=>{const b=e.target.closest("[data-view]");if(!b)return;state.resultsView=b.dataset.view;state.resultsPage=1;$$("#resultsView [data-view]").forEach(x=>x.classList.toggle("active",x===b));renderResults()});$("#resultsLoadMore").addEventListener("click",()=>{state.resultsPage++;renderResults()});
+$("#refreshBtn").addEventListener("click",()=>loadData({force:true}));$("#saveMarket").addEventListener("click",()=>{localStorage.setItem("clio_market_url",$("#marketUrl").value.trim());loadData({force:true})});$("#saveCollection").addEventListener("click",()=>{localStorage.setItem("clio_collection_url",$("#collectionUrl").value.trim());resetComputedCaches();loadData()});$("#fileInput").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;state.market=parseCSV(await f.text());resetComputedCaches();setStatus(`CSV manual carregado: ${state.market.length} registros.`);renderAll();go("radar")});
+window.removeHunt=i=>{state.hunt.splice(i,1);localStorage.setItem("clio_hunt",JSON.stringify(state.hunt));resetComputedCaches();renderAll()};$("#huntAdd").addEventListener("click",()=>{const v=$("#huntInput").value.trim();if(!v)return;state.hunt.push(v);localStorage.setItem("clio_hunt",JSON.stringify(state.hunt));$("#huntInput").value="";resetComputedCaches();renderAll()});$("#huntInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("#huntAdd").click()});
+$("#modalClose").addEventListener("click",()=>$("#detailDialog").close());$("#detailDialog").addEventListener("click",e=>{if(e.target===$("#detailDialog"))$("#detailDialog").close()});$("#today").textContent=new Intl.DateTimeFormat("pt-BR",{dateStyle:"full"}).format(new Date());
+loadData();
+</script>
+</body>
+</html>

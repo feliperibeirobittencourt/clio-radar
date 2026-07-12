@@ -16,6 +16,7 @@
     html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     body{min-height:100vh}
     button,input,select{font:inherit}
+    input,select,textarea{font-size:16px} /* evita zoom automático do iOS Safari ao focar */
     button{cursor:pointer}
     .shell{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:100vh}
     aside{position:sticky;top:0;height:100vh;padding:26px 18px;border-right:1px solid var(--line);background:#191510;color:#f7f1e8}
@@ -72,8 +73,11 @@
     .panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
     .panel h3{margin:0 0 13px;font-size:21px}
     .author-list{display:grid;gap:8px}
-    .author-item{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eee7dc;cursor:pointer}
+    .author-item{display:flex;justify-content:space-between;gap:12px;padding:12px 10px;border-bottom:1px solid #eee7dc;cursor:pointer;border-radius:10px;transition:.12s}
+    .author-item:hover,.author-item:active{background:#f8f4ed}
     .author-item:last-child{border:0}
+    .author-name{font-weight:700;color:var(--accent)}
+    .author-name::after{content:" ›";color:var(--muted);font-weight:400}
     .sort-select{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;color:var(--ink);max-width:210px}
     .results-toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
     .results-toolbar select,.results-toolbar input{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 11px;color:var(--ink)}
@@ -380,6 +384,8 @@
         <div class="metric"><span class="label">Completude catalogada</span><strong id="cComplete">—</strong></div>
         <div class="metric"><span class="label">Autores do recorte</span><strong id="cAuthors">—</strong><div class="meta" id="cAuthorGroups"></div></div>
       </div>
+
+      <div class="section-head"><h2>Visão financeira</h2></div>
       <div class="two collection-charts">
         <div class="panel"><h3>Valor investido acumulado</h3><p class="note">Com base em VALOR PAGO e DATA DE AQUISIÇÃO.</p><div class="mini-chart" id="valueGrowth"></div></div>
         <div class="panel"><h3>Crescimento do acervo</h3><p class="note">Exemplares adquiridos acumulados ao longo dos anos.</p><div class="mini-chart" id="itemGrowth"></div></div>
@@ -389,35 +395,32 @@
         <p class="note">Ranking dos exemplares físicos com maior valor investido.</p>
         <div id="topBooksList"></div>
       </div>
-      <div class="two">
-        <div class="panel">
-          <div class="section-head" style="margin:0 0 8px">
-            <div><h3 style="margin:0">Autores e completude</h3><p class="note">Toque em um autor para abrir a análise detalhada.</p></div>
-            <select id="authorGroup" class="sort-select">
-              <option value="all">Todos</option>
-              <option value="patrons">Patronos</option>
-              <option value="founders">Fundadores</option>
-            </select>
-            <select id="authorSort" class="sort-select">
-              <option value="complete_desc">Maior completude</option>
-              <option value="complete_asc">Menor completude</option>
-              <option value="count_desc">Maior nº de livros</option>
-              <option value="count_asc">Menor nº de livros</option>
-              <option value="value_desc">Maior valor investido</option>
-              <option value="value_asc">Menor valor investido</option>
-            </select>
-          </div>
-          <div class="author-list" id="authorsList"></div>
+
+      <div class="section-head"><h2>Autores e completude</h2></div>
+      <div class="panel">
+        <div class="section-head" style="margin:0 0 12px">
+          <p class="note" style="margin:0">Toque em um autor para abrir a análise detalhada.</p>
+          <select id="authorSort" class="sort-select">
+            <option value="complete_desc">Maior completude</option>
+            <option value="complete_asc">Menor completude</option>
+            <option value="count_desc">Maior nº de livros</option>
+            <option value="count_asc">Menor nº de livros</option>
+            <option value="value_desc">Maior valor investido</option>
+            <option value="value_asc">Menor valor investido</option>
+          </select>
         </div>
-        <div class="panel">
-  <h3>Lacunas observadas no mercado</h3>
-  <p class="note">Obras conhecidas ou observadas no mercado que não foram identificadas como possuídas na sua coleção.</p>
-  <div class="filters" id="gapModeFilters" style="margin-top:12px">
-    <button class="chip active" data-gap-mode="available">🔥 À venda agora</button>
-    <button class="chip" data-gap-mode="missed">⏳ Perdi / já passou</button>
-  </div>
-  <div id="gapsList"></div>
-</div>
+        <div class="view-toggle" id="authorGroupToggle" style="margin-bottom:14px">
+          <button class="active" data-group="all">Todos</button>
+          <button data-group="patrons">Patronos</button>
+          <button data-group="founders">Fundadores</button>
+        </div>
+        <div class="author-list" id="authorsList"></div>
+      </div>
+
+      <div class="section-head"><h2>Diversos / coautorias</h2></div>
+      <div class="panel">
+        <p class="note">Obras com vários autores ou antologias, registradas como "Diversos" na planilha — ainda sem um autor específico cadastrado.</p>
+        <div id="diversosList"></div>
       </div>
     </section>
 
@@ -473,7 +476,7 @@
 const DEFAULT_MARKET_URL = "https://raw.githubusercontent.com/feliperibeirobittencourt/monitor-leiloes/refs/heads/main/leiloes.csv";
 const DEFAULT_COLLECTION_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTy71HxXBO-cXNMpbsoSa-GwSDPPaVAzqh7hXMNUEpWsThdGyj7KYtzrGQalsYGMg/pub?gid=416493939&single=true&output=csv";
 const PATRONS = ["Adelino Fontoura", "Álvares de Azevedo", "Araújo Porto-Alegre", "Artur de Oliveira", "Basílio da Gama", "Bernardo Guimarães", "Casimiro de Abreu", "Castro Alves", "Cláudio Manoel da Costa", "Evaristo da Veiga", "Fagundes Varela", "França Júnior", "Francisco Adolfo de Varnhagen", "Francisco Otaviano", "Franklin Távora", "Gonçalves de Magalhães", "Gonçalves Dias", "Gregório de Matos", "Hipólito da Costa", "João Francisco Lisboa", "Joaquim Caetano da Silva", "Joaquim Manuel de Macedo", "Joaquim Serra", "José Bonifácio", "José de Alencar", "Júlio Ribeiro", "Junqueira Freire", "Laurindo Rabelo", "Maciel Monteiro", "Manuel Antônio de Almeida", "Martins Pena", "Pardal Mallet", "Pedro Luís", "Raul Pompeia", "Sousa Caldas", "Tavares Bastos", "Teófilo Dias", "Tobias Barreto", "Tomás Antônio Gonzaga", "Visconde do Rio Branco"];
-const state = { market:[], collection:[], page:"radar", query:"", filter:"relevantes", gapMode:"available", authorSort:"complete_desc", authorGroup:"all", resultsType:"all", resultsOwnership:"all", resultsSort:"date_desc", resultsView:"list", resultsPage:1, activeAuthor:null, authorView:"owned", hunt:JSON.parse(localStorage.getItem("clio_hunt")||"[]") };
+const state = { market:[], collection:[], page:"radar", query:"", filter:"relevantes", authorSort:"complete_desc", authorGroup:"all", resultsType:"all", resultsOwnership:"all", resultsSort:"date_desc", resultsView:"list", resultsPage:1, activeAuthor:null, authorView:"owned", hunt:JSON.parse(localStorage.getItem("clio_hunt")||"[]") };
 const RESULTS_PAGE_SIZE=60;
 
 const $ = s => document.querySelector(s);
@@ -542,20 +545,32 @@ function parseCollectionCSV(text){
       break;
     }
   }
+  if(headerIndex>=0) return rowsToObjects(rows,headerIndex);
 
-  // Fallback: tenta ponto e vírgula, caso a fonte mude.
-  if(headerIndex<0){
-    const semicolonRows=parseDelimitedRows(text,";");
-    for(let i=0;i<Math.min(semicolonRows.length,50);i++){
-      const cells=semicolonRows[i].map(norm);
-      if((cells.includes("autores")||cells.includes("autor")) && cells.includes("titulo") && cells.includes("tenho")){
-        return rowsToObjects(semicolonRows,i);
-      }
+  // Fallback: na planilha real, a coluna do nome do autor não tem texto
+  // de cabeçalho (célula em branco) — mas vem sempre logo depois da
+  // coluna "CADEIRA". Usa isso como âncora, igual fizemos no script
+  // Python que gera o CSV do mercado.
+  for(let i=0;i<Math.min(rows.length,50);i++){
+    const cells=rows[i].map(norm);
+    const iCadeira=cells.indexOf("cadeira");
+    if(iCadeira>=0 && cells.includes("titulo") && cells.includes("tenho")){
+      const objetos=rowsToObjects(rows,i);
+      const idxAutor=iCadeira+1;
+      const chaveOriginal=(rows[i][idxAutor]||"").trim() || `col_${idxAutor}`;
+      return objetos.map(o=>({...o, AUTORES:o[chaveOriginal]}));
     }
-    throw new Error("Coleção: cabeçalho AUTORES / TITULO / TENHO não encontrado");
   }
 
-  return rowsToObjects(rows,headerIndex);
+  // Último fallback: tenta ponto e vírgula, caso a fonte mude.
+  const semicolonRows=parseDelimitedRows(text,";");
+  for(let i=0;i<Math.min(semicolonRows.length,50);i++){
+    const cells=semicolonRows[i].map(norm);
+    if((cells.includes("autores")||cells.includes("autor")) && cells.includes("titulo") && cells.includes("tenho")){
+      return rowsToObjects(semicolonRows,i);
+    }
+  }
+  throw new Error("Coleção: cabeçalho AUTORES / TITULO / TENHO não encontrado");
 }
 function price(v){
   if(v==null||v==="") return null;
@@ -686,9 +701,12 @@ const PATRON_KEYS=new Set(PATRONS.map(canonicalAuthorName));
 function authorGroupOf(name){
   return PATRON_KEYS.has(canonicalAuthorName(name)) ? "patrons" : "founders";
 }
+function isDiversosAuthor(name){
+  return canonicalAuthorName(name)==="diversos";
+}
 function isValidCollectionAuthor(name){
   const n=canonicalAuthorName(name);
-  return n && n!=="autor nao identificado" && n!=="autores" && n!=="autor";
+  return n && n!=="autor nao identificado" && n!=="autores" && n!=="autor" && n!=="diversos";
 }
 
 function collectionTitle(c){ return col(c,["TITULO","TÍTULO","Título","Titulo"])||"Item sem título"; }
@@ -1053,7 +1071,7 @@ function renderCollection(){
   renderCollectionGrowth(owned);
   renderTopBooks(owned);
   $("#authorSort").value=state.authorSort;
-  $("#authorGroup").value=state.authorGroup;
+  $$("#authorGroupToggle [data-group]").forEach(b=>b.classList.toggle("active", b.dataset.group===state.authorGroup));
 
   $("#authorsList").innerHTML=sortedAuthors(authors).slice(0,100).map(({a,x,pct,val,count,group})=>{
     const pctText=Math.round(pct*100);
@@ -1061,15 +1079,15 @@ function renderCollection(){
     return `<div class="author-item" data-author="${esc(a)}"><div class="author-main"><div class="author-name">${esc(a)}</div><div class="author-sub">${groupLabel} · ${x.owned.length} tenho · ${x.all.length-x.owned.length} não tenho · ${x.all.length} catalogados</div></div><div class="author-stats"><div class="author-pct">${pctText}%</div><div class="author-money">${brl(val)} investidos</div></div></div>`;
   }).join("") || `<div class="empty">A coleção ainda não foi carregada.</div>`;
 
-  const candidates=state.market.filter(r=>rowType(r)!=="outro"&&!hasSameEdition(r)&&!hasOtherEdition(r));
-  let filtered=state.gapMode==="available"?candidates.filter(isCurrent):candidates.filter(r=>!isCurrent(r));
-  let gaps=groupMarket(filtered);
-  const gapScoreMap=new Map(); gaps.forEach(g=>gapScoreMap.set(g,score(g.rep)));
-  gaps.sort((a,b)=>state.gapMode==="available" ? gapScoreMap.get(b)-gapScoreMap.get(a)||(rowAuctionDate(a.rep)||0)-(rowAuctionDate(b.rep)||0) : (rowAuctionDate(b.rep)||0)-(rowAuctionDate(a.rep)||0)||gapScoreMap.get(b)-gapScoreMap.get(a));
-  $("#gapsList").innerHTML=gaps.slice(0,30).map(g=>{
-    const rep=g.rep,sc=score(rep),date=rowAuctionDate(rep),value=rowFinal(rep)??rowInitial(rep);
-    return `<div class="gap-card"><div class="gap-top"><div style="display:flex;gap:12px">${thumbHTML(rep,"gap")}<div><div class="gap-title">${esc(rowTitle(rep))}</div><div class="gap-meta">${esc(rowAuthor(rep))} · ${rowYear(rep)??"s/ ano"} · ${g.rows.length} ocorrência(s)</div></div></div><div class="priority-badge ${sc>=85?"hot":""}"><div class="n">${sc}</div><div class="t">${priorityLabel(sc)}</div></div></div><div class="gap-facts"><div class="gap-fact"><div class="k">${state.gapMode==="available"?"Pregão":"Última ocorrência"}</div><div class="v">${date?date.toLocaleDateString("pt-BR"):"Não informado"}</div></div><div class="gap-fact"><div class="k">${state.gapMode==="available"?"Lance / preço":"Valor observado"}</div><div class="v">${brl(value)}</div></div></div><div class="meta" style="margin-top:8px">${esc(rowAuctioneer(rep)||"Leiloeiro não identificado")}</div><button class="rowbtn" onclick="openDetail(${state.market.indexOf(rep)})">Ver detalhes →</button></div>`;
-  }).join("") || `<div class="empty">${state.gapMode==="available"?"Nenhuma lacuna disponível para venda foi identificada agora.":"Nenhuma oportunidade passada foi identificada."}</div>`;
+  const diversos=catalog.filter(r=>isDiversosAuthor(collectionAuthor(r)));
+  $("#diversosList").innerHTML=diversos.map(r=>{
+    const comment=collectionComment(r);
+    return `<div class="author-book">
+      <div class="author-book-title">${collectionOwned(r)?"✓":"○"} ${esc(collectionTitle(r))}</div>
+      <div class="author-book-meta">${rowYear(r)??"s/ ano"}${collectionValue(r)!=null?" · "+brl(collectionValue(r)):""}${collectionAcquired(r)?" · adquirido em "+collectionAcquired(r).toLocaleDateString("pt-BR"):""}</div>
+      ${comment?`<div class="author-comment">${esc(comment)}</div>`:""}
+    </div>`;
+  }).join("") || `<div class="empty">Nenhum item "Diversos" na coleção.</div>`;
 }
 function renderHunt(){
   $("#huntList").innerHTML=state.hunt.map((h,i)=>{
@@ -1090,9 +1108,17 @@ function openDetail(idx){
     rowCity(r)?{k:"Cidade",v:rowCity(r)}:null,
     rowSigned(r)?{k:"Assinado / autógrafo",v:"Sim"}:null,
   ].filter(Boolean);
+  const buscaImagem = !rowImage(r) ? (() => {
+    const termo = encodeURIComponent([rowAuthor(r), rowTitle(r), rowYear(r)].filter(Boolean).join(" "));
+    return `<div style="margin-top:10px;font-size:12px">
+      <a class="link" href="https://www.google.com/search?tbm=isch&q=${termo}" target="_blank" rel="noopener">Buscar capa (Google Imagens) ↗</a>
+      &nbsp;·&nbsp;
+      <a class="link" href="https://www.estantevirtual.com.br/busca?q=${termo}" target="_blank" rel="noopener">Buscar na Estante Virtual ↗</a>
+    </div>`;
+  })() : "";
   $("#dBody").innerHTML=`
     <div class="detail-top">
-      ${thumbHTML(r,"lg")}
+      <div>${thumbHTML(r,"lg")}${buscaImagem}</div>
       <div class="detail-main">
         <div class="detail-grid">
           <div class="detailbox"><div class="k">Felipe Score</div><div class="v"><span class="score ${scoreClass(sc)}">${sc}</span></div></div>
@@ -1287,7 +1313,6 @@ function go(page){
   state.page=page;
   $$(".page").forEach(x=>x.classList.toggle("active",x.id===`page-${page}`));
   $$("[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===page));
-  if(page==="pesquisa") $("#globalSearch").focus();
 }
 $$("[data-page]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.page)));
 function onGlobalSearchInput(){
@@ -1358,10 +1383,10 @@ $("#filters").addEventListener("click",e=>{
   const b=e.target.closest("[data-filter]"); if(!b)return;
   state.filter=b.dataset.filter; $$("#filters .chip").forEach(x=>x.classList.toggle("active",x===b)); renderRadar();
 });
-$("#gapModeFilters").addEventListener("click",e=>{
-  const b=e.target.closest("[data-gap-mode]"); if(!b)return;
-  state.gapMode=b.dataset.gapMode;
-  $$("#gapModeFilters .chip").forEach(x=>x.classList.toggle("active",x===b));
+$("#authorGroupToggle").addEventListener("click",e=>{
+  const b=e.target.closest("[data-group]"); if(!b)return;
+  state.authorGroup=b.dataset.group;
+  $$("#authorGroupToggle [data-group]").forEach(x=>x.classList.toggle("active",x===b));
   renderCollection();
 });
 $("#authorsList").addEventListener("click",e=>{
@@ -1369,10 +1394,6 @@ $("#authorsList").addEventListener("click",e=>{
 });
 $("#authorSort").addEventListener("change",e=>{
   state.authorSort=e.target.value;
-  renderCollection();
-});
-$("#authorGroup").addEventListener("change",e=>{
-  state.authorGroup=e.target.value;
   renderCollection();
 });
 $("#resultsType").addEventListener("change",e=>{state.resultsType=e.target.value;state.resultsPage=1;renderResults();});

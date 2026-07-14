@@ -499,8 +499,20 @@ const AUTHOR_PHOTO_OVERRIDES = {
   "carlos magalhaes de azeredo": "https://www.academia.org.br/sites/default/files/academicos/fotografias/magalhaes-de-azeredo.jpg",
   "basilio da gama": "https://www.academia.org.br/sites/default/files/academicos/fotografias/basilio-da-gama-cad4.jpg",
   "julia lopes de almeida": "https://www.bazardotempo.com.br/cdn/shop/files/Julia_Lopes_de_Almeida.jpg",
+  // apelidos/variantes do mesmo autor, usados às vezes no lugar do nome
+  // "oficial" — apontam pra mesma foto
+  "barao de loreto": "https://www.academia.org.br/sites/default/files/academicos/fotografias/barao-de-loreto-franklin-doria.jpg",
+  "jose bonifacio o moco": "https://www.academia.org.br/sites/default/files/academicos/fotografias/jose-bonifacio.jpg",
 };
-function authorPhotoUrl(name){ const chave=canonicalAuthorName(name); if(AUTHOR_PHOTO_OVERRIDES[chave]) return AUTHOR_PHOTO_OVERRIDES[chave]; return `https://www.academia.org.br/sites/default/files/academicos/fotografias/${norm(name).replace(/\s+/g,"-")}.jpg`; }
+function authorPhotoUrl(name){
+  const chave=canonicalAuthorName(name);
+  if(AUTHOR_PHOTO_OVERRIDES[chave]) return AUTHOR_PHOTO_OVERRIDES[chave];
+  // busca tolerante: cobre variações como sufixos extras ("...o Moço")
+  for(const k in AUTHOR_PHOTO_OVERRIDES){
+    if(chave.length>4 && k.length>4 && (chave.includes(k)||k.includes(chave))) return AUTHOR_PHOTO_OVERRIDES[k];
+  }
+  return `https://www.academia.org.br/sites/default/files/academicos/fotografias/${norm(name).replace(/\s+/g,"-")}.jpg`;
+}
 function authorInitials(name){ const words=String(name||"").split(/\s+/).filter(Boolean); if(!words.length) return "?"; return (words[0][0]+(words.length>1?words[words.length-1][0]:"")).toUpperCase(); }
 const PATRON_KEYS=PATRONS.map(canonicalAuthorName);
 const FOUNDER_KEYS=FOUNDERS.map(canonicalAuthorName);
@@ -679,7 +691,7 @@ function renderLivros(){
   $("#authorsCount").textContent=`${authors.size} autores`;
   $("#authorsPhotoGrid").innerHTML=sorted.map(({a,x,pct,val,group})=>{
     const pctText=Math.round(pct*100);
-    return `<div class="author-photo-card" data-author="${esc(a)}"><img class="author-photo" src="${escAttr(authorPhotoUrl(a))}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;author-photo-ph&quot;>${esc(authorInitials(a))}</div>'" /><div class="author-photo-name">${esc(a)}</div><div class="author-photo-meta">${group==="patrons"?"Patrono":"Fundador"} · ${pctText}%</div></div>`;
+    return `<div class="author-photo-card" data-author="${esc(a)}"><img class="author-photo" src="${escAttr(authorPhotoUrl(a))}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;author-photo-ph&quot;>${esc(authorInitials(a))}</div>'" /><div class="author-photo-name">${esc(a)}</div><div class="author-photo-meta">${x.owned.length}/${x.all.length} · ${group==="patrons"?"Patrono":"Fundador"} · ${pctText}%</div></div>`;
   }).join("")||`<div class="empty">A coleção ainda não foi carregada.</div>`;
 
   renderSheetTable();

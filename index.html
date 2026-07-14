@@ -697,7 +697,7 @@ function openDetail(idx){ const r=state.market[idx];if(!r)return; const sc=score
 window.openDetail=openDetail;
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function escAttr(s){return esc(s)}
-function renderAll(){renderRadar();renderSearch();renderResults();renderLivros();if(state.page==="financeiro")renderFinanceiro();renderHunt();renderSync()}
+function renderAll(){renderRadar();renderSearch();if(state.page==="resultados")renderResults();renderLivros();if(state.page==="financeiro")renderFinanceiro();renderHunt();renderSync()}
 
 const CLIO_DB_NAME="clio-radar";
 const CLIO_DB_VERSION=1;
@@ -725,10 +725,11 @@ function go(page){
   $$('.page-tabs [data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
   if(page==="livros") renderLivros();
   if(page==="financeiro") renderFinanceiro();
+  if(page==="resultados") renderResults();
 }
 $$('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
-function onGlobalSearchInput(){ const v=$("#globalSearch").value;$("#searchClear").classList.toggle("show",v.length>0);$("#searchHint").style.display=v.length>0?"none":"";clearTimeout(window.__searchDebounce);window.__searchDebounce=setTimeout(()=>{state.query=v;state.resultsPage=1;renderRadar();renderSearch();renderResults();renderQuickResults()},150); }
-$("#globalSearch").addEventListener("input",onGlobalSearchInput);$("#globalSearch").addEventListener("focus",()=>{if(state.query)renderQuickResults()});$("#searchClear").addEventListener("click",()=>{$("#globalSearch").value="";state.query="";state.resultsPage=1;$("#searchClear").classList.remove("show");$("#searchHint").style.display="";$("#quickResults").classList.remove("show");$("#quickResults").innerHTML="";renderRadar();renderSearch();renderResults();$("#globalSearch").focus()});$("#quickResults").addEventListener("click",e=>{if(e.target.closest("#quickSeeAll")){go("pesquisa");$("#quickResults").classList.remove("show");return}const item=e.target.closest("[data-idx]");if(item){openDetail(+item.dataset.idx);$("#quickResults").classList.remove("show")}});document.addEventListener("click",e=>{if(!e.target.closest(".search-wrap"))$("#quickResults").classList.remove("show")});
+function onGlobalSearchInput(){ const v=$("#globalSearch").value;$("#searchClear").classList.toggle("show",v.length>0);$("#searchHint").style.display=v.length>0?"none":"";clearTimeout(window.__searchDebounce);window.__searchDebounce=setTimeout(()=>{state.query=v;state.resultsPage=1;renderRadar();renderSearch();if(state.page==="resultados")renderResults();renderQuickResults()},150); }
+$("#globalSearch").addEventListener("input",onGlobalSearchInput);$("#globalSearch").addEventListener("focus",()=>{if(state.query)renderQuickResults()});$("#searchClear").addEventListener("click",()=>{$("#globalSearch").value="";state.query="";state.resultsPage=1;$("#searchClear").classList.remove("show");$("#searchHint").style.display="";$("#quickResults").classList.remove("show");$("#quickResults").innerHTML="";renderRadar();renderSearch();if(state.page==="resultados")renderResults();$("#globalSearch").focus()});$("#quickResults").addEventListener("click",e=>{if(e.target.closest("#quickSeeAll")){go("pesquisa");$("#quickResults").classList.remove("show");return}const item=e.target.closest("[data-idx]");if(item){openDetail(+item.dataset.idx);$("#quickResults").classList.remove("show")}});document.addEventListener("click",e=>{if(!e.target.closest(".search-wrap"))$("#quickResults").classList.remove("show")});
 $("#recentPeriod").addEventListener("change",e=>{state.recentPeriod=e.target.value;renderRadar()});
 $("#filters").addEventListener("click",e=>{const b=e.target.closest("[data-filter]");if(!b)return;state.filter=b.dataset.filter;$$("#filters .chip").forEach(x=>x.classList.toggle("active",x===b));renderRadar()});
 $("#authorGroupToggle").addEventListener("click",e=>{const b=e.target.closest("[data-group]");if(!b)return;state.authorGroup=b.dataset.group;$$("#authorGroupToggle [data-group]").forEach(x=>x.classList.toggle("active",x===b));renderLivros()});

@@ -1,0 +1,42 @@
+name: Atualizar dados otimizados do CLIO
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'leiloes.csv'
+      - 'scripts/build-data.mjs'
+      - 'package.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: clio-data-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: npm run build:data
+      - name: Publicar arquivos otimizados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data assets/autores package-lock.json
+          if git diff --cached --quiet; then
+            echo "Sem alterações."
+          else
+            git commit -m "Atualiza dados otimizados do CLIO"
+            git push
+          fi

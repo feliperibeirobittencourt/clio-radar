@@ -1,4 +1,4 @@
-name: Atualizar dados otimizados do CLIO
+name: OLD Atualizar dados otimizados do CLIO
 
 on:
   workflow_dispatch:

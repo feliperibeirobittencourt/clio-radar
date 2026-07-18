@@ -78,6 +78,7 @@ function authorPhotoInfo(name){const key=norm(name),file=AUTHOR_FILE_ALIASES[key
 function authorPhoto(name){return authorPhotoInfo(name).src}
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+const strictTitleKey=v=>norm(v).replace(/\b(?:vol(?:ume)?|tomo|parte|edicao|ed|livro)\s*[ivxlcdm\d]+\b/g,' ').replace(/\s+/g,' ').trim();
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const brl=n=>n==null?'—':new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(n);
 const extractYear=v=>{const m=String(v??'').match(/\b(1[5-9]\d{2}|20\d{2})\b/g);return m?Number(m.at(-1)):null};

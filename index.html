@@ -99,7 +99,7 @@ function rowLink(r){const raw=col(r,['Link','URL']);if(!raw)return'';const parts
 function ownershipFromSituation(v){const s=norm(v);if(s.includes('mesma edicao'))return'same';if(s.includes('outra edicao'))return'other';if(s.includes('nao tenho')||s.includes('nao identificado'))return'missing';return'missing'}
 function enrichMarket(r,i){const author=col(r,['Autor','Author']),title=col(r,['Título','Titulo','Obra','Title'])||col(r,['Descrição completa','Descricao completa','Comentários','Comentarios']).slice(0,120)||'Item sem título',year=extractYear(col(r,['Ano da edição','Ano da edicao','Ano','Year']))||extractYear(title),typeRaw=norm(col(r,['Tipo','Tipo do item','Categoria'])),desc=col(r,['Descrição completa','Descricao completa','Comentários','Comentarios']),type=typeRaw.includes('document')?'documento':typeRaw.includes('livr')?'livro':/\b(carta|manuscrito|autografo|oficio)\b/.test(norm(desc))?'documento':'livro',edition=col(r,['Edição','Edicao']),publisher=col(r,['Editora']),status=norm(col(r,['Status'])),auctionDate=parseDate(col(r,['Data do pregão','Data do pregao','Pregão','Pregao','Data'])),detected=parseDate(col(r,['Detectado em','Detectado'])),initial=price(col(r,['Lance inicial (R$)','Lance inicial','Preço','Preco'])),final=price(col(r,['Valor final (R$)','Valor final','Preço final','Preco final'])),signed=norm(col(r,['Assinado?','Assinado']))==='sim',first=norm(col(r,['1ª edição?','1a edicao?','1a edicao']))==='sim'||/\b(1a edicao|primeira edicao|1 edicao)\b/.test(norm(desc+' '+edition)),ownership=ownershipFromSituation(col(r,['Situação na coleção','Situacao na colecao'])),image=col(r,['Imagem','URL da imagem','Image']),auctioneer=col(r,['Leiloeiro','Casa de leilão','Casa de leilao']),city=col(r,['Cidade']),search=norm([author,title,year,publisher,auctioneer,city,desc.slice(0,700)].join(' ')),id=col(r,['ID lote','ID'])||`${i}`;return{raw:r,i,id,key:`${id}|${norm(auctioneer)}|${year||''}`,author,title,year:year?+year:null,type,edition,publisher,status,auctionDate,detected,initial,final,signed,first,ownership,image,auctioneer,city,desc,search,link:rowLink(r)}}
 function enrichCollection(r,i){const author=col(r,['AUTORES','Autores','AUTOR','Autor'])||'Autor não identificado',title=col(r,['TITULO','TÍTULO','Título','Titulo'])||'Item sem título',year=extractYear(col(r,['Ano da edição','Ano da edicao','Ano','Year']))||extractYear(title),status=String(col(r,['STATUS','Status'])).trim().toUpperCase(),owned=status==='TENHO'||(!status&&col(r,['TENHO','Tenho'])!==''),desire=!owned&&['sim','x','1','true'].includes(norm(col(r,['DESEJO','Desejo']))),value=price(col(r,['VALOR PAGO','Valor Pago','Valor pago','VALOR','Valor'])),acquired=parseDate(col(r,['DATA DE AQUISIÇÃO','DATA DE AQUISICAO','Data de Aquisição','Data de Aquisicao','DATA','Data'])),comment=col(r,['COMENTARIO','COMENTÁRIO','Comentario','Comentário']),publisher=col(r,['EDITORA','Editora']),edition=col(r,['EDIÇÃO','EDICAO','Edição','Edicao']),images=[col(r,['IMAGEM CAPA','Imagem capa','Imagem','URL da imagem']),col(r,['IMAGEM 1','Imagem 1','Foto 1']),col(r,['IMAGEM 2','Imagem 2','Foto 2']),col(r,['IMAGEM 3','Imagem 3','Foto 3']),col(r,['IMAGEM 4','Imagem 4','Foto 4']),col(r,['IMAGEM 5','Imagem 5','Foto 5'])].filter(Boolean),bookId=Number(r.bookId||r._bookId||col(r,['REFERÊNCIA','REFERENCIA','REF','ID','NÚMERO','NUMERO','col_4']))||null,sheetRow=Number(r.sheetRow||r._sheetRow||col(r,['SHEET ROW','LINHA']))||null,search=norm([author,title,year,publisher,edition,comment,status].join(' '));return{raw:r,i,key:`c:${i}`,bookId,sheetRow,author,title,year:year?+year:null,status,owned,desire,value,acquired,comment,publisher,edition,images,group:authorGroup(author),search}}
-const state={page:'radar',market:[],historyData:[],searchData:[],collection:[],manifest:null,marketByAuthor:new Map(),collectionByAuthor:new Map(),marketGroups:new Map(),filter:'all',recentPeriod:'today',radarSort:'scoreDesc',aliases:[],query:'',authorGroup:'all',author:null,authorBookFilter:'all',authorBookSort:'title',authorSoldMode:'all',authorMarketPage:1,resultsMode:'all',resultsPeriod:'all',resultsSort:'saleDesc',resultsPage:1,itemGroup:'all',itemOwned:'all',sheetPage:1,sheetSort:{key:'autor',dir:1},topGroup:'all',purchaseStatus:'all',buySort:'endAsc',radarItems:[],hunt:JSON.parse(localStorage.getItem('clio_hunt')||'[]'),stars:new Set(JSON.parse(localStorage.getItem('clio_stars')||'[]')),buys:new Set(JSON.parse(localStorage.getItem('clio_buys')||'[]'))};
+const state={page:'radar',market:[],historyData:[],searchData:[],collection:[],manifest:null,marketByAuthor:new Map(),collectionByAuthor:new Map(),marketGroups:new Map(),filter:'all',recentPeriod:'today',radarSort:'scoreDesc',aliases:[],query:'',authorGroup:'all',author:null,authorBookFilter:'all',authorBookSort:'title',authorSoldMode:'all',authorMarketPage:1,resultsMode:'all',resultsPeriod:'all',resultsSort:'saleDesc',resultsPage:1,itemGroup:'all',itemOwned:'all',sheetPage:1,sheetSort:{key:'autor',dir:1},topGroup:'all',purchaseStatus:'all',buySort:'endAsc',radarItems:[],hunt:JSON.parse(localStorage.getItem('clio_hunt')||'[]'),stars:new Set(JSON.parse(localStorage.getItem('clio_stars')||'[]')),buys:new Set()};
 function persist(){localStorage.setItem('clio_hunt',JSON.stringify(state.hunt));localStorage.setItem('clio_stars',JSON.stringify([...state.stars]));localStorage.setItem('clio_buys',JSON.stringify([...state.buys]))}
 function startOfToday(){const d=new Date();d.setHours(0,0,0,0);return d}
 function validAuctionDate(r){if(!r.auctionDate)return null;const d=new Date(r.auctionDate);return Number.isNaN(d.getTime())?null:d}
@@ -185,11 +185,88 @@ async function loadPrebuilt(){const manifest=await fetchJSON(PREBUILT_MANIFEST,'
 function setStatus(s){$('#statusBox').textContent=s}
 function appsConfig(){return{url:localStorage.getItem('clio_apps_url')||'https://script.google.com/macros/s/AKfycbz5MYOs2vU9Mkj_ijyJ6WwAq8DM7zK1AG_rvYLBSWxZF2zK7RxxzvD0ZtFQg9d5ASYv/exec',token:localStorage.getItem('clio_apps_token')||''}}
 async function appsCall(action,payload={}){const c=appsConfig();if(!c.url||!c.token)throw new Error('Configure a URL e a chave do Apps Script em Configurações.');const res=await fetch(c.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,token:c.token,...payload})});const data=await res.json();if(!data.ok)throw new Error(data.error||'Erro na planilha.');return data}
-async function loadRadarItems(){if(!appsConfig().token){state.radarItems=[];return}const d=await appsCall('listRadar');state.radarItems=Array.isArray(d.items)?d.items:[];state.buys=new Set(state.radarItems.map(x=>x.key||x.marketKey).filter(Boolean).map(String));persist()}
-function radarPayload(r,status){const key=String(r.key??r.marketKey??'');return{key,marketKey:key,status,author:r.author,title:r.title,year:r.year||'',edition:r.edition||'',publisher:r.publisher||'',auctioneer:r.auctioneer||'',auctionDate:r.auctionDate?r.auctionDate.toISOString():'',link:r.link||'',image:r.image||'',price:r.initial??r.final??r.value??'',comment:r.comment||''}}
-async function saveRadarItem(r,status='COMPRAR'){const d=await appsCall('saveRadar',{item:radarPayload(r,status)});await loadRadarItems();renderCurrent();return d}
-async function removeRadarItem(key){const d=await appsCall('removeRadar',{key});await loadRadarItems();renderCurrent();return d}
-async function markRadarBought(source,fields){const d=await appsCall('buyRadar',{key:source.key||source.marketKey,fields:{...fields,status:'COMPRADO'}});await loadRadarItems();setStatus('✅ Livro salvo na planilha como COMPRADO.');await loadData(true);return d}
+async function loadRadarItems(){
+  if(!appsConfig().token){
+    state.radarItems=[];
+    state.buys=new Set();
+    return;
+  }
+  const d=await appsCall('listRadar');
+  state.radarItems=(Array.isArray(d.items)?d.items:[]).map(x=>({...x,key:String(x.key??x.marketKey??''),marketKey:String(x.marketKey??x.key??'')}));
+  state.buys=new Set(state.radarItems.map(x=>x.key||x.marketKey).filter(Boolean).map(String));
+  localStorage.removeItem('clio_buys');
+}
+function radarPayload(r,status){
+  const key=String(r.key??r.marketKey??'');
+  return{key,marketKey:key,status,author:r.author,title:r.title,year:r.year||'',edition:r.edition||'',publisher:r.publisher||'',auctioneer:r.auctioneer||'',auctionDate:r.auctionDate instanceof Date?r.auctionDate.toISOString():(r.auctionDate||''),link:r.link||'',image:r.image||'',price:r.initial??r.final??r.value??'',comment:r.comment||''}
+}
+function upsertRadarLocal(item){
+  const key=String(item.key??item.marketKey??'');
+  const normalized={...item,key,marketKey:key,status:String(item.status||'COMPRAR').toUpperCase()};
+  const i=state.radarItems.findIndex(x=>String(x.key??x.marketKey??'')===key);
+  if(i>=0)state.radarItems[i]=normalized;else state.radarItems.unshift(normalized);
+  state.buys.add(key);
+}
+function removeRadarLocal(key){
+  key=String(key??'');
+  state.radarItems=state.radarItems.filter(x=>String(x.key??x.marketKey??'')!==key);
+  state.buys.delete(key);
+}
+function renderRadarPurchaseViews(){
+  renderRadar();
+  renderBuys();
+}
+async function saveRadarItem(r,status='COMPRAR'){
+  const payload=radarPayload(r,status);
+  const previous=state.radarItems.map(x=>({...x}));
+  upsertRadarLocal(payload);
+  renderRadarPurchaseViews();
+  try{
+    const d=await appsCall('saveRadar',{item:payload});
+    if(!d?.item)throw new Error('O Apps Script não confirmou a gravação.');
+    upsertRadarLocal(d.item);
+    renderRadarPurchaseViews();
+    return d;
+  }catch(err){
+    state.radarItems=previous;
+    state.buys=new Set(previous.map(x=>String(x.key??x.marketKey??'')).filter(Boolean));
+    renderRadarPurchaseViews();
+    throw err;
+  }
+}
+async function removeRadarItem(key){
+  key=String(key??'');
+  const previous=state.radarItems.map(x=>({...x}));
+  removeRadarLocal(key);
+  renderRadarPurchaseViews();
+  try{
+    const d=await appsCall('removeRadar',{key});
+    if(d?.removed===false)throw new Error('O item não foi encontrado na aba RADAR.');
+    return d;
+  }catch(err){
+    state.radarItems=previous;
+    state.buys=new Set(previous.map(x=>String(x.key??x.marketKey??'')).filter(Boolean));
+    renderRadarPurchaseViews();
+    throw err;
+  }
+}
+async function markRadarBought(source,fields){
+  const key=String(source.key??source.marketKey??'');
+  const previous=state.radarItems.map(x=>({...x}));
+  removeRadarLocal(key);
+  renderRadarPurchaseViews();
+  try{
+    const d=await appsCall('buyRadar',{key,fields:{...fields,status:'COMPRADO'}});
+    setStatus('✅ Livro salvo na planilha como COMPRADO.');
+    await loadData(true);
+    return d;
+  }catch(err){
+    state.radarItems=previous;
+    state.buys=new Set(previous.map(x=>String(x.key??x.marketKey??'')).filter(Boolean));
+    renderRadarPurchaseViews();
+    throw err;
+  }
+}
 
 function marketToCollection(r,status){return{author:r.author,title:r.title,year:r.year,edition:r.edition,publisher:r.publisher,status,value:r.initial??r.final,date:new Date().toISOString().slice(0,10),comment:r.auctioneer||'',auctioneer:r.auctioneer||'',auctionDate:r.auctionDate?r.auctionDate.toISOString():'',lotLink:r.link||'',lotImage:r.image||'',marketKey:r.key||''}}
 function findCollectionForMarket(r){const alias=aliasForMarket(r);if(alias&&alias.type==='LINK'){const linked=state.collection.find(c=>Number(c.sheetRow)===Number(alias.sheetRow));if(linked)return linked}const a=norm(r.author),t=norm(r.title);return state.collection.find(c=>norm(c.author)===a&&norm(c.title)===t&&(!r.year||!c.year||r.year===c.year))}
@@ -237,26 +314,19 @@ const bu=e.target.closest('[data-buy]');if(bu){
   const r=getMarketByKey(k);
   if(!r){
     const msg='Erro ao localizar o livro selecionado no Radar.';
-    setStatus(msg);
-    alert(msg);
-    return;
+    setStatus(msg);alert(msg);return;
   }
-  bu.disabled=true;
   try{
-    const already=[...state.buys].some(x=>String(x)===k);
-    if(already){
+    if(state.buys.has(k)){
       await removeRadarItem(k);
       setStatus('Item removido de Comprar.');
     }else{
       await saveRadarItem(r,'COMPRAR');
-      setStatus('✅ Item salvo em Comprar e sincronizado entre os aparelhos.');
+      setStatus('✅ Item salvo em Comprar e na aba RADAR.');
     }
   }catch(err){
-    const msg='Não foi possível atualizar Comprar: '+(err?.message||String(err));
-    setStatus(msg);
-    alert(msg);
-  }finally{
-    bu.disabled=false;
+    const msg='Falha ao gravar na planilha: '+(err?.message||String(err));
+    setStatus(msg);alert(msg);
   }
   return;
 }

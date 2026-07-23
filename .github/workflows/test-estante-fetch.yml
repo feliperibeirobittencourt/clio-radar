@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Buscar "Machado de Assis" usado, R$30-100.000, mais recentes, página 1
         run: |
-          URL="https://www.estantevirtual.com.br/busca?q=machado+de+assis&tipo-de-livro=usado&_preco=3000-10000000&pagina=1"
+          URL="https://www.estantevirtual.com.br/busca?q=machado+de+assis&tipo-de-livro=usado&_preco=3000-10000000&pagina=1&sort=new-releases"
           echo "URL: $URL"
           HTTP_CODE=$(curl -sS -L -o response.html -w "%{http_code}" \
             -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \

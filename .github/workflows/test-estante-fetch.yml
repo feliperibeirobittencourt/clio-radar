@@ -1,0 +1,38 @@
+name: TESTE - Buscar na Estante Virtual
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Buscar "Machado de Assis" usado, R$30-100.000, mais recentes, página 1
+        run: |
+          URL="https://www.estantevirtual.com.br/busca?q=machado+de+assis&tipo-de-livro=usado&_preco=3000-10000000&pagina=1"
+          echo "URL: $URL"
+          HTTP_CODE=$(curl -sS -L -o response.html -w "%{http_code}" \
+            -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
+            -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" \
+            -H "Accept-Language: pt-BR,pt;q=0.9,en;q=0.8" \
+            "$URL")
+          echo "HTTP status: $HTTP_CODE"
+          echo "Tamanho da resposta (bytes): $(wc -c < response.html)"
+          echo "--- Indícios de bloqueio/antibot ---"
+          grep -oiE "captcha|cloudflare|checking your browser|access denied|robot|bloqueado|acesso negado" response.html | sort -u || echo "(nenhum indício encontrado)"
+          echo "--- Ocorrências de possíveis blocos de resultado (heurística) ---"
+          grep -oiE "class=\"[^\"]*(card|resultado|produto|listing)[^\"]*\"" response.html | sort | uniq -c | sort -rn | head -20 || echo "(nenhum padrão encontrado)"
+          echo "--- Título da página ---"
+          grep -oiE "<title>.*</title>" response.html | head -1 || echo "(sem <title>)"
+          echo "--- Primeiros 3000 caracteres da resposta ---"
+          head -c 3000 response.html
+          echo ""
+          echo "--- Últimos 1000 caracteres da resposta ---"
+          tail -c 1000 response.html
+
+      - name: Publicar resposta completa como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: estante-virtual-response
+          path: response.html
+          retention-days: 3

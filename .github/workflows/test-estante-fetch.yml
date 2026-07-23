@@ -20,15 +20,22 @@ jobs:
           echo "Tamanho da resposta (bytes): $(wc -c < response.html)"
           echo "--- Indícios de bloqueio/antibot ---"
           grep -oiE "captcha|cloudflare|checking your browser|access denied|robot|bloqueado|acesso negado" response.html | sort -u || echo "(nenhum indício encontrado)"
-          echo "--- Ocorrências de possíveis blocos de resultado (heurística) ---"
-          grep -oiE "class=\"[^\"]*(card|resultado|produto|listing)[^\"]*\"" response.html | sort | uniq -c | sort -rn | head -20 || echo "(nenhum padrão encontrado)"
+          echo "--- Contagem de cards de produto ---"
+          grep -oc "product-item__link" response.html || echo 0
+          echo "--- Contagem de ocorrências de 'usado' (case-insensitive) ---"
+          grep -oic "usado" response.html || echo 0
+          echo "--- Contagem de ocorrências de 'novo' (case-insensitive) ---"
+          grep -oic ">novo<\|\"novo\"" response.html || echo 0
+          echo "--- Trecho ao redor dos 3 primeiros cards de produto ---"
+          grep -oE '.{200}product-item__link.{600}' response.html | head -3
+          echo "--- Links/parametros de ordenação encontrados ---"
+          grep -oiE 'href="[^"]*(ordenacao|ordenar|sort)[^"]*"' response.html | sort -u | head -20 || echo "(nenhum encontrado)"
+          echo "--- Options/valores de ordenação (select) ---"
+          grep -oiE '<option[^>]*value="[^"]*"[^>]*>[^<]*(recente|relevanc|menor|maior)[^<]*</option>' response.html | sort -u | head -20 || echo "(nenhum encontrado)"
+          echo "--- Preços (R\$) encontrados, amostra ---"
+          grep -oE 'R\$[0-9. ]{2,12}' response.html | sort -u | head -20 || echo "(nenhum encontrado)"
           echo "--- Título da página ---"
           grep -oiE "<title>.*</title>" response.html | head -1 || echo "(sem <title>)"
-          echo "--- Primeiros 3000 caracteres da resposta ---"
-          head -c 3000 response.html
-          echo ""
-          echo "--- Últimos 1000 caracteres da resposta ---"
-          tail -c 1000 response.html
 
       - name: Publicar resposta completa como artefato
         uses: actions/upload-artifact@v4

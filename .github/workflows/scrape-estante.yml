@@ -1,0 +1,47 @@
+name: Buscar novidades na Estante Virtual
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: clio-estante-scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Buscar os 81 autores na Estante Virtual (1 página por autor, intervalo de 1 min)
+        run: node scripts/scrape-estante.mjs
+
+      - name: Publicar hoje/histórico atualizados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add raw/estante-hoje.csv raw/estante-historico.csv raw/estante-status.json
+
+          if git diff --cached --quiet; then
+            echo "Sem novidades na Estante Virtual hoje."
+            exit 0
+          fi
+
+          git commit -m "Atualiza achados da Estante Virtual"
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -34,30 +34,39 @@ jobs:
       - name: Instalar BeautifulSoup
         run: pip install --quiet beautifulsoup4 lxml
 
-      - name: Extrair texto legível dos cards de produto
+      - name: Extrair lista de resultados via JSON-LD e opções de ordenação
         run: |
           python3 << 'PYEOF'
+          import json, re
           from bs4 import BeautifulSoup
           with open('response.html', encoding='utf-8') as f:
-              soup = BeautifulSoup(f.read(), 'lxml')
-          links = soup.select('a.product-item__link') or soup.select('a[class*="product-item"]')
-          print(f'Total de links de produto encontrados: {len(links)}')
-          for i, a in enumerate(links[:15]):
-              card = a
-              for _ in range(4):
-                  if card.parent:
-                      card = card.parent
-              text = card.get_text(' | ', strip=True)
-              href = a.get('href', '')
-              print(f'--- Item {i+1} ---')
-              print(f'href: {href}')
-              print(f'texto: {text[:500]}')
-              print()
-          # Also try structured data (schema.org ItemList / Product), if present
+              html = f.read()
+          soup = BeautifulSoup(html, 'lxml')
+
           scripts = soup.find_all('script', attrs={'type': 'application/ld+json'})
-          print(f'Blocos application/ld+json encontrados: {len(scripts)}')
-          for s in scripts[:3]:
-              print((s.string or '')[:800])
+          for s in scripts:
+              try:
+                  data = json.loads(s.string or '{}')
+              except Exception:
+                  continue
+              if data.get('@type') != 'ItemList':
+                  continue
+              items = data.get('itemListElement', [])
+              print(f'ItemList: {data.get("name")}  |  numberOfItems={data.get("numberOfItems")}  |  itens neste bloco={len(items)}')
+              for it in items:
+                  p = it.get('item', {})
+                  offer = p.get('offers', {})
+                  print(f'{it.get("position"):>3}. {p.get("name","?")}  ->  R$ {offer.get("price","?")}  ({offer.get("availability","").split("/")[-1]})  {p.get("url","")}')
+
+          # Find the sort <select> and its options (value + label)
+          for sel in soup.find_all('select'):
+              opts = sel.find_all('option')
+              labels = ' | '.join(o.get_text(strip=True) for o in opts)
+              if 'recente' in labels.lower() or 'relev' in labels.lower():
+                  print()
+                  print('Select de ordenação encontrado:', sel.get('name') or sel.get('id') or '(sem nome)')
+                  for o in opts:
+                      print(f'  value="{o.get("value")}"  texto="{o.get_text(strip=True)}"  selected={o.has_attr("selected")}')
           PYEOF
 
       - name: Publicar resposta completa como artefato

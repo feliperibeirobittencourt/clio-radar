@@ -10,8 +10,10 @@ const AUTHORS_FILE=path.join(ROOT,'data','authors.json');
 
 const MAX_YEAR=Number(process.env.ESTANTE_MAX_YEAR)||1940;
 const DELAY_MS=Number(process.env.ESTANTE_DELAY_MS)||60_000;
+const IMAGE_DELAY_MS=Number(process.env.ESTANTE_IMAGE_DELAY_MS)||3_000;
 const BASE='https://www.estantevirtual.com.br';
-const HEADERS=['Autor','Grupo','Título','Ano','Preço (R$)','Na janela 1850-1930?','Link','Visto em'];
+const IMAGE_BASE='https://static.estantevirtual.com.br';
+const HEADERS=['Autor','Grupo','Título','Ano','Preço (R$)','Na janela 1850-1930?','Link','Imagem','Visto em'];
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const norm=v=>String(v??'').normalize('NFD').replace(/\p{Mn}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
@@ -45,11 +47,26 @@ function extractCards(html){
   return cards;
 }
 
+const FETCH_HEADERS={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36','Accept-Language':'pt-BR,pt;q=0.9,en;q=0.8'};
+
 async function fetchSearchPage(author){
   const url=`${BASE}/busca?q=${encodeURIComponent(author)}&tipo-de-livro=usado&_preco=3000-10000000&pagina=1&sort=new-releases`;
-  const res=await fetch(url,{headers:{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36','Accept-Language':'pt-BR,pt;q=0.9,en;q=0.8'}});
+  const res=await fetch(url,{headers:FETCH_HEADERS});
   if(!res.ok)throw new Error(`HTTP ${res.status}`);
   return res.text();
+}
+
+async function fetchCoverImage(productUrl){
+  try{
+    const res=await fetch(productUrl,{headers:FETCH_HEADERS});
+    if(!res.ok)return '';
+    const html=await res.text();
+    const m=html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i)||html.match(/<meta[^>]+content="([^"]+)"[^>]+property="og:image"/i);
+    if(!m)return '';
+    const raw=m[1];
+    if(/indisponivel/i.test(raw))return '';
+    return raw.startsWith('http')?raw:`${IMAGE_BASE}${raw}`;
+  }catch{return ''}
 }
 
 function searchFallbackLink(author,year){return `${BASE}/busca?q=${encodeURIComponent(`${author} ${year}`)}`}
@@ -62,9 +79,10 @@ async function main(){
   try{existingHistoryText=await fs.readFile(HIST_FILE,'utf8')}catch{}
   const existingHistory=existingHistoryText?readCSV(existingHistoryText):[];
   const historySet=new Set(existingHistory.map(rowKey));
+  const imageByKey=new Map(existingHistory.map(r=>[rowKey(r),r['Imagem']||'']));
 
   const hojeRows=[],newRows=[];
-  let failures=0;
+  let failures=0,imagesFetched=0;
 
   for(let i=0;i<authors.length;i++){
     const a=authors[i];
@@ -76,10 +94,18 @@ async function main(){
         const year=c.year||extractYear(c.title);
         if(!year||year>MAX_YEAR)continue;
         const link=c.href?`${BASE}${c.href}`:searchFallbackLink(a.name,year);
-        const row={'Autor':a.name,'Grupo':groupLabel(a.group),'Título':c.title,'Ano':year,'Preço (R$)':c.price??'','Na janela 1850-1930?':(year>=1850&&year<=1930)?'SIM':'','Link':link,'Visto em':brtStamp(new Date())};
-        hojeRows.push(row);
+        const row={'Autor':a.name,'Grupo':groupLabel(a.group),'Título':c.title,'Ano':year,'Preço (R$)':c.price??'','Na janela 1850-1930?':(year>=1850&&year<=1930)?'SIM':'','Link':link,'Imagem':'','Visto em':brtStamp(new Date())};
         const key=rowKey(row);
-        if(!historySet.has(key)){historySet.add(key);newRows.push(row)}
+        const isNew=!historySet.has(key);
+        if(!isNew){
+          row['Imagem']=imageByKey.get(key)||'';
+        }else if(c.href){
+          row['Imagem']=await fetchCoverImage(link);
+          imagesFetched++;
+          await sleep(IMAGE_DELAY_MS);
+        }
+        hojeRows.push(row);
+        if(isNew){historySet.add(key);imageByKey.set(key,row['Imagem']);newRows.push(row)}
       }
     }catch(e){
       failures++;
@@ -92,9 +118,9 @@ async function main(){
   await fs.mkdir(RAW,{recursive:true});
   await fs.writeFile(HOJE_FILE,toCSV(hojeRows));
   await fs.writeFile(HIST_FILE,toCSV(updatedHistory));
-  await fs.writeFile(STATUS_FILE,JSON.stringify({lastRun:new Date().toISOString(),authorsSearched:authors.length,authorFailures:failures,foundToday:hojeRows.length,newToday:newRows.length,totalHistory:updatedHistory.length},null,2));
+  await fs.writeFile(STATUS_FILE,JSON.stringify({lastRun:new Date().toISOString(),authorsSearched:authors.length,authorFailures:failures,foundToday:hojeRows.length,newToday:newRows.length,imagesFetched,totalHistory:updatedHistory.length},null,2));
 
-  console.log(`Concluído. Hoje: ${hojeRows.length} · Novos no histórico: ${newRows.length} · Total histórico: ${updatedHistory.length} · Falhas de busca: ${failures}.`);
+  console.log(`Concluído. Hoje: ${hojeRows.length} · Novos no histórico: ${newRows.length} · Imagens buscadas: ${imagesFetched} · Total histórico: ${updatedHistory.length} · Falhas de busca: ${failures}.`);
 }
 
 await main();

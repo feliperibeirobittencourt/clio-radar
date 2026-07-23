@@ -26,16 +26,39 @@ jobs:
           grep -oic "usado" response.html || echo 0
           echo "--- Contagem de ocorrências de 'novo' (case-insensitive) ---"
           grep -oic ">novo<\|\"novo\"" response.html || echo 0
-          echo "--- Trecho ao redor dos 3 primeiros cards de produto ---"
-          grep -oE '.{200}product-item__link.{600}' response.html | head -3
           echo "--- Links/parametros de ordenação encontrados ---"
           grep -oiE 'href="[^"]*(ordenacao|ordenar|sort)[^"]*"' response.html | sort -u | head -20 || echo "(nenhum encontrado)"
-          echo "--- Options/valores de ordenação (select) ---"
-          grep -oiE '<option[^>]*value="[^"]*"[^>]*>[^<]*(recente|relevanc|menor|maior)[^<]*</option>' response.html | sort -u | head -20 || echo "(nenhum encontrado)"
-          echo "--- Preços (R\$) encontrados, amostra ---"
-          grep -oE 'R\$[0-9. ]{2,12}' response.html | sort -u | head -20 || echo "(nenhum encontrado)"
           echo "--- Título da página ---"
           grep -oiE "<title>.*</title>" response.html | head -1 || echo "(sem <title>)"
+
+      - name: Instalar BeautifulSoup
+        run: pip install --quiet beautifulsoup4 lxml
+
+      - name: Extrair texto legível dos cards de produto
+        run: |
+          python3 << 'PYEOF'
+          from bs4 import BeautifulSoup
+          with open('response.html', encoding='utf-8') as f:
+              soup = BeautifulSoup(f.read(), 'lxml')
+          links = soup.select('a.product-item__link') or soup.select('a[class*="product-item"]')
+          print(f'Total de links de produto encontrados: {len(links)}')
+          for i, a in enumerate(links[:15]):
+              card = a
+              for _ in range(4):
+                  if card.parent:
+                      card = card.parent
+              text = card.get_text(' | ', strip=True)
+              href = a.get('href', '')
+              print(f'--- Item {i+1} ---')
+              print(f'href: {href}')
+              print(f'texto: {text[:500]}')
+              print()
+          # Also try structured data (schema.org ItemList / Product), if present
+          scripts = soup.find_all('script', attrs={'type': 'application/ld+json'})
+          print(f'Blocos application/ld+json encontrados: {len(scripts)}')
+          for s in scripts[:3]:
+              print((s.string or '')[:800])
+          PYEOF
 
       - name: Publicar resposta completa como artefato
         uses: actions/upload-artifact@v4

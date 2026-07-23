@@ -1,4 +1,4 @@
-name: TESTE - Estante Virtual (pagina de produto)
+name: TESTE - Estante Virtual (ano por card na pagina de busca)
 
 on:
   workflow_dispatch:
@@ -7,15 +7,9 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - name: Buscar pagina de produto e pagina de busca (para achar ano e data de postagem)
+      - name: Buscar pagina de busca e inspecionar cada card de resultado
         run: |
           pip install --quiet beautifulsoup4 lxml
-          curl -sS -L -o produto.html \
-            -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
-            -H "Accept-Language: pt-BR,pt;q=0.9,en;q=0.8" \
-            "https://www.estantevirtual.com.br/livro/dom-casmurro-texto-integral-grp-RM7-0998-000"
-          echo "Tamanho: $(wc -c < produto.html)"
-
           curl -sS -L -o busca.html \
             -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
             -H "Accept-Language: pt-BR,pt;q=0.9,en;q=0.8" \
@@ -26,48 +20,58 @@ jobs:
           import json, re
           from bs4 import BeautifulSoup
 
-          print("=========== PAGINA DE PRODUTO ===========")
-          with open('produto.html', encoding='utf-8') as f:
+          with open('busca.html', encoding='utf-8') as f:
               html = f.read()
           soup = BeautifulSoup(html, 'lxml')
 
-          for kw in ['ano', 'edição', 'public', 'postad', 'cadastrad', 'anunciad', 'data']:
-              hits = [m.start() for m in re.finditer(kw, html, re.I)][:6]
-              print(f'--- ocorrencias de "{kw}": {len(re.findall(kw, html, re.I))} (mostrando ate 6 trechos) ---')
-              for h in hits:
-                  snippet = re.sub(r'\s+', ' ', html[max(0,h-80):h+120])
-                  print('  ...', snippet, '...')
+          print("=========== CANDIDATOS A CONTAINER DE CARD ===========")
+          # find anchors that look like product links
+          anchors = soup.find_all('a', href=re.compile(r'/livro/'))
+          print(f"total anchors /livro/: {len(anchors)}")
 
-          print()
-          print("--- Todos os blocos application/ld+json (produto) ---")
-          for s in soup.find_all('script', attrs={'type': 'application/ld+json'}):
-              try:
-                  data = json.loads(s.string or '{}')
-              except Exception:
+          seen = set()
+          count = 0
+          for a in anchors:
+              href = a.get('href')
+              if href in seen:
                   continue
-              print(json.dumps(data, ensure_ascii=False)[:1500])
+              seen.add(href)
+              count += 1
+              if count > 5:
+                  break
+              # walk up to find a reasonably sized card container
+              node = a
+              card = None
+              for _ in range(8):
+                  if node.parent is None:
+                      break
+                  node = node.parent
+                  txt = node.get_text(' ', strip=True)
+                  if 'R$' in txt and len(txt) < 800:
+                      card = node
+                  if len(txt) > 800:
+                      break
+              print(f"--- card {count}: {href} ---")
+              if card:
+                  print("TEXTO DO CARD:", re.sub(r'\s+', ' ', card.get_text(' ', strip=True)))
+                  print("HTML DO CARD (primeiros 2000 chars):")
+                  print(str(card)[:2000])
+              else:
+                  print("(nao achei um container razoavel)")
               print()
 
-          print("--- Tabela/lista de detalhes do livro (procurando dt/dd, tr/td, ou li com 'ano') ---")
-          for tag in soup.find_all(['dt','dd','li','tr','td','span','div']):
-              txt = tag.get_text(' ', strip=True)
-              if re.search(r'\bano\b', txt, re.I) and len(txt) < 120:
-                  print('  TAG:', tag.name, 'CLASS:', tag.get('class'), 'TEXT:', txt)
-
           print()
-          print("=========== PAGINA DE BUSCA (script de estado inicial / JSON embutido) ===========")
-          with open('busca.html', encoding='utf-8') as f:
-              html2 = f.read()
-          for kw in ['ano', 'public', 'postad', 'cadastrad']:
-              cnt = len(re.findall(kw, html2, re.I))
-              print(f'ocorrencias de "{kw}" na busca: {cnt}')
+          print("=========== BUSCA DIRETA POR 'ano' NO HTML BRUTO DA PAGINA DE BUSCA (contexto) ===========")
+          hits = [m.start() for m in re.finditer(r'ano', html, re.I)]
+          print(f"total ocorrencias: {len(hits)}")
+          for h in hits[:15]:
+              snippet = re.sub(r'\s+', ' ', html[max(0,h-100):h+150])
+              print('  ...', snippet, '...')
           PYEOF
 
-      - name: Publicar paginas como artefato
+      - name: Publicar pagina como artefato
         uses: actions/upload-artifact@v4
         with:
-          name: estante-paginas
-          path: |
-            produto.html
-            busca.html
+          name: estante-busca-page
+          path: busca.html
           retention-days: 3

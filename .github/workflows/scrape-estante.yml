@@ -27,21 +27,29 @@ jobs:
         with:
           node-version: 22
 
+      - name: Instalar dependências
+        run: npm install
+
       - name: Buscar os 81 autores na Estante Virtual (1 página por autor, intervalo de 1 min)
         run: node scripts/scrape-estante.mjs
 
-      - name: Publicar hoje/histórico atualizados
+      - name: Reconstruir dados do CLIO (leilões + Estante Virtual)
+        run: npm run build:data
+
+      - name: Publicar leilões, Estante Virtual e dados otimizados
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add raw/estante-hoje.csv raw/estante-historico.csv raw/estante-status.json
+          rm -rf node_modules
+
+          git add raw/estante-hoje.csv raw/estante-historico.csv raw/estante-status.json data assets/autores package-lock.json
 
           if git diff --cached --quiet; then
             echo "Sem novidades na Estante Virtual hoje."
             exit 0
           fi
 
-          git commit -m "Atualiza achados da Estante Virtual"
+          git commit -m "Atualiza achados da Estante Virtual e reconstrói dados do CLIO"
           git pull --rebase origin main
           git push origin HEAD:main

@@ -29,15 +29,19 @@ function csvField(v){const s=String(v??'');return /[",\n]/.test(s)?`"${s.replace
 function toCSV(rows){return [HEADERS.join(','),...rows.map(r=>HEADERS.map(h=>csvField(r[h])).join(','))].join('\n')+'\n'}
 
 function extractCards(html){
-  const linkRe=/<a class="product-item__link[^"]*"[^>]*href="(\/livro\/[^"]+)"[^>]*title="([^"]*)"/g;
-  const matches=[...html.matchAll(linkRe)];
+  const tagRe=/<a\b[^>]*>/g;
+  const productTags=[...html.matchAll(tagRe)].filter(m=>/class="[^"]*product-item__link/.test(m[0]));
   const seen=new Set(),cards=[];
-  for(let idx=0;idx<matches.length;idx++){
-    const m=matches[idx],href=m[1];
+  for(let idx=0;idx<productTags.length;idx++){
+    const m=productTags[idx],tag=m[0];
+    const hrefMatch=tag.match(/href="([^"]+)"/);
+    if(!hrefMatch||!hrefMatch[1].startsWith('/livro/'))continue;
+    const href=hrefMatch[1];
     if(seen.has(href))continue;
     seen.add(href);
-    const title=decodeEntities(m[2]).trim();
-    const start=m.index,end=idx+1<matches.length?matches[idx+1].index:Math.min(html.length,start+4000);
+    const titleMatch=tag.match(/title="([^"]*)"/);
+    const title=titleMatch?decodeEntities(titleMatch[1]).trim():'';
+    const start=m.index,end=idx+1<productTags.length?productTags[idx+1].index:Math.min(html.length,start+4000);
     const segment=html.slice(start,end);
     const authorMatch=segment.match(/product-item__author"[^>]*>\s*([\s\S]*?)\s*<\/p>/);
     const yearMatch=segment.match(/product-item__year"[^>]*>\s*(\d{4})\s*<\/p>/);

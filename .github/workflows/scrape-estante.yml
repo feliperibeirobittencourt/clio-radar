@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: clio-estante-scrape
@@ -27,29 +28,35 @@ jobs:
         with:
           node-version: 22
 
-      - name: Instalar dependências
-        run: npm install
-
       - name: Buscar os 81 autores na Estante Virtual (1 página por autor, intervalo de 1 min)
         run: node scripts/scrape-estante.mjs
 
-      - name: Reconstruir dados do CLIO (leilões + Estante Virtual)
-        run: npm run build:data
-
-      - name: Publicar leilões, Estante Virtual e dados otimizados
+      - name: Publicar achados da Estante Virtual
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          rm -rf node_modules
-
-          git add raw/estante-hoje.csv raw/estante-historico.csv raw/estante-status.json data assets/autores package-lock.json
+          git add raw/estante-hoje.csv raw/estante-historico.csv raw/estante-status.json
 
           if git diff --cached --quiet; then
             echo "Sem novidades na Estante Virtual hoje."
             exit 0
           fi
 
-          git commit -m "Atualiza achados da Estante Virtual e reconstrói dados do CLIO"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          git commit -m "Atualiza achados da Estante Virtual"
+
+          for i in 1 2 3 4 5; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Tentativa $i de publicar falhou (provável conflito com outra atualização em andamento). Tentando novamente…"
+            git rebase --abort 2>/dev/null || true
+            sleep 10
+          done
+          echo "Não foi possível publicar os achados após 5 tentativas."
+          exit 1
+
+      - name: Acionar reconstrução dos dados do CLIO (leilões + Estante Virtual)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-clio-data.yml --ref main

@@ -82,14 +82,17 @@ async function main(){
   const imageByKey=new Map(existingHistory.map(r=>[rowKey(r),r['Imagem']||'']));
 
   const hojeRows=[],newRows=[];
-  let failures=0,imagesFetched=0;
+  let failures=0,imagesFetched=0,totalCards=0,totalWithYear=0,totalEligible=0;
 
   for(let i=0;i<authors.length;i++){
     const a=authors[i];
-    console.log(`[${i+1}/${authors.length}] Buscando: ${a.name}`);
     try{
       const html=await fetchSearchPage(a.name);
       const cards=extractCards(html);
+      const years=cards.map(c=>c.year||extractYear(c.title)).filter(Boolean);
+      const eligible=years.filter(y=>y<=MAX_YEAR);
+      totalCards+=cards.length;totalWithYear+=years.length;totalEligible+=eligible.length;
+      console.log(`[${i+1}/${authors.length}] ${a.name}: ${cards.length} cards, ${years.length} com ano, ${eligible.length} elegíveis (<=${MAX_YEAR})${years.length?` — anos: ${[...years].sort((x,y)=>x-y).join(',')}`:''}`);
       for(const c of cards){
         const year=c.year||extractYear(c.title);
         if(!year||year>MAX_YEAR)continue;
@@ -118,9 +121,9 @@ async function main(){
   await fs.mkdir(RAW,{recursive:true});
   await fs.writeFile(HOJE_FILE,toCSV(hojeRows));
   await fs.writeFile(HIST_FILE,toCSV(updatedHistory));
-  await fs.writeFile(STATUS_FILE,JSON.stringify({lastRun:new Date().toISOString(),authorsSearched:authors.length,authorFailures:failures,foundToday:hojeRows.length,newToday:newRows.length,imagesFetched,totalHistory:updatedHistory.length},null,2));
+  await fs.writeFile(STATUS_FILE,JSON.stringify({lastRun:new Date().toISOString(),authorsSearched:authors.length,authorFailures:failures,foundToday:hojeRows.length,newToday:newRows.length,imagesFetched,totalHistory:updatedHistory.length,totalCardsSeen:totalCards,totalWithYear,totalEligible},null,2));
 
-  console.log(`Concluído. Hoje: ${hojeRows.length} · Novos no histórico: ${newRows.length} · Imagens buscadas: ${imagesFetched} · Total histórico: ${updatedHistory.length} · Falhas de busca: ${failures}.`);
+  console.log(`Concluído. Cards vistos: ${totalCards} · Com ano: ${totalWithYear} · Elegíveis (<=${MAX_YEAR}): ${totalEligible} · Hoje: ${hojeRows.length} · Novos no histórico: ${newRows.length} · Imagens buscadas: ${imagesFetched} · Total histórico: ${updatedHistory.length} · Falhas de busca: ${failures}.`);
 }
 
 await main();

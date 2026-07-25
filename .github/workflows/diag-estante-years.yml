@@ -1,0 +1,50 @@
+name: TESTE - Distribuicao de anos por autor (diagnostico)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Amostrar anos reais por autor (sem filtro, sem delay de 1min)
+        run: |
+          node << 'EOF'
+          const authors = ["Machado de Assis","José de Alencar","Castro Alves","Gonçalves Dias","Raul Pompeia","Aluísio Azevedo","Olavo Bilac"];
+          const BASE='https://www.estantevirtual.com.br';
+          const HEADERS={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36','Accept-Language':'pt-BR,pt;q=0.9,en;q=0.8'};
+          function extractCards(html){
+            const linkRe=/<a class="product-item__link[^"]*"[^>]*href="(\/livro\/[^"]+)"[^>]*title="([^"]*)"/g;
+            const matches=[...html.matchAll(linkRe)];
+            const seen=new Set(),cards=[];
+            for(let idx=0;idx<matches.length;idx++){
+              const m=matches[idx],href=m[1];
+              if(seen.has(href))continue;
+              seen.add(href);
+              const start=m.index,end=idx+1<matches.length?matches[idx+1].index:Math.min(html.length,start+4000);
+              const segment=html.slice(start,end);
+              const yearMatch=segment.match(/product-item__year"[^>]*>\s*(\d{4})\s*<\/p>/);
+              cards.push({href,year:yearMatch?Number(yearMatch[1]):null});
+            }
+            return cards;
+          }
+          (async () => {
+            for (const author of authors) {
+              const url = `${BASE}/busca?q=${encodeURIComponent(author)}&tipo-de-livro=usado&_preco=3000-10000000&pagina=1&sort=new-releases`;
+              try {
+                const res = await fetch(url, { headers: HEADERS });
+                const html = await res.text();
+                const cards = extractCards(html);
+                const years = cards.map(c => c.year).filter(Boolean).sort((a,b)=>a-b);
+                const noYear = cards.filter(c => !c.year).length;
+                console.log(`${author}: HTTP ${res.status}, tamanho ${html.length}, cards=${cards.length}, sem-ano=${noYear}, anos=[${years.join(',')}], min=${years[0]}, <=1940: ${years.filter(y=>y<=1940).length}`);
+              } catch (e) {
+                console.log(`${author}: ERRO ${e.message}`);
+              }
+            }
+          })();
+          EOF

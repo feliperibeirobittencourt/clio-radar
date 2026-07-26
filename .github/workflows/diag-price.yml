@@ -1,0 +1,38 @@
+name: TESTE - Investigar formato de preco sem match
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Buscar Clovis Bevilaqua e inspecionar area de preco de cada card
+        run: |
+          node << 'EOF'
+          const BASE='https://www.estantevirtual.com.br';
+          const HEADERS={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36','Accept-Language':'pt-BR,pt;q=0.9,en;q=0.8'};
+          (async () => {
+            const url = `${BASE}/busca?q=${encodeURIComponent('Clóvis Beviláqua')}&tipo-de-livro=usado&_preco=3000-10000000&pagina=1&sort=new-releases`;
+            const res = await fetch(url, { headers: HEADERS });
+            const html = await res.text();
+            console.log('HTTP', res.status, 'tamanho', html.length);
+            const tagRe=/<a\b[^>]*>/g;
+            const productTags=[...html.matchAll(tagRe)].filter(m=>/class="[^"]*product-item__link/.test(m[0]));
+            console.log('cards encontrados:', productTags.length);
+            for(let idx=0; idx<productTags.length; idx++){
+              const m=productTags[idx],tag=m[0];
+              const titleMatch=tag.match(/title="([^"]*)"/);
+              const start=m.index,end=idx+1<productTags.length?productTags[idx+1].index:Math.min(html.length,start+4000);
+              const segment=html.slice(start,end);
+              const buyAreaIdx=segment.indexOf('product-item__buy-area');
+              const priceSnippet = buyAreaIdx>=0 ? segment.slice(buyAreaIdx, buyAreaIdx+500) : '(sem product-item__buy-area no segmento)';
+              console.log(`--- card ${idx+1}: ${titleMatch?titleMatch[1]:'?'} ---`);
+              console.log(priceSnippet);
+            }
+          })();
+          EOF

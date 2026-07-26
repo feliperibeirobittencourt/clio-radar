@@ -45,7 +45,7 @@ function extractCards(html){
     const segment=html.slice(start,end);
     const authorMatch=segment.match(/product-item__author"[^>]*>\s*([\s\S]*?)\s*<\/p>/);
     const yearMatch=segment.match(/product-item__year"[^>]*>\s*(\d{4})\s*<\/p>/);
-    const priceMatch=segment.match(/A partir de R\$\s*([\d.,]+)/);
+    const priceMatch=segment.match(/data-auto="price"[^>]*>\s*R\$\s*([\d.,]+)/)||segment.match(/A partir de R\$\s*([\d.,]+)/)||segment.match(/R\$\s*([\d.,]+)/);
     cards.push({href,title,cardAuthor:authorMatch?decodeEntities(authorMatch[1]).trim():'',year:yearMatch?Number(yearMatch[1]):null,price:priceMatch?price(priceMatch[1]):null});
   }
   return cards;

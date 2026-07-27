@@ -109,8 +109,10 @@ const state={page:'radar',market:[],historyData:[],searchData:[],estanteHistory:
 function persist(){localStorage.setItem('clio_hunt',JSON.stringify(state.hunt));localStorage.setItem('clio_stars',JSON.stringify([...state.stars]));localStorage.setItem('clio_buys',JSON.stringify([...state.buys]))}
 function startOfToday(){const d=new Date();d.setHours(0,0,0,0);return d}
 function validAuctionDate(r){if(!r.auctionDate)return null;const d=new Date(r.auctionDate);return Number.isNaN(d.getTime())?null:d}
-function current(r){const d=validAuctionDate(r);return !d||d>=startOfToday()}
-function pastAuction(r){const d=validAuctionDate(r);return !!d&&d<startOfToday()}
+const CLOSED_STATUSES=new Set(['vendido','encerrado sem dado']);
+function isClosedStatus(r){return CLOSED_STATUSES.has(r.status)}
+function current(r){if(isClosedStatus(r))return false;const d=validAuctionDate(r);return !d||d>=startOfToday()}
+function pastAuction(r){if(isClosedStatus(r))return true;const d=validAuctionDate(r);return !!d&&d<startOfToday()}
 let ownedEditionCache=new Map();
 function aliasKey(r){return `${norm(r.author)}|${norm(r.title)}|${r.year||''}`}
 function aliasForMarket(r){return state.aliases.find(a=>`${norm(a.marketAuthor)}|${norm(a.marketTitle)}|${a.marketYear||''}`===aliasKey(r))||null}

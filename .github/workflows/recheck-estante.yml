@@ -1,0 +1,81 @@
+name: Reconferir anúncios da Estante Virtual
+
+on:
+  workflow_dispatch:
+    inputs:
+      escopo:
+        description: 'window = só a janela 1850-1930 · all = histórico inteiro'
+        required: false
+        default: ''
+  schedule:
+    # Todo dia às 12h UTC (depois da busca diária, que roda às 10h UTC).
+    - cron: '0 12 * * *'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: clio-estante-scrape
+  cancel-in-progress: false
+
+jobs:
+  recheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Definir escopo (diário = janela 1850-1930 · domingo = histórico inteiro)
+        id: escopo
+        run: |
+          if [ -n "${{ inputs.escopo }}" ]; then
+            echo "valor=${{ inputs.escopo }}" >> "$GITHUB_OUTPUT"
+          elif [ "$(date -u +%u)" = "7" ]; then
+            echo "valor=all" >> "$GITHUB_OUTPUT"
+          else
+            echo "valor=window" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Reconferir links da Estante Virtual (escopo ${{ steps.escopo.outputs.valor }})
+        env:
+          RECHECK_SCOPE: ${{ steps.escopo.outputs.valor }}
+        run: node scripts/recheck-estante.mjs
+
+      - name: Publicar status atualizado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add raw/estante-historico.csv
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma mudança de status na Estante Virtual."
+            exit 0
+          fi
+
+          git commit -m "Reconfere status da Estante Virtual (${{ steps.escopo.outputs.valor }})"
+
+          for i in 1 2 3 4 5; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Tentativa $i de publicar falhou (provável conflito com outra atualização em andamento). Tentando novamente…"
+            git rebase --abort 2>/dev/null || true
+            sleep 10
+          done
+          echo "Não foi possível publicar o status após 5 tentativas."
+          exit 1
+
+      - name: Acionar reconstrução dos dados do CLIO (leilões + Estante Virtual)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-clio-data.yml --ref main

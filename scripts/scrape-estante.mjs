@@ -13,7 +13,7 @@ const DELAY_MS=Number(process.env.ESTANTE_DELAY_MS)||60_000;
 const IMAGE_DELAY_MS=Number(process.env.ESTANTE_IMAGE_DELAY_MS)||3_000;
 const BASE='https://www.estantevirtual.com.br';
 const IMAGE_BASE='https://static.estantevirtual.com.br';
-const HEADERS=['Autor','Grupo','Título','Ano','Preço (R$)','Na janela 1850-1930?','Link','Imagem','Visto em'];
+const HEADERS=['Autor','Grupo','Título','Ano','Preço (R$)','Na janela 1850-1930?','Link','Imagem','Status','Verificado em','Visto em'];
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const norm=v=>String(v??'').normalize('NFD').replace(/\p{Mn}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
@@ -84,6 +84,8 @@ async function main(){
   const existingHistory=existingHistoryText?readCSV(existingHistoryText):[];
   const historySet=new Set(existingHistory.map(rowKey));
   const imageByKey=new Map(existingHistory.map(r=>[rowKey(r),r['Imagem']||'']));
+  const statusByKey=new Map(existingHistory.map(r=>[rowKey(r),r['Status']||'ativo']));
+  const verifiedByKey=new Map(existingHistory.map(r=>[rowKey(r),r['Verificado em']||'']));
 
   const hojeRows=[],newRows=[];
   let failures=0,imagesFetched=0,totalCards=0,totalWithYear=0,totalEligible=0;
@@ -101,18 +103,22 @@ async function main(){
         const year=c.year||extractYear(c.title);
         if(!year||year>MAX_YEAR)continue;
         const link=c.href?`${BASE}${c.href}`:searchFallbackLink(a.name,year);
-        const row={'Autor':a.name,'Grupo':groupLabel(a.group),'Título':c.title,'Ano':year,'Preço (R$)':c.price??'','Na janela 1850-1930?':(year>=1850&&year<=1930)?'SIM':'','Link':link,'Imagem':'','Visto em':brtStamp(new Date())};
+        const row={'Autor':a.name,'Grupo':groupLabel(a.group),'Título':c.title,'Ano':year,'Preço (R$)':c.price??'','Na janela 1850-1930?':(year>=1850&&year<=1930)?'SIM':'','Link':link,'Imagem':'','Status':'ativo','Verificado em':'','Visto em':brtStamp(new Date())};
         const key=rowKey(row);
         const isNew=!historySet.has(key);
         if(!isNew){
           row['Imagem']=imageByKey.get(key)||'';
+          // preserva o status confirmado pela rotina de recheck (scripts/recheck-estante.mjs),
+          // em vez de reabrir como "ativo" só porque reapareceu numa busca.
+          row['Status']=statusByKey.get(key)||'ativo';
+          row['Verificado em']=verifiedByKey.get(key)||'';
         }else if(c.href){
           row['Imagem']=await fetchCoverImage(link);
           imagesFetched++;
           await sleep(IMAGE_DELAY_MS);
         }
         hojeRows.push(row);
-        if(isNew){historySet.add(key);imageByKey.set(key,row['Imagem']);newRows.push(row)}
+        if(isNew){historySet.add(key);imageByKey.set(key,row['Imagem']);statusByKey.set(key,row['Status']);verifiedByKey.set(key,row['Verificado em']);newRows.push(row)}
       }
     }catch(e){
       failures++;

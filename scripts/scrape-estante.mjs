@@ -54,7 +54,10 @@ function extractCards(html){
 const FETCH_HEADERS={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36','Accept-Language':'pt-BR,pt;q=0.9,en;q=0.8'};
 
 async function fetchSearchPage(author){
-  const url=`${BASE}/busca?q=${encodeURIComponent(author)}&tipo-de-livro=usado&_preco=3000-10000000&pagina=1&sort=new-releases`;
+  // searchField=autor restringe a busca ao campo de autor (em vez de busca livre
+  // por qualquer campo do anúncio), evitando ruído de livros que só mencionam o
+  // nome por acaso — mesmo ajuste já validado no monitor Python irmão.
+  const url=`${BASE}/busca?q=${encodeURIComponent(author)}&searchField=autor&tipo-de-livro=usado&_preco=3000-10000000&pagina=1&sort=new-releases`;
   const res=await fetch(url,{headers:FETCH_HEADERS});
   if(!res.ok)throw new Error(`HTTP ${res.status}`);
   return res.text();

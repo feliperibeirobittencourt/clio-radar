@@ -5,6 +5,7 @@ const ROOT=path.resolve(process.cwd());
 const RAW=path.join(ROOT,'raw');
 const HOJE_FILE=path.join(RAW,'estante-hoje.csv');
 const HIST_FILE=path.join(RAW,'estante-historico.csv');
+const EXCLUSOES_FILE=path.join(RAW,'estante-exclusoes.csv');
 const STATUS_FILE=path.join(RAW,'estante-status.json');
 const AUTHORS_FILE=path.join(ROOT,'data','authors.json');
 
@@ -82,9 +83,15 @@ function rowKey(r){return r['Link']?norm(r['Link']):norm(`${r['Autor']}|${r['Tí
 
 async function main(){
   const authors=JSON.parse(await fs.readFile(AUTHORS_FILE,'utf8'));
+  let exclusoesText='';
+  try{exclusoesText=await fs.readFile(EXCLUSOES_FILE,'utf8')}catch{}
+  // Itens marcados como erro (autor errado, edição irrelevante etc.) nunca mais
+  // devem reentrar em hoje.csv/historico.csv, mesmo que a busca os encontre de
+  // novo — ver scripts/recheck-estante.mjs para o fluxo de como adicionar aqui.
+  const exclusoesSet=new Set((exclusoesText?readCSV(exclusoesText):[]).map(rowKey));
   let existingHistoryText='';
   try{existingHistoryText=await fs.readFile(HIST_FILE,'utf8')}catch{}
-  const existingHistory=existingHistoryText?readCSV(existingHistoryText):[];
+  const existingHistory=(existingHistoryText?readCSV(existingHistoryText):[]).filter(r=>!exclusoesSet.has(rowKey(r)));
   const historySet=new Set(existingHistory.map(rowKey));
   const imageByKey=new Map(existingHistory.map(r=>[rowKey(r),r['Imagem']||'']));
   const statusByKey=new Map(existingHistory.map(r=>[rowKey(r),r['Status']||'ativo']));
@@ -106,8 +113,12 @@ async function main(){
         const year=c.year||extractYear(c.title);
         if(!year||year>MAX_YEAR)continue;
         const link=c.href?`${BASE}${c.href}`:searchFallbackLink(a.name,year);
-        const row={'Autor':a.name,'Grupo':groupLabel(a.group),'Título':c.title,'Ano':year,'Preço (R$)':c.price??'','Na janela 1850-1930?':(year>=1850&&year<=1930)?'SIM':'','Link':link,'Imagem':'','Status':'ativo','Verificado em':'','Visto em':brtStamp(new Date())};
+        // .toFixed(2) evita ambiguidade na releitura: um preço tipo 106.2 (JS
+        // derruba o zero à direita) seria mal interpretado como separador de
+        // milhar por build-data.mjs e viraria 1062 em vez de 106,20.
+        const row={'Autor':a.name,'Grupo':groupLabel(a.group),'Título':c.title,'Ano':year,'Preço (R$)':c.price!=null?c.price.toFixed(2):'','Na janela 1850-1930?':(year>=1850&&year<=1930)?'SIM':'','Link':link,'Imagem':'','Status':'ativo','Verificado em':'','Visto em':brtStamp(new Date())};
         const key=rowKey(row);
+        if(exclusoesSet.has(key))continue;
         const isNew=!historySet.has(key);
         if(!isNew){
           row['Imagem']=imageByKey.get(key)||'';

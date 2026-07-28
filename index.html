@@ -119,13 +119,23 @@ function marketItemKey(r){return r.link?norm(r.link):norm(`${r.author}|${r.title
 function aliasForMarket(r){return state.aliases.find(a=>`${norm(a.marketAuthor)}|${norm(a.marketTitle)}|${a.marketYear||''}`===aliasKey(r))||null}
 function resolveAliasTarget(a){if(!a)return null;const byBookId=a.collectionBookId?state.collection.find(x=>x.bookId!=null&&Number(x.bookId)===Number(a.collectionBookId)):null;if(byBookId)return byBookId;return a.collectionAuthor?state.collection.find(x=>norm(x.author)===norm(a.collectionAuthor)&&norm(x.title)===norm(a.collectionTitle)&&(!a.collectionYear||!x.year||String(x.year)===String(a.collectionYear)))||null:null}
 function linkedCollectionRows(r){const a=aliasForMarket(r);if(a){if(a.type==='BLOCK')return[];const c=resolveAliasTarget(a);return c&&c.owned?[c]:[]}return null}
+// Normaliza título pra CORRESPONDÊNCIA AUTOMÁTICA (nunca pra exibição): remove
+// texto comum de anúncio de leilão (LIVRO:, Raro -, "1a edição", "Volume X") e
+// aproxima grafia antiga da moderna (ph/th, y, z final, consoante dobrada que
+// não existe mais em português — sem mexer em rr/ss, que ainda têm som próprio
+// hoje). Sem isso "Esphinge" (grafia de época) nunca batia com "Esfinge" no
+// acervo. Não usar pra vínculo manual (aliasKey/marketItemKey) — esses têm que
+// ficar estáveis exatamente como foram salvos.
+function stripListingNoise(s){return s.replace(/^livro\s*/,'').replace(/^raro\s*-?\s*/,'').replace(/\b\d+\s*[ao]?\s*edicao\b/g,' ').replace(/\bvolume\s+[ivxlcdm\d]+\b/g,' ').replace(/\b\d+\s+volumes?\b/g,' ').replace(/\s+/g,' ').trim()}
+function archaicSpelling(s){return s.replace(/ph/g,'f').replace(/th/g,'t').replace(/(ll|tt|pp|cc|mm|nn|bb|dd|ff|gg)/g,m=>m[0]).replace(/pt/g,'t').replace(/ct/g,'t').replace(/y/g,'i').replace(/z(?=\s|$)/g,'s')}
+function canon(v){return archaicSpelling(stripListingNoise(norm(v)))}
 function ownedEditionsFor(r){
   const cacheKey=`${norm(r.author)}|${norm(r.title)}`;
   if(ownedEditionCache.has(cacheKey))return ownedEditionCache.get(cacheKey);
   const manual=linkedCollectionRows(r);
-  const authorKey=norm(r.author),titleTokens=norm(r.title).split(' ').filter(x=>x.length>3).slice(0,8);
+  const authorKey=norm(r.author),titleTokens=canon(r.title).split(' ').filter(x=>x.length>3).slice(0,8);
   const rows=manual!==null?manual:state.collection.filter(c=>c.owned&&norm(c.author)&&authorKey&&(norm(c.author).includes(authorKey)||authorKey.includes(norm(c.author)))).filter(c=>{
-    const ct=norm(c.title),overlap=titleTokens.filter(t=>ct.includes(t)).length;
+    const ct=canon(c.title),overlap=titleTokens.filter(t=>ct.includes(t)).length;
     return titleTokens.length?overlap>=Math.min(2,titleTokens.length):false;
   });
   const years=[...new Set(rows.map(c=>c.year).filter(Boolean))].sort((a,b)=>a-b);
@@ -138,7 +148,7 @@ function effectiveOwnership(r){
   if(r.year&&own.rows.some(c=>c.year===r.year))return 'same';
   return 'other';
 }
-function desiredCollectionMatch(r){const a=norm(r.author),tokens=norm(r.title).split(' ').filter(x=>x.length>3);return state.collection.some(c=>c.desire&&norm(c.author)===a&&tokens.length&&tokens.filter(t=>norm(c.title).includes(t)).length>=Math.min(2,tokens.length))}
+function desiredCollectionMatch(r){const a=norm(r.author),tokens=canon(r.title).split(' ').filter(x=>x.length>3);return state.collection.some(c=>c.desire&&norm(c.author)===a&&tokens.length&&tokens.filter(t=>canon(c.title).includes(t)).length>=Math.min(2,tokens.length))}
 function score(r){let s=0;const ownership=effectiveOwnership(r);if(ownership==='missing')s+=35;else if(ownership==='other'){s+=18;const own=ownedEditionsFor(r);if(r.year&&own.oldest&&r.year<own.oldest){const gap=own.oldest-r.year;s+=gap>=30?25:gap>=10?20:15}}else s-=30;if(r.first)s+=25;if(r.signed)s+=18;if(r.type==='documento')s+=20;if(r.year&&r.year<=1900)s+=10;if(state.hunt.some(h=>r.search.includes(norm(h)))||desiredCollectionMatch(r))s+=30;if(['machado de assis','jose de alencar','olavo bilac','julia lopes'].some(x=>norm(r.author).includes(x)))s+=12;if(r.type==='outro')s-=55;return Math.max(0,Math.min(100,s))}
 function scoreClass(n){return n>=85?'hot':n>=60?'mid':''}
 function ownershipLabel(r){const ownership=effectiveOwnership(r);if(ownership==='same'){const own=ownedEditionsFor(r);return`<span class="tag good">✓ Mesma edição</span>${own.years.length?`<div class="owned-edition-years">Tenho: ${own.years.join(' · ')}</div>`:''}`}if(ownership==='other'){const own=ownedEditionsFor(r),years=own.years;if(!years.length)return'<span class="tag gold">Outra edição</span>';const older=r.year&&own.oldest&&r.year<own.oldest;return`<span class="tag gold">${older?'↑ ':''}Outra edição</span><div class="owned-edition-years">Tenho: ${years.join(' · ')}</div>`}return'<span class="tag bad">✕ Não tenho</span>'}
@@ -293,8 +303,8 @@ async function removeRadarItem(key){
   }
 }
 function marketToCollection(r,status){return{author:r.author,title:r.title,year:r.year,edition:r.edition,publisher:r.publisher,status,value:r.initial??r.final,date:new Date().toISOString().slice(0,10),comment:r.auctioneer||'',auctioneer:r.auctioneer||'',auctionDate:r.auctionDate?r.auctionDate.toISOString():'',lotLink:r.link||'',lotImage:r.image||'',marketKey:r.key||''}}
-function findCollectionForMarket(r){const alias=aliasForMarket(r);if(alias&&alias.type==='LINK'){const linked=resolveAliasTarget(alias);if(linked)return linked}const a=norm(r.author),t=norm(r.title);return state.collection.find(c=>norm(c.author)===a&&norm(c.title)===t&&c.year===r.year)}
-function findCollectionForFields(fields){const a=norm(fields.author||''),t=norm(fields.title||'');if(!a||!t)return null;const fy=toNum(fields.year);return state.collection.find(c=>norm(c.author)===a&&norm(c.title)===t&&c.year===fy)||null}
+function findCollectionForMarket(r){const alias=aliasForMarket(r);if(alias&&alias.type==='LINK'){const linked=resolveAliasTarget(alias);if(linked)return linked}const a=norm(r.author),t=canon(r.title);return state.collection.find(c=>norm(c.author)===a&&canon(c.title)===t&&c.year===r.year)}
+function findCollectionForFields(fields){const a=norm(fields.author||''),t=canon(fields.title||'');if(!a||!t)return null;const fy=toNum(fields.year);return state.collection.find(c=>norm(c.author)===a&&canon(c.title)===t&&c.year===fy)||null}
 async function savePurchaseRecord(source,status,fields={}){let c=(source.sourceKind==='collection'||source.sheetRow!=null)?source:findCollectionForMarket(source);const merged={...(source.sourceKind==='market'?marketToCollection(source,status):{author:source.author,title:source.title,year:source.year}),...fields,status};let result;if(c){result=await appsCall('updateBook',{bookId:c.bookId,row:c.sheetRow,author:c.author,title:c.title,year:c.year,fields:merged});Object.assign(c,{...merged,owned:status==='TENHO',status,desire:c.desire});}else{result=await appsCall('createBook',{fields:merged});const raw=result.book||{};c=enrichCollection({...raw,_sheetRow:result.row},state.collection.length);state.collection.push(c)}if(source.key&&status!=='COMPRAR')state.buys.delete(source.key);if(source.key&&status==='COMPRAR')state.buys.add(source.key);persist();buildIndexes();renderCurrent();return result}
 async function filesToPayload(input){const files=[...(input.files||[])].slice(0,6);return Promise.all(files.map(f=>new Promise((resolve,reject)=>{const rd=new FileReader();rd.onload=()=>resolve({name:f.name,mimeType:f.type||'image/jpeg',base64:String(rd.result).split(',')[1]});rd.onerror=reject;rd.readAsDataURL(f)})))}
 function purchaseAuthorOptions(){return [...new Set(state.collection.map(c=>c.author).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'))}

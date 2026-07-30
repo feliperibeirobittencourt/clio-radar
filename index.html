@@ -133,7 +133,7 @@ function linkedCollectionRows(r){const a=aliasForMarket(r);if(a){if(a.type==='BL
 // acervo. Não usar pra vínculo manual (aliasKey/marketItemKey) — esses têm que
 // ficar estáveis exatamente como foram salvos.
 function stripListingNoise(s){return s.replace(/^livro\s*/,'').replace(/^raro\s*-?\s*/,'').replace(/\b\d+\s*[ao]?\s*edicao\b/g,' ').replace(/\bvolume\s+[ivxlcdm\d]+\b/g,' ').replace(/\b\d+\s+volumes?\b/g,' ').replace(/\s+/g,' ').trim()}
-function archaicSpelling(s){return s.replace(/ph/g,'f').replace(/th/g,'t').replace(/(ll|tt|pp|cc|mm|nn|bb|dd|ff|gg)/g,m=>m[0]).replace(/pt/g,'t').replace(/ct/g,'t').replace(/y/g,'i').replace(/z(?=\s|$)/g,'s')}
+function archaicSpelling(s){return s.replace(/ph/g,'f').replace(/th/g,'t').replace(/(ll|tt|pp|cc|mm|nn|bb|dd|ff|gg)/g,m=>m[0]).replace(/pt/g,'t').replace(/ct/g,'t').replace(/y/g,'i').replace(/z/g,'s')}
 function canon(v){return archaicSpelling(stripListingNoise(norm(v)))}
 function ownedEditionsFor(r){
   const cacheKey=`${norm(r.author)}|${norm(r.title)}`;
@@ -176,30 +176,42 @@ async function renderQuick(){const q=$('#globalSearch').value.trim(),box=$('#qui
 function historicalRows(){const source=state.historyData.length?state.historyData:state.market;return source.filter(r=>pastAuction(r)&&r.final!=null).sort((a,b)=>(b.auctionDate||0)-(a.auctionDate||0))}
 function marketHistoryFor(r){const authorKey=norm(r.author),titleKey=strictTitleKey(r.title);return historicalRows().filter(x=>x.i!==r.i&&norm(x.author)===authorKey&&strictTitleKey(x.title)===titleKey)}
 function renderResults(){const q=norm($('#resultsSearch').value||''),pageSize=5,now=new Date();let rows=historicalRows();if(state.resultsPeriod!=='all'){rows=rows.filter(r=>{if(!r.auctionDate)return false;if(state.resultsPeriod==='today')return r.auctionDate.toDateString()===now.toDateString();const days={week:7,month:30,year:365}[state.resultsPeriod];return days?r.auctionDate>=new Date(now.getTime()-days*86400000):true})}if(state.resultsMode==='missing')rows=rows.filter(r=>effectiveOwnership(r)==='missing');if(q)rows=rows.filter(r=>r.search.includes(q));rows=[...rows];if(state.resultsSort==='saleDesc')rows.sort((a,b)=>(b.auctionDate||0)-(a.auctionDate||0));if(state.resultsSort==='yearAsc')rows.sort((a,b)=>(a.year??9999)-(b.year??9999)||(b.auctionDate||0)-(a.auctionDate||0));if(state.resultsSort==='yearDesc')rows.sort((a,b)=>(b.year??0)-(a.year??0)||(b.auctionDate||0)-(a.auctionDate||0));if(state.resultsSort==='valueDesc')rows.sort((a,b)=>(b.final??-Infinity)-(a.final??-Infinity)||(b.auctionDate||0)-(a.auctionDate||0));if(state.resultsSort==='valueAsc')rows.sort((a,b)=>(a.final??Infinity)-(b.final??Infinity)||(b.auctionDate||0)-(a.auctionDate||0));const pages=Math.max(1,Math.ceil(rows.length/pageSize));state.resultsPage=Math.min(state.resultsPage,pages);const vis=rows.slice((state.resultsPage-1)*pageSize,state.resultsPage*pageSize);$('#resultsCount').textContent=`${rows.length} vendas`;$('#resultsCards').innerHTML=vis.map(r=>`<div class="market-card"><div style="display:flex;gap:11px">${thumb(r)}<div><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${r.year??'s/ ano'} · ${r.auctionDate?r.auctionDate.toLocaleDateString('pt-BR'):'s/data'} · <b>${brl(r.final)}</b><br>${esc(r.auctioneer||'Leiloeiro não identificado')} · ${ownershipLabel(r)}</div><div style="margin-top:6px;display:flex;gap:8px;align-items:center"><button class="buy-btn ${state.buys.has(r.key)?'active':''}" data-buy="${esc(r.key)}" title="${state.buys.has(r.key)?'Remover da Lista de Compra':'Adicionar à Lista de Compra'}">🛒</button><button class="rowbtn" data-market-detail="${r.i}">Ver →</button></div></div></div></div>`).join('')||'<div class="empty">Nenhuma venda encontrada.</div>';renderPager('#resultsPager',pages,state.resultsPage,p=>{state.resultsPage=p;renderResults()})}
+function titleTokens(title){return canon(title).split(' ').filter(x=>x.length>3)}
 function reviewCandidates(){
-  // pré-computa canon()/tokens de cada livro do acervo uma única vez — sem
-  // isso, cada um dos ~5000 itens do radar/Estante recalculava tudo de novo
-  // pra cada um dos ~1000 livros que você tem, custando segundos por chamada.
-  const ownedBooks=state.collection.filter(c=>c.owned&&c.author).map(c=>{const ca=norm(c.author),cTokens=canon(c.title).split(' ').filter(x=>x.length>3);return{book:c,ca,cSet:new Set(cTokens)}});
+  // Pré-computa tokens de TODO o acervo (tenha ou não — sugerir o título certo
+  // que ainda não está marcado como TENHO é melhor que sugerir um título
+  // errado só porque esse já está marcado) uma única vez.
+  const allBooks=state.collection.filter(c=>c.author&&c.title).map(c=>({book:c,ca:norm(c.author),tokens:new Set(titleTokens(c.title))}));
   const source=state.searchData.length?state.searchData:state.market,seen=new Set(),out=[];
   for(const r of source){
     if(!r.author||!r.title)continue;
     if(aliasForMarket(r))continue; // já resolvido manualmente (vinculado ou "não tenho")
     if(effectiveOwnership(r)!=='missing')continue; // já bate sozinho
-    const authorKey=norm(r.author),marketTokens=canon(r.title).split(' ').filter(x=>x.length>3);
+    const authorKey=norm(r.author),marketTokens=titleTokens(r.title);
     if(!marketTokens.length)continue;
+    const pool=allBooks.filter(b=>b.ca&&(b.ca.includes(authorKey)||authorKey.includes(b.ca)));
+    if(!pool.length)continue;
+    // Peso por raridade da palavra dentro do próprio autor (tipo IDF): um
+    // autor de Direito tem "direito" em quase todo título, então bater só
+    // nisso não prova nada; bater numa palavra rara ("Sucessões") sim. Sem
+    // isso, "Direito das Sucessões" empatava com um "Criminologia e Direito"
+    // completamente diferente, só por dividir a palavra genérica "direito".
+    const df=new Map();
+    for(const p of pool)for(const t of p.tokens)df.set(t,(df.get(t)||0)+1);
+    const weight=t=>1/(df.get(t)||1);
     let best=null;
-    for(const ob of ownedBooks){
-      if(!ob.ca||!(ob.ca.includes(authorKey)||authorKey.includes(ob.ca)))continue;
-      const shared=marketTokens.filter(t=>ob.cSet.has(t)).length,union=new Set([...marketTokens,...ob.cSet]).size;
-      const overlap=union?shared/union:0;
-      if(!best||overlap>best.overlap)best={book:ob.book,overlap};
+    for(const p of pool){
+      const union=new Set([...marketTokens,...p.tokens]);
+      let shared=0,unionW=0;
+      for(const t of union){const w=weight(t);unionW+=w;if(marketTokens.includes(t)&&p.tokens.has(t))shared+=w}
+      const score=unionW?shared/unionW:0;
+      if(!best||score>best.score)best={book:p.book,score};
     }
-    if(!best||best.overlap<0.1)continue;
+    if(!best||best.score<0.15)continue;
     const dedupeKey=`${authorKey}|${canon(r.title)}|${best.book.key}`;
     if(seen.has(dedupeKey))continue;
     seen.add(dedupeKey);
-    out.push({item:r,book:best.book,overlap:best.overlap});
+    out.push({item:r,book:best.book,overlap:best.score});
   }
   out.sort((a,b)=>b.overlap-a.overlap);
   return out;
@@ -219,7 +231,7 @@ function paintRevisao(){
   state.revisaoPage=Math.min(state.revisaoPage,pages);
   const vis=rows.slice((state.revisaoPage-1)*pageSize,state.revisaoPage*pageSize);
   $('#revisaoCount').textContent=`${rows.length} candidato(s)`;
-  $('#revisaoCards').innerHTML=vis.map((x,i)=>{const r=x.item,idx=(state.revisaoPage-1)*pageSize+i,checked=state.revisaoSelected.has(x);return `<div class="market-card"><div style="display:flex;gap:11px"><input type="checkbox" data-review-select="${idx}" ${checked?'checked':''} style="margin-top:4px;width:18px;height:18px">${thumb(r)}<div style="flex:1"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${r.year??'s/ ano'} · ${r.source==='estante'?'Estante Virtual':esc(r.auctioneer||'Leilão')}</div><div class="note" style="margin-top:6px">Talvez seja: <b>${esc(x.book.title)}</b>${x.book.year?' — '+x.book.year:''}</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="primary" data-review-confirm="${idx}">✓ É esse</button><button class="secondary" data-review-reject="${idx}">✕ Não é</button><button class="rowbtn" data-market-detail="${r.i}">Ver →</button></div></div></div></div>`}).join('')||'<div class="empty">Nenhum candidato pendente. 🎉</div>';
+  $('#revisaoCards').innerHTML=vis.map((x,i)=>{const r=x.item,idx=(state.revisaoPage-1)*pageSize+i,checked=state.revisaoSelected.has(x);return `<div class="market-card"><div style="display:flex;gap:11px"><input type="checkbox" data-review-select="${idx}" ${checked?'checked':''} style="margin-top:4px;width:18px;height:18px">${thumb(r)}<div style="flex:1"><div class="t">${esc(r.title)}</div><div class="m">${esc(r.author)} · ${r.year??'s/ ano'} · ${r.source==='estante'?'Estante Virtual':esc(r.auctioneer||'Leilão')}</div><div class="note" style="margin-top:6px">Talvez seja: <b>${esc(x.book.title)}</b>${x.book.year?' — '+x.book.year:''}${x.book.owned?'':' <span class="tag gold">ainda não marcado como TENHO</span>'}</div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="primary" data-review-confirm="${idx}">✓ É esse</button><button class="secondary" data-review-reject="${idx}">✕ Não é</button><button class="rowbtn" data-market-detail="${r.i}">Ver →</button></div></div></div></div>`}).join('')||'<div class="empty">Nenhum candidato pendente. 🎉</div>';
   renderPager('#revisaoPager',pages,state.revisaoPage,p=>{state.revisaoPage=p;paintRevisao()});
   const selCount=state.revisaoSelected.size,bar=$('#revisaoBulkBar');
   if(selCount){bar.style.display='';bar.innerHTML=`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${selCount} selecionado(s)</b><button class="primary" data-review-bulk-confirm>✓ É esse (${selCount})</button><button class="secondary" data-review-bulk-reject>✕ Não é (${selCount})</button><button class="secondary" data-review-bulk-clear>Limpar seleção</button></div>`}else{bar.style.display='none';bar.innerHTML=''}

@@ -116,9 +116,13 @@ function isClosedStatus(r){return CLOSED_STATUSES.has(r.status)}
 function current(r){if(isClosedStatus(r))return false;const d=validAuctionDate(r);return !d||d>=startOfToday()}
 function pastAuction(r){if(isClosedStatus(r))return true;const d=validAuctionDate(r);return !!d&&d<startOfToday()}
 let ownedEditionCache=new Map();
-function aliasKey(r){return `${norm(r.author)}|${norm(r.title)}|${r.year||''}`}
-function marketItemKey(r){return r.link?norm(r.link):norm(`${r.author}|${r.title}|${r.year||''}`)}
-function aliasForMarket(r){return state.aliases.find(a=>`${norm(a.marketAuthor)}|${norm(a.marketTitle)}|${a.marketYear||''}`===aliasKey(r))||null}
+// só dígitos: a planilha pode devolver o ano com formatação de milhar
+// ("1.881" em vez de "1881") dependendo do formato da célula — comparar só
+// os dígitos evita que isso quebre silenciosamente o casamento do vínculo.
+const onlyDigits=v=>String(v??'').replace(/[^\d]/g,'');
+function aliasKey(r){return `${norm(r.author)}|${norm(r.title)}|${onlyDigits(r.year)}`}
+function marketItemKey(r){return r.link?norm(r.link):norm(`${r.author}|${r.title}|${onlyDigits(r.year)}`)}
+function aliasForMarket(r){return state.aliases.find(a=>`${norm(a.marketAuthor)}|${norm(a.marketTitle)}|${onlyDigits(a.marketYear)}`===aliasKey(r))||null}
 function resolveAliasTarget(a){if(!a)return null;const byBookId=a.collectionBookId?state.collection.find(x=>x.bookId!=null&&Number(x.bookId)===Number(a.collectionBookId)):null;if(byBookId)return byBookId;return a.collectionAuthor?state.collection.find(x=>norm(x.author)===norm(a.collectionAuthor)&&norm(x.title)===norm(a.collectionTitle)&&(!a.collectionYear||!x.year||String(x.year)===String(a.collectionYear)))||null:null}
 function linkedCollectionRows(r){const a=aliasForMarket(r);if(a){if(a.type==='BLOCK')return[];const c=resolveAliasTarget(a);return c&&c.owned?[c]:[]}return null}
 // Normaliza título pra CORRESPONDÊNCIA AUTOMÁTICA (nunca pra exibição): remove
@@ -272,8 +276,40 @@ async function saveMarketAlias(r,c,type='LINK'){await appsCall('saveAlias',{type
 // Aplica o vínculo localmente na hora (sem esperar a planilha) e manda salvar
 // em segundo plano — usado na revisão em lote, pra dar pra clicar rápido item
 // após item sem esperar ~5s de ida e volta na rede a cada clique.
-function applyLocalAlias(type,r,c){const key=aliasKey(r),idx=state.aliases.findIndex(a=>`${norm(a.marketAuthor)}|${norm(a.marketTitle)}|${a.marketYear||''}`===key);const entry={type,marketAuthor:r.author,marketTitle:r.title,marketYear:r.year||'',collectionBookId:c?.bookId||'',collectionAuthor:c?.author||'',collectionTitle:c?.title||'',collectionYear:c?.year||''};if(idx>=0)state.aliases[idx]=entry;else state.aliases.push(entry)}
-function saveAliasBackground(type,r,c){applyLocalAlias(type,r,c);appsCall('saveAlias',{type,marketAuthor:r.author,marketTitle:r.title,marketYear:r.year||'',sheetRow:c?.sheetRow||'',collectionBookId:c?.bookId||'',collectionAuthor:c?.author||'',collectionTitle:c?.title||'',collectionYear:c?.year||''}).catch(err=>{setStatus('⚠️ Falha ao salvar um vínculo na planilha: '+err.message)})}
+function applyLocalAlias(type,r,c){const key=aliasKey(r),idx=state.aliases.findIndex(a=>`${norm(a.marketAuthor)}|${norm(a.marketTitle)}|${onlyDigits(a.marketYear)}`===key);const entry={type,marketAuthor:r.author,marketTitle:r.title,marketYear:r.year||'',collectionBookId:c?.bookId||'',collectionAuthor:c?.author||'',collectionTitle:c?.title||'',collectionYear:c?.year||''};if(idx>=0)state.aliases[idx]=entry;else state.aliases.push(entry)}
+// Fila de vínculos pendentes de salvar na planilha — persistida no
+// localStorage (sobrevive a fechar a aba) e processada UM DE CADA VEZ, com
+// novas tentativas em caso de falha. Sem isso, cliques rápidos em sequência
+// disparavam vários saveAlias ao mesmo tempo; como a leitura+escrita da aba
+// de vínculos no Apps Script não é atômica, dois salvamentos concorrentes
+// podiam se sobrescrever e o vínculo simplesmente sumia sem nenhum aviso —
+// foi o que aconteceu numa sessão de revisão em lote: os itens "confirmados"
+// voltaram a aparecer no dia seguinte porque boa parte não chegou a ser
+// gravada de verdade na planilha.
+const PENDING_ALIASES_KEY='clio_pending_aliases';
+let aliasQueueRunning=false;
+function loadPendingAliases(){try{return JSON.parse(localStorage.getItem(PENDING_ALIASES_KEY)||'[]')}catch{return[]}}
+function savePendingAliases(list){try{localStorage.setItem(PENDING_ALIASES_KEY,JSON.stringify(list))}catch{}}
+function queueAliasSave(payload){const list=loadPendingAliases();list.push(payload);savePendingAliases(list);runAliasQueue()}
+async function runAliasQueue(){
+  if(aliasQueueRunning)return;
+  aliasQueueRunning=true;
+  try{
+    while(true){
+      const list=loadPendingAliases();
+      if(!list.length)break;
+      const payload=list[0];
+      let ok=false,lastErr=null;
+      for(let attempt=0;attempt<3&&!ok;attempt++){
+        if(attempt>0)await new Promise(res=>setTimeout(res,1000*attempt));
+        try{await appsCall('saveAlias',payload);ok=true}catch(err){lastErr=err}
+      }
+      if(ok){const rest=loadPendingAliases();rest.shift();savePendingAliases(rest)}
+      else{setStatus(`⚠️ Não consegui salvar "${payload.marketTitle}" na planilha (${lastErr?.message||'erro'}). Vou tentar de novo mais tarde — não feche a aba agora.`);break}
+    }
+  }finally{aliasQueueRunning=false}
+}
+function saveAliasBackground(type,r,c){applyLocalAlias(type,r,c);queueAliasSave({type,marketAuthor:r.author,marketTitle:r.title,marketYear:r.year||'',sheetRow:c?.sheetRow||'',collectionBookId:c?.bookId||'',collectionAuthor:c?.author||'',collectionTitle:c?.title||'',collectionYear:c?.year||''})}
 async function loadPrebuilt(){const manifest=await fetchJSON(PREBUILT_MANIFEST,'no-store');state.manifest=manifest;const [currentRows,collectionRows]=await Promise.all([fetchJSON(versionedDataUrl(manifest.files.current),'no-store'),manifest.files.collection?fetchJSON(versionedDataUrl(manifest.files.collection),'no-store'):Promise.reject(new Error('collection.json ainda não gerado'))]);state.market=currentRows.map(hydrateMarket);state.collection=collectionRows.map(hydrateCollection);state.historyData=[];state.searchData=[];buildIndexes();await loadAliases();await loadRadarItems();updateSummary();renderCurrent();await dbSet('prebuilt-version',manifest.version).catch(()=>{});setStatus(`Base otimizada ${manifest.version}. Mercado atual: ${state.market.length.toLocaleString('pt-BR')} · coleção: ${state.collection.length.toLocaleString('pt-BR')}.`);document.body.classList.remove('loading')}
 let toastTimer=null;
 function setStatus(s){
@@ -467,7 +503,7 @@ $('#purchaseClose').onclick=()=>$('#purchaseDialog').close();
 $('#purchaseDeleteBtn').onclick=async()=>{const key=$('#purchaseDeleteBtn').dataset.deleteKey;const r=key&&state.collection.find(x=>x.key===key);if(!r)return;if(!confirm(`Remover o status de compra de "${r.title}"? O livro continua na planilha, só volta a aparecer como "não tenho".`))return;try{await deleteBook(r);setStatus('↩️ Status de compra removido. O livro continua na planilha.');$('#purchaseDialog').close()}catch(err){setStatus('Falha ao remover: '+err.message);alert('Não foi possível remover: '+err.message)}};
 $('#purchaseDialog').onclick=e=>{if(e.target===$('#purchaseDialog'))$('#purchaseDialog').close()};
 $('#purchaseForm').onsubmit=async e=>{e.preventDefault();const key=$('#purchaseKey').value,source=state.radarItems.map(radarHydrate).find(r=>r.key===key)||getMarketByKey(key)||state.collection.find(r=>r.key===key)||{key:'',sourceKind:'external'};const fields={author:$('#purchaseAuthor').value.trim(),title:$('#purchaseBookTitle').value.trim(),year:$('#purchaseYear').value.trim(),edition:$('#purchaseEdition').value.trim(),publisher:$('#purchasePublisher').value.trim(),status:$('#purchaseStatus').value,value:$('#purchaseValue').value.trim(),date:$('#purchaseDate').value,comment:$('#purchaseComment').value.trim(),description:$('#purchaseDescription').value.trim(),auctioneer:source.auctioneer||'',auctionDate:source.auctionDate?source.auctionDate.toISOString():'',lotLink:source.link||'',lotImage:source.image||'',marketKey:source.key||''};try{let linked=((source.sourceKind==='radar'||source.sourceKind==='market')?findCollectionForMarket(source):null)||findCollectionForFields(fields);let result;try{result=await savePurchaseRecord(linked||source,fields.status,fields)}catch(err){if(!linked||!/não encontrado/i.test(err.message||''))throw err;setStatus('Registro desatualizado, atualizando dados e tentando novamente…');await refreshRemote(localStorage.getItem('clio_market_url')||DEFAULT_MARKET_URL,localStorage.getItem('clio_collection_url')||DEFAULT_COLLECTION_URL,true);linked=((source.sourceKind==='radar'||source.sourceKind==='market')?findCollectionForMarket(source):null)||findCollectionForFields(fields);result=await savePurchaseRecord(linked||source,fields.status,fields)}if(source.sourceKind==='radar')await removeRadarItem(source.key).catch(()=>{});setStatus(fields.status==='TENHO'?'✅ Livro marcado como TENHO.':'✅ Livro salvo na planilha como COMPRADO.');const photos=await filesToPayload($('#purchasePhotos'));if(photos.length){await appsCall('uploadPhotos',{bookId:result.bookId||result.book?.bookId||source.bookId||'',row:result.row,author:fields.author,title:fields.title,year:fields.year,photos});const targetBook=linked||findCollectionForFields(fields);if(targetBook){const previewUrls=[...$('#purchasePhotos').files].map(f=>URL.createObjectURL(f));targetBook.images=[...previewUrls,...(targetBook.images||[])].slice(0,6);persist();buildIndexes();renderCurrent()}}$('#purchaseDialog').close()}catch(err){alert('Não foi possível salvar: '+err.message)}};
-$('#modalClose').onclick=()=>$('#detailDialog').close();$('#detailDialog').onclick=e=>{if(e.target===$('#detailDialog'))$('#detailDialog').close()};function setNavCollapsed(v){$('.shell').classList.toggle('nav-collapsed',v);$('#navCollapseBtn').textContent=v?'›':'‹';localStorage.setItem('clio_nav_collapsed',v?'1':'0')}$('#navCollapseBtn').onclick=()=>setNavCollapsed(!$('.shell').classList.contains('nav-collapsed'));setNavCollapsed(localStorage.getItem('clio_nav_collapsed')==='1');$('#today').textContent=new Intl.DateTimeFormat('pt-BR',{dateStyle:'full'}).format(new Date());loadData();if(readEstanteUpdate())startEstantePolling();else renderUpdateProgress();
+$('#modalClose').onclick=()=>$('#detailDialog').close();$('#detailDialog').onclick=e=>{if(e.target===$('#detailDialog'))$('#detailDialog').close()};function setNavCollapsed(v){$('.shell').classList.toggle('nav-collapsed',v);$('#navCollapseBtn').textContent=v?'›':'‹';localStorage.setItem('clio_nav_collapsed',v?'1':'0')}$('#navCollapseBtn').onclick=()=>setNavCollapsed(!$('.shell').classList.contains('nav-collapsed'));setNavCollapsed(localStorage.getItem('clio_nav_collapsed')==='1');$('#today').textContent=new Intl.DateTimeFormat('pt-BR',{dateStyle:'full'}).format(new Date());loadData();if(readEstanteUpdate())startEstantePolling();else renderUpdateProgress();runAliasQueue();
 </script>
 </body>
 </html>

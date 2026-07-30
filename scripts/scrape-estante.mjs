@@ -77,7 +77,7 @@ async function fetchCoverImage(productUrl){
   }catch{return ''}
 }
 
-function searchFallbackLink(author,year){return `${BASE}/busca?q=${encodeURIComponent(`${author} ${year}`)}`}
+function searchFallbackLink(author,year){return `${BASE}/busca?nsCat=Natural&q=${encodeURIComponent(author)}&searchField=titulo-autor&ano-de-publicacao=${encodeURIComponent(year)}`}
 function groupLabel(g){return g==='patrons'?'Patrono':'Fundador'}
 function rowKey(r){return r['Link']?norm(r['Link']):norm(`${r['Autor']}|${r['Título']}|${r['Ano']}`)}
 

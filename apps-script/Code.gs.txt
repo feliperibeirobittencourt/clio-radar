@@ -1,0 +1,333 @@
+/**
+ * CLIO — Google Sheets / Drive / RADAR compartilhado
+ * Cole todo este arquivo em Extensões > Apps Script.
+ */
+const CLIO_VERSION = '2026-07-30-alias-batch-v1';
+
+const CLIO = {
+  FOLDER_NAME: 'CLIO - Fotos do Acervo',
+  REQUIRED_COLUMNS: ['STATUS','DESEJO','EDIÇÃO','IMAGEM CAPA','IMAGEM 1','IMAGEM 2','IMAGEM 3','IMAGEM 4','IMAGEM 5','IMAGEM LOTE','LINK LOTE','DATA LEILÃO'],
+  ALIAS_SHEET: 'ALIASES_CLIO',
+  RADAR_SHEET: 'RADAR',
+  EXCLUSOES_SHEET: 'EXCLUSOES_CLIO',
+  BOOK_ID_COLUMN: 5
+};
+
+const RADAR_HEADERS = ['CHAVE','STATUS','AUTOR','TÍTULO','ANO','EDIÇÃO','EDITORA','LEILOEIRO','DATA LEILÃO','LINK','IMAGEM','PREÇO','COMENTÁRIO','ATUALIZADO EM'];
+const EXCLUSOES_HEADERS = ['CHAVE','AUTOR','TÍTULO','ANO','LINK','MOTIVO','ATUALIZADO EM'];
+
+function doGet(e) {
+  try {
+    const action=String(e?.parameter?.action||'ping');
+    if(action==='ping')return json_({ok:true,service:'CLIO',version:CLIO_VERSION,now:new Date().toISOString()});
+    return json_({ok:false,error:'Ação GET desconhecida.'});
+  } catch(err){return json_({ok:false,error:String(err.message||err)})}
+}
+
+function doPost(e) {
+  try {
+    const body=JSON.parse(e?.postData?.contents||'{}');
+    validateToken_(body.token);
+    const action=String(body.action||'');
+    if(action==='setup')return json_(setupClio_());
+    if(action==='updateBook')return json_(updateBook_(body));
+    if(action==='createBook')return json_(createBook_(body));
+    if(action==='deleteBook')return json_(deleteBook_(body));
+    if(action==='uploadPhotos')return json_(uploadPhotos_(body));
+    if(action==='findBook')return json_(findBookResponse_(body));
+    if(action==='listAliases')return json_(listAliases_());
+    if(action==='saveAlias')return json_(saveAlias_(body));
+    if(action==='saveAliasesBatch')return json_(saveAliasesBatch_(body));
+    if(action==='removeAlias')return json_(removeAlias_(body));
+    if(action==='listRadar')return json_(listRadar_());
+    if(action==='saveRadar')return json_(saveRadar_(body));
+    if(action==='removeRadar')return json_(removeRadar_(body));
+    if(action==='buyRadar')return json_(buyRadar_(body));
+    if(action==='triggerEstanteScrape')return json_(triggerEstanteScrape_());
+    if(action==='excludeItem')return json_(excludeItem_(body));
+    throw new Error('Ação POST desconhecida.');
+  } catch(err){return json_({ok:false,error:String(err.message||err)})}
+}
+
+function setupClio_(){
+  const sheet=findCollectionSheet_();
+  const map=ensureColumns_(sheet);
+  const ids=ensureBookIds_(sheet);
+  radarSheet_();
+  const props=PropertiesService.getScriptProperties();
+  let token=props.getProperty('CLIO_TOKEN');
+  if(!token){token=Utilities.getUuid().replace(/-/g,'')+Utilities.getUuid().replace(/-/g,'');props.setProperty('CLIO_TOKEN',token)}
+  return {ok:true,sheet:sheet.getName(),columns:map,ids,radar:CLIO.RADAR_SHEET,token};
+}
+
+function validateToken_(token){
+  const expected=PropertiesService.getScriptProperties().getProperty('CLIO_TOKEN');
+  if(!expected)throw new Error('Integração ainda não configurada. Execute setupClio.');
+  if(!token||String(token)!==expected)throw new Error('Chave CLIO inválida.');
+}
+
+function findCollectionSheet_(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  for(const sheet of ss.getSheets()){
+    if(sheet.getName()===CLIO.RADAR_SHEET||sheet.getName()===CLIO.ALIAS_SHEET)continue;
+    const values=sheet.getRange(1,1,Math.min(50,sheet.getLastRow()||1),Math.max(1,sheet.getLastColumn())).getDisplayValues();
+    for(let r=0;r<values.length;r++){
+      const hs=values[r].map(norm_);
+      if((hs.includes('autores')||hs.includes('autor'))&&hs.includes('titulo')&&hs.includes('tenho')){sheet.__clioHeaderRow=r+1;return sheet}
+    }
+  }
+  throw new Error('Não encontrei a aba da coleção.');
+}
+
+function headerInfo_(sheet){
+  const lastCol=Math.max(1,sheet.getLastColumn());
+  let headerRow=sheet.__clioHeaderRow;
+  if(!headerRow){
+    const values=sheet.getRange(1,1,Math.min(50,sheet.getLastRow()||1),lastCol).getDisplayValues();
+    for(let r=0;r<values.length;r++){const hs=values[r].map(norm_);if((hs.includes('autores')||hs.includes('autor'))&&hs.includes('titulo')&&hs.includes('tenho')){headerRow=r+1;break}}
+  }
+  if(!headerRow)throw new Error('Cabeçalho da coleção não encontrado.');
+  const headers=sheet.getRange(headerRow,1,1,lastCol).getDisplayValues()[0],map={};
+  headers.forEach((h,i)=>{const k=norm_(h);if(k)map[k]=i+1});
+  return {headerRow,headers,map};
+}
+
+function ensureColumns_(sheet){
+  let info=headerInfo_(sheet);
+  for(const name of CLIO.REQUIRED_COLUMNS){
+    if(!findColumn_(info.map,[name])){sheet.getRange(info.headerRow,sheet.getLastColumn()+1).setValue(name);info=headerInfo_(sheet)}
+  }
+  return info.map;
+}
+
+function updateBook_(body){
+  const sheet=findCollectionSheet_();ensureColumns_(sheet);const info=headerInfo_(sheet);
+  const row=findRow_(sheet,body,info);if(!row)throw new Error('Livro não encontrado na planilha.');
+  applyFields_(sheet,row,body.fields||{},info);SpreadsheetApp.flush();
+  return {ok:true,row,bookId:Number(sheet.getRange(row,CLIO.BOOK_ID_COLUMN).getValue())||null,book:readRow_(sheet,row,info)};
+}
+
+function createBook_(body){
+  const sheet=findCollectionSheet_();ensureColumns_(sheet);const info=headerInfo_(sheet);
+  const fields=Object.assign({},body.fields||{});if(!fields.author||!fields.title)throw new Error('Autor e título são obrigatórios.');
+  const row=sheet.getLastRow()+1,bookId=nextBookId_(sheet);sheet.getRange(row,CLIO.BOOK_ID_COLUMN).setValue(bookId);
+  applyFields_(sheet,row,fields,info);SpreadsheetApp.flush();
+  return {ok:true,row,bookId,book:readRow_(sheet,row,info)};
+}
+
+function deleteBook_(body){
+  const sheet=findCollectionSheet_();ensureColumns_(sheet);const info=headerInfo_(sheet);
+  const row=findRow_(sheet,body,info);if(!row)throw new Error('Livro não encontrado na planilha.');
+  ['STATUS','TENHO','VALOR PAGO','COMENTARIO','DATA DE AQUISIÇÃO','EDIÇÃO'].forEach(name=>{
+    const c=findColumn_(info.map,[name]);if(c)sheet.getRange(row,c).setValue('');
+  });
+  SpreadsheetApp.flush();
+  return {ok:true,cleared:true,row};
+}
+
+function radarSheet_(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();let sh=ss.getSheetByName(CLIO.RADAR_SHEET);
+  if(!sh){sh=ss.insertSheet(CLIO.RADAR_SHEET);sh.getRange(1,1,1,RADAR_HEADERS.length).setValues([RADAR_HEADERS]);sh.setFrozenRows(1)}
+  const current=sh.getRange(1,1,1,Math.max(sh.getLastColumn(),RADAR_HEADERS.length)).getDisplayValues()[0];
+  RADAR_HEADERS.forEach((h,i)=>{if(current[i]!==h)sh.getRange(1,i+1).setValue(h)});
+  return sh;
+}
+
+function radarRowToItem_(r){return{key:r[0],marketKey:r[0],status:r[1]||'COMPRAR',author:r[2],title:r[3],year:r[4],edition:r[5],publisher:r[6],auctioneer:r[7],auctionDate:r[8],link:r[9],image:r[10],price:r[11],comment:r[12],updatedAt:r[13]}}
+
+function listRadar_(){
+  const sh=radarSheet_(),last=sh.getLastRow();
+  if(last<2)return {ok:true,items:[]};
+  return {ok:true,items:sh.getRange(2,1,last-1,RADAR_HEADERS.length).getDisplayValues().filter(r=>r[0]).map(radarRowToItem_)};
+}
+
+function saveRadar_(body){
+  const item=body.item||{},key=String(item.key||item.marketKey||'').trim();if(!key)throw new Error('Chave do lote ausente.');
+  const sh=radarSheet_(),last=sh.getLastRow();let row=0;
+  if(last>=2){const keys=sh.getRange(2,1,last-1,1).getDisplayValues().flat();const i=keys.indexOf(key);if(i>=0)row=i+2}
+  if(!row)row=last+1;
+  const values=[[key,String(item.status||'COMPRAR').toUpperCase(),item.author||'',item.title||'',item.year||'',item.edition||'',item.publisher||'',item.auctioneer||'',item.auctionDate||'',item.link||'',item.image||'',item.price??'',item.comment||'',new Date()]];
+  sh.getRange(row,1,1,RADAR_HEADERS.length).setValues(values);SpreadsheetApp.flush();
+  return {ok:true,version:CLIO_VERSION,row,item:radarRowToItem_(sh.getRange(row,1,1,RADAR_HEADERS.length).getDisplayValues()[0])};
+}
+
+function removeRadar_(body){
+  const key=String(body.key||'').trim(),sh=radarSheet_(),last=sh.getLastRow();if(!key||last<2)return {ok:true,removed:false};
+  const keys=sh.getRange(2,1,last-1,1).getDisplayValues().flat();
+  for(let i=keys.length-1;i>=0;i--)if(keys[i]===key){sh.deleteRow(i+2);return {ok:true,removed:true}}
+  return {ok:true,removed:false};
+}
+
+function buyRadar_(body){
+  const key=String(body.key||'').trim();if(!key)throw new Error('Chave do lote ausente.');
+  const sh=radarSheet_(),last=sh.getLastRow();if(last<2)throw new Error('Item não encontrado na aba RADAR.');
+  const rows=sh.getRange(2,1,last-1,RADAR_HEADERS.length).getDisplayValues();let idx=-1;
+  for(let i=0;i<rows.length;i++)if(rows[i][0]===key){idx=i;break}
+  if(idx<0)throw new Error('Item não encontrado na aba RADAR.');
+  const item=radarRowToItem_(rows[idx]),fields=Object.assign({
+    author:item.author,title:item.title,year:item.year,edition:item.edition,publisher:item.publisher,
+    auctioneer:item.auctioneer,auctionDate:item.auctionDate,lotLink:item.link,lotImage:item.image,
+    value:item.price,comment:item.comment,marketKey:key,status:'COMPRADO',owned:false
+  },body.fields||{},{status:'COMPRADO',owned:false});
+  const result=createBook_({fields});
+  sh.deleteRow(idx+2);SpreadsheetApp.flush();
+  return Object.assign({ok:true,removedFromRadar:true},result);
+}
+
+function triggerEstanteScrape_(){
+  const token=PropertiesService.getScriptProperties().getProperty('GITHUB_ESTANTE_PAT');
+  if(!token)throw new Error('Token do GitHub não configurado. Abra o Apps Script > Configurações do projeto > Propriedades do script e adicione GITHUB_ESTANTE_PAT.');
+  const url='https://api.github.com/repos/feliperibeirobittencourt/clio-radar/actions/workflows/scrape-estante.yml/dispatches';
+  const res=UrlFetchApp.fetch(url,{
+    method:'post',
+    contentType:'application/json',
+    headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},
+    payload:JSON.stringify({ref:'main'}),
+    muteHttpExceptions:true
+  });
+  const code=res.getResponseCode();
+  if(code<200||code>=300)throw new Error('GitHub respondeu '+code+': '+res.getContentText().slice(0,300));
+  return {ok:true,triggered:true};
+}
+
+function uploadPhotos_(body){
+  const sheet=findCollectionSheet_();ensureColumns_(sheet);const info=headerInfo_(sheet),row=findRow_(sheet,body,info);
+  if(!row)throw new Error('Livro não encontrado para anexar fotos.');
+  const photos=Array.isArray(body.photos)?body.photos.slice(0,6):[];if(!photos.length)return {ok:true,row,urls:[]};
+  const folder=getPhotoFolder_(),urls=[];
+  photos.forEach((p,i)=>{const bytes=Utilities.base64Decode(String(p.base64||'').replace(/^data:[^;]+;base64,/,'')),type=String(p.mimeType||'image/jpeg'),ext=type.includes('png')?'png':type.includes('webp')?'webp':'jpg',name=safeName_(`${body.author||'livro'}-${body.title||row}-${Date.now()}-${i+1}.${ext}`),file=folder.createFile(Utilities.newBlob(bytes,type,name));file.setSharing(DriveApp.Access.ANYONE_WITH_LINK,DriveApp.Permission.VIEW);urls.push(`https://drive.google.com/uc?export=view&id=${file.getId()}`)});
+  ['IMAGEM CAPA','IMAGEM 1','IMAGEM 2','IMAGEM 3','IMAGEM 4','IMAGEM 5'].forEach((n,i)=>{if(urls[i])setNamed_(sheet,row,info,n,urls[i])});
+  SpreadsheetApp.flush();return {ok:true,row,urls};
+}
+
+function aliasSheet_(){const ss=SpreadsheetApp.getActiveSpreadsheet();let sh=ss.getSheetByName(CLIO.ALIAS_SHEET);if(!sh){sh=ss.insertSheet(CLIO.ALIAS_SHEET);sh.getRange(1,1,1,9).setValues([['TIPO','AUTOR MERCADO','TÍTULO MERCADO','ANO MERCADO','LINHA ACERVO','AUTOR ACERVO','TÍTULO ACERVO','ANO ACERVO','ATUALIZADO EM']]);sh.hideSheet()}return sh}
+function listAliases_(){const sh=aliasSheet_(),last=sh.getLastRow();if(last<2)return {ok:true,aliases:[]};const v=sh.getRange(2,1,last-1,9).getDisplayValues();return {ok:true,aliases:v.map(r=>({type:r[0],marketAuthor:r[1],marketTitle:r[2],marketYear:r[3],sheetRow:Number(r[4])||null,collectionAuthor:r[5],collectionTitle:r[6],collectionYear:r[7],updatedAt:r[8]}))}}
+// Trava a escrita: sem isso, dois cliques quase simultâneos (revisão em
+// lote) podem ler a planilha antes um do outro escrever, decidir a MESMA
+// linha de destino, e o segundo sobrescreve o primeiro — o vínculo salvo
+// antes some sem nenhum erro aparecer.
+function saveAlias_(body){
+  const lock=LockService.getScriptLock();
+  lock.waitLock(20000);
+  try{
+    const sh=aliasSheet_(),type=String(body.type||'LINK').toUpperCase(),ma=String(body.marketAuthor||''),mt=String(body.marketTitle||''),my=String(body.marketYear||''),row=Number(body.sheetRow||0),ca=String(body.collectionAuthor||''),ct=String(body.collectionTitle||''),cy=String(body.collectionYear||'');
+    if(!ma||!mt)throw new Error('Autor e título do mercado são obrigatórios.');
+    const key=[norm_(ma),norm_(mt),onlyDigits_(my)].join('|'),last=sh.getLastRow();
+    let target=0;
+    if(last>=2){const vals=sh.getRange(2,1,last-1,9).getDisplayValues();for(let i=0;i<vals.length;i++)if([norm_(vals[i][1]),norm_(vals[i][2]),onlyDigits_(vals[i][3])].join('|')===key){target=i+2;break}}
+    if(!target)target=last+1;
+    sh.getRange(target,1,1,9).setValues([[type,ma,mt,my,row||'',ca,ct,cy,new Date()]]);
+    return {ok:true,row:target};
+  }finally{
+    lock.releaseLock();
+  }
+}
+// Salva vários vínculos de uma vez, com UMA leitura e UMA trava só — usado
+// pela revisão em lote no site. Antes cada confirmação virava uma chamada
+// HTTP própria; para centenas de itens isso exige minutos de aba aberta sem
+// interrupção, e no Safari do iPad basta trocar de app ou a tela bloquear
+// para a fila travar pela metade (itens "confirmados" reaparecendo no dia
+// seguinte). Em lotes, poucas chamadas bastam para salvar tudo.
+function saveAliasesBatch_(body){
+  const lock=LockService.getScriptLock();
+  lock.waitLock(20000);
+  try{
+    const items=Array.isArray(body.items)?body.items:[];
+    if(!items.length)return {ok:true,saved:0};
+    const sh=aliasSheet_(),last=sh.getLastRow();
+    const rowByKey=new Map();
+    if(last>=2){
+      const vals=sh.getRange(2,1,last-1,9).getDisplayValues();
+      vals.forEach((v,i)=>rowByKey.set([norm_(v[1]),norm_(v[2]),onlyDigits_(v[3])].join('|'),i+2));
+    }
+    let nextRow=last+1,saved=0;
+    for(const it of items){
+      const type=String(it.type||'LINK').toUpperCase(),ma=String(it.marketAuthor||''),mt=String(it.marketTitle||''),my=String(it.marketYear||''),row=Number(it.sheetRow||0),ca=String(it.collectionAuthor||''),ct=String(it.collectionTitle||''),cy=String(it.collectionYear||'');
+      if(!ma||!mt)continue;
+      const key=[norm_(ma),norm_(mt),onlyDigits_(my)].join('|');
+      let target=rowByKey.get(key);
+      if(!target){target=nextRow++;rowByKey.set(key,target)}
+      sh.getRange(target,1,1,9).setValues([[type,ma,mt,my,row||'',ca,ct,cy,new Date()]]);
+      saved++;
+    }
+    return {ok:true,saved};
+  }finally{
+    lock.releaseLock();
+  }
+}
+function removeAlias_(body){
+  const lock=LockService.getScriptLock();
+  lock.waitLock(20000);
+  try{
+    const sh=aliasSheet_(),key=[norm_(body.marketAuthor||''),norm_(body.marketTitle||''),onlyDigits_(body.marketYear||'')].join('|'),last=sh.getLastRow();
+    if(last<2)return {ok:true,removed:false};
+    const vals=sh.getRange(2,1,last-1,9).getDisplayValues();
+    for(let i=vals.length-1;i>=0;i--)if([norm_(vals[i][1]),norm_(vals[i][2]),onlyDigits_(vals[i][3])].join('|')===key){sh.deleteRow(i+2);return {ok:true,removed:true}}
+    return {ok:true,removed:false};
+  }finally{
+    lock.releaseLock();
+  }
+}
+
+function exclusoesSheet_(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  let sh=ss.getSheetByName(CLIO.EXCLUSOES_SHEET);
+  if(!sh){sh=ss.insertSheet(CLIO.EXCLUSOES_SHEET);sh.getRange(1,1,1,EXCLUSOES_HEADERS.length).setValues([EXCLUSOES_HEADERS]);sh.hideSheet()}
+  return sh;
+}
+function excludeItem_(body){
+  const lock=LockService.getScriptLock();
+  lock.waitLock(20000);
+  try{
+    const author=String(body.author||''),title=String(body.title||'');
+    if(!author||!title)throw new Error('Autor e título são obrigatórios para excluir.');
+    const year=String(body.year||''),link=String(body.link||''),
+      reason=String(body.reason||'').trim()||'Excluído pelo dashboard',
+      key=link?norm_(link):[norm_(author),norm_(title),onlyDigits_(year)].join('|'),
+      sh=exclusoesSheet_(),last=sh.getLastRow();
+    let target=0;
+    if(last>=2){const keys=sh.getRange(2,1,last-1,1).getDisplayValues().flat();const i=keys.indexOf(key);if(i>=0)target=i+2}
+    if(!target)target=last+1;
+    sh.getRange(target,1,1,EXCLUSOES_HEADERS.length).setValues([[key,author,title,year,link,reason,new Date()]]);
+    SpreadsheetApp.flush();
+    return {ok:true,row:target};
+  }finally{
+    lock.releaseLock();
+  }
+}
+
+function findBookResponse_(body){const sheet=findCollectionSheet_(),info=headerInfo_(sheet),row=findRow_(sheet,body,info);return {ok:true,row:row||null,book:row?readRow_(sheet,row,info):null}}
+function findRow_(sheet,body,info){
+  const last=sheet.getLastRow(),start=info.headerRow+1,count=Math.max(0,last-info.headerRow);if(!count)return null;
+  const explicit=Number(body.row||body.sheetRow||0),bookId=String(body.bookId||'').trim(),author=norm_(body.author||body.fields?.author||''),title=norm_(body.title||body.fields?.title||''),year=String(body.year||body.fields?.year||'').trim(),values=sheet.getRange(start,1,count,sheet.getLastColumn()).getDisplayValues();
+  if(bookId)for(let i=0;i<values.length;i++)if(String(values[i][CLIO.BOOK_ID_COLUMN-1]||'').trim()===bookId)return start+i;
+  const ac=findColumn_(info.map,['AUTORES','AUTOR']),tc=findColumn_(info.map,['TITULO','TÍTULO']),yc=findColumn_(info.map,['ANO','ANO DA EDIÇÃO','ANO DA EDICAO']);
+  const matches=i=>{const v=values[i-start];if(!v)return false;const a=ac?norm_(v[ac-1]):'',t=tc?norm_(v[tc-1]):'',y=yc?String(v[yc-1]||'').trim():'';if(title&&t!==title)return false;if(author&&a&&a!==author)return false;if(year&&y&&y!==year)return false;return Boolean(title||author||year)};
+  if(explicit>=start&&explicit<=last&&matches(explicit))return explicit;
+  const candidates=[];for(let r=start;r<=last;r++)if(matches(r))candidates.push(r);
+  if(candidates.length===1)return candidates[0];if(candidates.length>1)throw new Error('Há mais de um livro com os mesmos dados.');return null;
+}
+
+function applyFields_(sheet,row,fields,info){
+  const aliases={author:['AUTORES','AUTOR'],title:['TITULO','TÍTULO'],year:['ANO','ANO DA EDIÇÃO','ANO DA EDICAO'],status:['STATUS'],desire:['DESEJO'],edition:['EDIÇÃO','EDICAO'],publisher:['EDITORA'],value:['VALOR PAGO','VALOR','VALOR TOTAL'],date:['DATA DE AQUISIÇÃO','DATA DE AQUISICAO','DATA'],comment:['COMENTARIO','COMENTÁRIO'],owned:['TENHO'],auctioneer:['LEILOEIRO','CASA','VENDEDOR','ORIGEM'],auctionDate:['DATA LEILAO','DATA DO LEILAO'],lotLink:['LINK LOTE','LINK DO LOTE','URL LOTE'],lotImage:['IMAGEM LOTE'],marketKey:['CHAVE MERCADO']};
+  Object.entries(fields).forEach(([k,v])=>{if(k==='photos')return;const c=findColumn_(info.map,aliases[k]||[k]);if(!c)return;if(k==='date'&&v)v=parseClientDate_(v);if(k==='desire')v=v?'SIM':'';if(k==='owned')v=v?'SIM':'';sheet.getRange(row,c).setValue(v==null?'':v)});
+  if(Object.prototype.hasOwnProperty.call(fields,'status')){const status=String(fields.status||'').toUpperCase().trim();setNamed_(sheet,row,info,'STATUS',status);const c=findColumn_(info.map,['TENHO']);if(c)sheet.getRange(row,c).setValue(status==='TENHO'?'SIM':'')}
+}
+
+function readRow_(sheet,row,info){const vals=sheet.getRange(row,1,1,sheet.getLastColumn()).getDisplayValues()[0],out={sheetRow:row,bookId:Number(vals[CLIO.BOOK_ID_COLUMN-1])||null};info.headers.forEach((h,i)=>{if(h)out[h]=vals[i]});return out}
+function setNamed_(sheet,row,info,name,value){const c=findColumn_(info.map,[name]);if(c)sheet.getRange(row,c).setValue(value)}
+function findColumn_(map,names){for(const name of names){const k=norm_(name);if(k&&Object.prototype.hasOwnProperty.call(map,k))return map[k]}return null}
+function getPhotoFolder_(){const it=DriveApp.getFoldersByName(CLIO.FOLDER_NAME);return it.hasNext()?it.next():DriveApp.createFolder(CLIO.FOLDER_NAME)}
+function parseClientDate_(s){const m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?new Date(+m[1],+m[2]-1,+m[3]):s}
+function safeName_(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').slice(0,180)}
+function norm_(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+// so digitos: a celula do ano pode vir formatada com separador de milhar
+// ("1.881") dependendo do formato aplicado - comparar so os digitos evita
+// que isso quebre o casamento da chave em silencio.
+function onlyDigits_(v){return String(v??'').replace(/[^0-9]/g,'')}
+function json_(obj){return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON)}
+
+function ensureBookIds_(sheet){const info=headerInfo_(sheet),start=info.headerRow+1,count=Math.max(0,sheet.getLastRow()-info.headerRow);if(!count)return {filled:0,nextId:1};const range=sheet.getRange(start,CLIO.BOOK_ID_COLUMN,count,1),values=range.getDisplayValues(),used=new Set();let max=0;values.forEach(r=>{const n=Number(String(r[0]||'').trim());if(Number.isFinite(n)&&n>0){used.add(n);max=Math.max(max,n)}});let next=max+1,filled=0;const output=values.map(r=>{const n=Number(String(r[0]||'').trim());if(Number.isFinite(n)&&n>0)return[n];while(used.has(next))next++;used.add(next);filled++;return[next++]});if(filled)range.setValues(output);SpreadsheetApp.flush();return {filled,nextId:next}}
+function nextBookId_(sheet){const info=headerInfo_(sheet),start=info.headerRow+1,count=Math.max(0,sheet.getLastRow()-info.headerRow);if(!count)return 1;const nums=sheet.getRange(start,CLIO.BOOK_ID_COLUMN,count,1).getDisplayValues().flat().map(v=>Number(String(v||'').trim())).filter(n=>Number.isFinite(n)&&n>0);return nums.length?Math.max.apply(null,nums)+1:1}
+function setupClio(){const result=setupClio_();console.log(JSON.stringify(result,null,2));return result}
+function preencherReferenciasClio(){const result=ensureBookIds_(findCollectionSheet_());console.log(JSON.stringify(result,null,2));return result}

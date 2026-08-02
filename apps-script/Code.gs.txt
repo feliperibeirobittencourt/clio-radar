@@ -2,7 +2,7 @@
  * CLIO — Google Sheets / Drive / RADAR compartilhado
  * Cole todo este arquivo em Extensões > Apps Script.
  */
-const CLIO_VERSION = '2026-07-30-alias-batch-v1';
+const CLIO_VERSION = '2026-07-30-visto-v1';
 
 const CLIO = {
   FOLDER_NAME: 'CLIO - Fotos do Acervo',
@@ -10,11 +10,13 @@ const CLIO = {
   ALIAS_SHEET: 'ALIASES_CLIO',
   RADAR_SHEET: 'RADAR',
   EXCLUSOES_SHEET: 'EXCLUSOES_CLIO',
+  VISTOS_SHEET: 'VISTOS_CLIO',
   BOOK_ID_COLUMN: 5
 };
 
 const RADAR_HEADERS = ['CHAVE','STATUS','AUTOR','TÍTULO','ANO','EDIÇÃO','EDITORA','LEILOEIRO','DATA LEILÃO','LINK','IMAGEM','PREÇO','COMENTÁRIO','ATUALIZADO EM'];
 const EXCLUSOES_HEADERS = ['CHAVE','AUTOR','TÍTULO','ANO','LINK','MOTIVO','ATUALIZADO EM'];
+const VISTOS_HEADERS = ['CHAVE','AUTOR','TÍTULO','ANO','LINK','ATUALIZADO EM'];
 
 function doGet(e) {
   try {
@@ -39,6 +41,8 @@ function doPost(e) {
     if(action==='saveAlias')return json_(saveAlias_(body));
     if(action==='saveAliasesBatch')return json_(saveAliasesBatch_(body));
     if(action==='removeAlias')return json_(removeAlias_(body));
+    if(action==='listVistos')return json_(listVistos_());
+    if(action==='markVistosBatch')return json_(markVistosBatch_(body));
     if(action==='listRadar')return json_(listRadar_());
     if(action==='saveRadar')return json_(saveRadar_(body));
     if(action==='removeRadar')return json_(removeRadar_(body));
@@ -296,6 +300,58 @@ function excludeItem_(body){
   }
 }
 
+function vistosSheet_(){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  let sh=ss.getSheetByName(CLIO.VISTOS_SHEET);
+  if(!sh){sh=ss.insertSheet(CLIO.VISTOS_SHEET);sh.getRange(1,1,1,VISTOS_HEADERS.length).setValues([VISTOS_HEADERS]);sh.hideSheet()}
+  return sh;
+}
+function listVistos_(){
+  const sh=vistosSheet_(),last=sh.getLastRow();
+  if(last<2)return {ok:true,vistos:[]};
+  const v=sh.getRange(2,1,last-1,VISTOS_HEADERS.length).getDisplayValues();
+  return {ok:true,vistos:v.filter(r=>r[0]).map(r=>({key:r[0],author:r[1],title:r[2],year:r[3],link:r[4],updatedAt:r[5]}))};
+}
+// Marca/desmarca "já visto" em lote, com UMA leitura e UMA trava só — mesmo
+// motivo do saveAliasesBatch: marcar vários itens rapidamente não pode
+// depender de um request por clique. "Última ação vence": se o mesmo item
+// aparecer mais de uma vez no lote (marcar e desmarcar em sequência rápida),
+// só o estado mais recente é aplicado.
+function markVistosBatch_(body){
+  const lock=LockService.getScriptLock();
+  lock.waitLock(20000);
+  try{
+    const items=Array.isArray(body.items)?body.items:[];
+    if(!items.length)return {ok:true,saved:0};
+    const latestByKey=new Map();
+    for(const it of items){const key=String(it.key||'');if(key)latestByKey.set(key,it)}
+    const sh=vistosSheet_(),last=sh.getLastRow();
+    const rowByKey=new Map();
+    if(last>=2){
+      const vals=sh.getRange(2,1,last-1,VISTOS_HEADERS.length).getDisplayValues();
+      vals.forEach((v,i)=>rowByKey.set(v[0],i+2));
+    }
+    const toDelete=[];
+    let nextRow=last+1,saved=0;
+    for(const it of latestByKey.values()){
+      const key=String(it.key||'');
+      if(it.remove){
+        const target=rowByKey.get(key);
+        if(target)toDelete.push(target);
+        continue;
+      }
+      const author=String(it.author||''),title=String(it.title||''),year=String(it.year||''),link=String(it.link||'');
+      let target=rowByKey.get(key);
+      if(!target){target=nextRow++;rowByKey.set(key,target)}
+      sh.getRange(target,1,1,VISTOS_HEADERS.length).setValues([[key,author,title,year,link,new Date()]]);
+      saved++;
+    }
+    toDelete.sort((a,b)=>b-a).forEach(r=>sh.deleteRow(r));
+    return {ok:true,saved};
+  }finally{
+    lock.releaseLock();
+  }
+}
 function findBookResponse_(body){const sheet=findCollectionSheet_(),info=headerInfo_(sheet),row=findRow_(sheet,body,info);return {ok:true,row:row||null,book:row?readRow_(sheet,row,info):null}}
 function findRow_(sheet,body,info){
   const last=sheet.getLastRow(),start=info.headerRow+1,count=Math.max(0,last-info.headerRow);if(!count)return null;

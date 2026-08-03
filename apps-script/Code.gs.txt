@@ -2,7 +2,7 @@
  * CLIO — Google Sheets / Drive / RADAR compartilhado
  * Cole todo este arquivo em Extensões > Apps Script.
  */
-const CLIO_VERSION = '2026-07-30-visto-v1';
+const CLIO_VERSION = '2026-08-03-fallback-key-fix-v1';
 
 const CLIO = {
   FOLDER_NAME: 'CLIO - Fotos do Acervo',
@@ -287,7 +287,7 @@ function excludeItem_(body){
     if(!author||!title)throw new Error('Autor e título são obrigatórios para excluir.');
     const year=String(body.year||''),link=String(body.link||''),
       reason=String(body.reason||'').trim()||'Excluído pelo dashboard',
-      key=link?norm_(link):[norm_(author),norm_(title),onlyDigits_(year)].join('|'),
+      key=(link&&!isFallbackSearchLink_(link))?norm_(link):[norm_(author),norm_(title),onlyDigits_(year)].join('|'),
       sh=exclusoesSheet_(),last=sh.getLastRow();
     let target=0;
     if(last>=2){const keys=sh.getRange(2,1,last-1,1).getDisplayValues().flat();const i=keys.indexOf(key);if(i>=0)target=i+2}
@@ -381,6 +381,11 @@ function norm_(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]
 // ("1.881") dependendo do formato aplicado - comparar so os digitos evita
 // que isso quebre o casamento da chave em silencio.
 function onlyDigits_(v){return String(v??'').replace(/[^0-9]/g,'')}
+// Link de busca de fallback (sem página própria do anúncio) é montado só com
+// autor+ano — vários títulos diferentes do mesmo autor no mesmo ano
+// compartilham o MESMO link, então não pode ser tratado como identificador
+// único do item nesse caso.
+function isFallbackSearchLink_(link){return /\/busca\?/.test(String(link??''))}
 function json_(obj){return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON)}
 
 function ensureBookIds_(sheet){const info=headerInfo_(sheet),start=info.headerRow+1,count=Math.max(0,sheet.getLastRow()-info.headerRow);if(!count)return {filled:0,nextId:1};const range=sheet.getRange(start,CLIO.BOOK_ID_COLUMN,count,1),values=range.getDisplayValues(),used=new Set();let max=0;values.forEach(r=>{const n=Number(String(r[0]||'').trim());if(Number.isFinite(n)&&n>0){used.add(n);max=Math.max(max,n)}});let next=max+1,filled=0;const output=values.map(r=>{const n=Number(String(r[0]||'').trim());if(Number.isFinite(n)&&n>0)return[n];while(used.has(next))next++;used.add(next);filled++;return[next++]});if(filled)range.setValues(output);SpreadsheetApp.flush();return {filled,nextId:next}}

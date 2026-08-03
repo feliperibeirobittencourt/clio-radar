@@ -121,7 +121,12 @@ let ownedEditionCache=new Map();
 // os dígitos evita que isso quebre silenciosamente o casamento do vínculo.
 const onlyDigits=v=>String(v??'').replace(/[^\d]/g,'');
 function aliasKey(r){return `${norm(r.author)}|${norm(r.title)}|${onlyDigits(r.year)}`}
-function marketItemKey(r){return r.link?norm(r.link):norm(`${r.author}|${r.title}|${onlyDigits(r.year)}`)}
+// Link de busca de fallback (sem página própria) é montado só com autor+ano —
+// vários títulos diferentes do mesmo autor no mesmo ano compartilham o MESMO
+// link. Usá-lo sozinho como chave faria excluir/marcar "já visto" um título
+// arrastar outros títulos distintos do mesmo autor/ano junto.
+function isFallbackSearchLink(link){return /\/busca\?/.test(String(link||''))}
+function marketItemKey(r){return r.link&&!isFallbackSearchLink(r.link)?norm(r.link):norm(`${r.author}|${r.title}|${onlyDigits(r.year)}`)}
 function aliasForMarket(r){return state.aliases.find(a=>`${norm(a.marketAuthor)}|${norm(a.marketTitle)}|${onlyDigits(a.marketYear)}`===aliasKey(r))||null}
 function resolveAliasTarget(a){if(!a)return null;const byBookId=a.collectionBookId?state.collection.find(x=>x.bookId!=null&&Number(x.bookId)===Number(a.collectionBookId)):null;if(byBookId)return byBookId;return a.collectionAuthor?state.collection.find(x=>norm(x.author)===norm(a.collectionAuthor)&&norm(x.title)===norm(a.collectionTitle)&&(!a.collectionYear||!x.year||String(x.year)===String(a.collectionYear)))||null:null}
 function linkedCollectionRows(r){const a=aliasForMarket(r);if(a){if(a.type==='BLOCK')return[];const c=resolveAliasTarget(a);return c&&c.owned?[c]:[]}return null}

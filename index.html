@@ -219,7 +219,15 @@ function reviewCandidates(){
     seen.add(dedupeKey);
     out.push({item:r,book:best.book,overlap:best.score});
   }
-  out.sort((a,b)=>b.overlap-a.overlap);
+  // Prioriza Estante Virtual, depois valor decrescente — livros mais caros
+  // que ainda não bateram automaticamente valem mais a pena revisar primeiro.
+  out.sort((a,b)=>{
+    const srcA=a.item.source==='estante'?0:1,srcB=b.item.source==='estante'?0:1;
+    if(srcA!==srcB)return srcA-srcB;
+    const priceA=a.item.initial??a.item.final??0,priceB=b.item.initial??b.item.final??0;
+    if(priceB!==priceA)return priceB-priceA;
+    return b.overlap-a.overlap;
+  });
   return out;
 }
 function renderRevisao(){

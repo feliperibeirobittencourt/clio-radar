@@ -604,6 +604,7 @@ const bu=e.target.closest('[data-buy]');if(bu){
       setStatus('Item removido de Comprar.');
     }else{
       await saveRadarItem(r,'COMPRAR');
+      if(!isVisto(r))toggleVisto(r);
       setStatus('✅ Item salvo em Comprar e na aba RADAR.');
     }
   }catch(err){

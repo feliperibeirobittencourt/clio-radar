@@ -470,9 +470,10 @@ async function loadRadarItems(){
   state.buys=new Set(state.radarItems.map(x=>x.key||x.marketKey).filter(Boolean).map(String));
   localStorage.removeItem('clio_buys');
 }
+function safeUrl(u){if(!u)return'';try{new URL(u);return u}catch{return''}}
 function radarPayload(r,status){
   const key=String(r.key??r.marketKey??'');
-  return{key,marketKey:key,status,author:r.author,title:r.title,year:r.year||'',edition:r.edition||'',publisher:r.publisher||'',auctioneer:r.auctioneer||'',auctionDate:r.auctionDate instanceof Date?r.auctionDate.toISOString():(r.auctionDate||''),link:r.link||'',image:r.image||'',price:r.initial??r.final??r.value??'',comment:r.comment||''}
+  return{key,marketKey:key,status,author:r.author,title:r.title,year:r.year||'',edition:r.edition||'',publisher:r.publisher||'',auctioneer:r.auctioneer||'',auctionDate:r.auctionDate instanceof Date?r.auctionDate.toISOString():(r.auctionDate||''),link:safeUrl(r.link),image:safeUrl(r.image),price:r.initial??r.final??r.value??'',comment:r.comment||''}
 }
 function upsertRadarLocal(item){
   const key=String(item.key??item.marketKey??'');

@@ -137,7 +137,7 @@ function linkedCollectionRows(r){const a=aliasForMarket(r);if(a){if(a.type==='BL
 // hoje). Sem isso "Esphinge" (grafia de época) nunca batia com "Esfinge" no
 // acervo. Não usar pra vínculo manual (aliasKey/marketItemKey) — esses têm que
 // ficar estáveis exatamente como foram salvos.
-function stripListingNoise(s){return s.replace(/^livro\s*/,'').replace(/^raro\s*-?\s*/,'').replace(/\b\d+\s*[ao]?\s*edicao\b/g,' ').replace(/\bvolume\s+[ivxlcdm\d]+\b/g,' ').replace(/\b\d+\s+volumes?\b/g,' ').replace(/\s+/g,' ').trim()}
+function stripListingNoise(s){return s.replace(/^livro\s*/,'').replace(/^raro\s*-?\s*/,'').replace(/\b\d+\s*[aoªº]?\s*edicao\b/g,' ').replace(/\bvolume\s+[ivxlcdm\d]+\b/g,' ').replace(/\b\d+\s+volumes?\b/g,' ').replace(/\s+/g,' ').trim()}
 function archaicSpelling(s){return s.replace(/ph/g,'f').replace(/th/g,'t').replace(/(ll|tt|pp|cc|mm|nn|bb|dd|ff|gg)/g,m=>m[0]).replace(/pt/g,'t').replace(/ct/g,'t').replace(/y/g,'i').replace(/z/g,'s')}
 function canon(v){return archaicSpelling(stripListingNoise(norm(v)))}
 function ownedEditionsFor(r){

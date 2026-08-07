@@ -1,249 +1,128 @@
-===== BUSCA AUTOR =====
-url=https://www.estantevirtual.com.br/busca?q=Machado+de+Assis&searchField=autor&tipo-de-livro=usado&_preco=3000-10000000&pagina=1&sort=new-releases
+===== PAGINA DO VENDEDOR — JSON-LD completo =====
+url=https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344
 
-status=200 tamanho=1180298
+status=200 tamanho=103658
 
---- primeiro card completo ---
+blocos ld+json encontrados: 2
 
-s="product-item__button product-item__button--goTo btn btn--action btn--block icon--right" data-v-4b2a5b4f data-v-797be7be><span data-v-4b2a5b4f>Ver ofertas</span> <!----></button></div></div></div><div data-code="R83-0491-000" class="product-item product-list__item" data-v-797be7be data-v-0add55ba>
+--- bloco ld+json #0 ---
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.estantevirtual.com.br"},{"@type":"ListItem","position":2,"name":"Sebos e Livreiros","item":"https://www.estantevirtual.com.br/sebos-e-livreiros"},{"@type":"ListItem","position":3,"name":"Books Denise Damasceno","item":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344"}]}
 
---- ocorrências de "vendedor" (4) ---
+--- bloco ld+json #1 ---
+{"@context":"https://schema.org","@type":"ItemList","name":"Books Denise Damasceno","url":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344","numberOfItems":"6","itemListElement":[{"@type":"ListItem","position":1,"item":{"@context":"https://schema.org","@type":"Product","url":"https://www.estantevirtual.com.br/livro/1U2-1068-000","sku":"1U2-1068-000","name":"Touchstone Student’s Book 3b","brand":{"@type":"Brand","name":"N/A"},"offers":{"@type":"Offer","price":30,"priceCurrency":"BRL","availability":"https://schema.org/InStock","hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","applicableCountry":["BR"],"merchantReturnDays":30,"returnMethod":"https://schema.org/ReturnByMail","returnFees":"https://schema.org/FreeReturn"}},"image":"https://static.estantevirtual.com.br/book/00/1U2-1068-000/1U2-1068-000_detail1.jpg?ts=1710445269910"}},{"@type":"ListItem","position":2,"item":{"@context":"https://schema.org","@type":"Product","url":"https://www.estantevirtual.com.br/livro/1U2-0008-000","sku":"1U2-0008-000","name":"Grammar Dimensions Platinum Ed. 3","brand":{"@type":"Brand","name":"N/A"},"offers":{"@type":"Offer","price":30,"priceCurrency":"BRL","availability":"https://schema.org/InStock","hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","applicableCountry":["BR"],"merchantReturnDays":30,"returnMethod":"https://schema.org/ReturnByMail","returnFees":"https://schema.org/FreeReturn"}},"image":"https://static.estantevirtual.com.br/book/00/1U2-0008-000/1U2-0008-000_detail1.jpg?ts=1710361209827"}},{"@type":"ListItem","position":3,"item":{"@context":"https://schema.org","@type":"Product","url":"https://www.estantevirtual.com.br/livro/1U1-9832-000","sku":"1U1-9832-000","name":"Passages 2","brand":{"@type":"Brand","name":"N/A"},"offers":{"@type":"Offer","price":30,"priceCurrency":"BRL","availability":"https://schema.org/InStock","hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","applicableCountry":["BR"],"merchantReturnDays":30,"returnMethod":"https://schema.org/ReturnByMail","returnFees":"https://schema.org/FreeReturn"}},"image":"https://static.estantevirtual.com.br/book/00/1U1-9832-000/1U1-9832-000_detail1.jpg?ts=1710192181623"}},{"@type":"ListItem","position":4,"item":{"@context":"https://schema.org","@type":"Product","url":"https://www.estantevirtual.com.br/livro/1U1-9821-000","sku":"1U1-9821-000","name":"English Id Starter Teacher’s Book","brand":{"@type":"Brand","name":"N/A"},"offers":{"@type":"Offer","price":50,"priceCurrency":"BRL","availability":"https://schema.org/InStock","hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","applicableCountry":["BR"],"merchantReturnDays":30,"returnMethod":"https://schema.org/ReturnByMail","returnFees":"https://schema.org/FreeReturn"}},"image":"https://static.estantevirtual.com.br/book/00/1U1-9821-000/1U1-9821-000_detail1.jpg?ts=1710366177992"}},{"@type":"ListItem","position":5,"item":{"@context":"https://schema.org","@type":"Product","url":"https://www.estantevirtual.com.br/livro/1U1-9811-000","sku":"1U1-9811-000","name":"Face 2 Face Upper Intermediate Std Book + Workbook","brand":{"@type":"Brand","name":"N/A"},"offers":{"@type":"Offer","price":29,"priceCurrency":"BRL","availability":"https://schema.org/InStock","hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","applicableCountry":["BR"],"merchantReturnDays":30,"returnMethod":"https://schema.org/ReturnByMail","returnFees":"https://schema.org/FreeReturn"}},"image":"https://static.estantevirtual.com.br/book/00/1U1-9811-000/1U1-9811-000_detail1.jpg?ts=1710566185242"}},{"@type":"ListItem","position":6,"item":{"@context":"https://schema.org","@type":"Product","url":"https://www.estantevirtual.com.br/livro/1U1-9546-000","sku":"1U1-9546-000","name":"Passages 1","brand":{"@type":"Brand","name":"N/A"},"offers":{"@type":"Offer","price":30,"priceCurrency":"BRL","availability":"https://schema.org/InStock","hasMerchantReturnPolicy":{"@type":"MerchantReturnPolicy","returnPolicyCategory":"https://schema.org/MerchantReturnFiniteReturnWindow","applicableCountry":["BR"],"merchantReturnDays":30,"returnMethod":"https://schema.org/ReturnByMail","returnFees":"https://schema.org/FreeReturn"}},"image":"https://static.estantevirtual.com.br/book/00/1U1-9546-000/1U1-9546-000_detail1.jpg?ts=1710506145215"}}]}
 
-[vendedor #0]
-e manuseio, oxidação (páginas amareladas), grifos, assinaturas ou desgastes superficiais. O valor e a descrição são determinados individualmente pelo vendedor, baseados na edição e preservação do exemplar. Por se tratarem de peças únicas e exemplares de acervo, não garantimos a permanência do item em estoque ou a sua reposição, estando a venda condicionada à disponibilidade da unidade específica anunciada."</p></section></footer></div>
-    </div>
-    <script>
-      (function (a, b, c, d, e, f, g) {
-        a['CsdmObject'] = e; a[e] = a[e] || fu
+--- ocorrências de "city (4) ---
 
-[vendedor #1]
-e manuseio, oxidação (páginas amareladas), grifos, assinaturas ou desgastes superficiais. O valor e a descrição são determinados individualmente pelo vendedor, baseados na edição e preservação do exemplar. Por se tratarem de peças únicas e exemplares de acervo, não garantimos a permanência do item em estoque ou a sua reposição, estando a venda condicionada à disponibilidade da unidade específica anunciada.\"","copyRights":"Pessoa jurídica de direito privado, com sede na Rua da Assembléia, no 100, sala 2801, Centro, Cidade do Rio de Janeiro - RJ
+["city #0]
+","additionalImages":[],"colorCode":"","colorName":"","secondaryColorName":"","installment":{"numberOfInstallments":1,"amountInCents":3000},"reviewStars":0,"reviewCount":0,"stamps":[],"modalities":[],"city":"","attributes":[{"code":7,"name":"year","value":"2006"},{"code":2,"name":"isbn","value":"9780521601412"},{"code":4,"name":"publisher","value":"Cambridge"},{"code":6,"name":"has_invoice","value":"false"},{"code":13,"name":"has_cover_image","value":"com_capa"},{"code":3,"name":"language","value":"Inglês"},{"code":5,"name":"condition","value":"usado"},{"code":8,"name":"author","value":"Michael Mccarthy, Jeanne Mccarten, Helen Sandiford"}],"variations":[],"sku":"1U2-1068-000"},{"skuCode":"1U
 
-[vendedor #2]
-e manuseio, oxidação (páginas amareladas), grifos, assinaturas ou desgastes superficiais. O valor e a descrição são determinados individualmente pelo vendedor, baseados na edição e preservação do exemplar. Por se tratarem de peças únicas e exemplares de acervo, não garantimos a permanência do item em estoque ou a sua reposição, estando a venda condicionada à disponibilidade da unidade específica anunciada.\"","copyRightsShort":"Pessoa jurídica de direito privado, com sede na Rua da Assembléia, no 100, sala 2801, Centro, Cidade do Rio de Janeiro
+["city #1]
+","additionalImages":[],"colorCode":"","colorName":"","secondaryColorName":"","installment":{"numberOfInstallments":1,"amountInCents":3000},"reviewStars":0,"reviewCount":0,"stamps":[],"modalities":[],"city":"","attributes":[{"code":2,"name":"isbn","value":"9780838402771"},{"code":8,"name":"author","value":"Stephen H. Thewlis"},{"code":6,"name":"has_invoice","value":"false"},{"code":13,"name":"has_cover_image","value":"com_capa"},{"code":3,"name":"language","value":"Inglês"},{"code":4,"name":"publisher","value":"Heinle"},{"code":7,"name":"year","value":"2000"},{"code":5,"name":"condition","value":"usado"}],"variations":[],"sku":"1U2-0008-000"},{"skuCode":"1U1-9832-000-01","childrens":[{"skuCo
 
-[vendedor #3]
-e manuseio, oxidação (páginas amareladas), grifos, assinaturas ou desgastes superficiais. O valor e a descrição são determinados individualmente pelo vendedor, baseados na edição e preservação do exemplar. Por se tratarem de peças únicas e exemplares de acervo, não garantimos a permanência do item em estoque ou a sua reposição, estando a venda condicionada à disponibilidade da unidade específica anunciada.\"","stamps":[{"title":"Entrega Expressa","content":"Em até 48h","icon":"timer"},{"title":"Até 10x sem juros","content":"no cartão de crédito
+["city #2]
+","additionalImages":[],"colorCode":"","colorName":"","secondaryColorName":"","installment":{"numberOfInstallments":1,"amountInCents":3000},"reviewStars":0,"reviewCount":0,"stamps":[],"modalities":[],"city":"","attributes":[{"code":7,"name":"year","value":"2008"},{"code":6,"name":"has_invoice","value":"false"},{"code":4,"name":"publisher","value":"Cambridge"},{"code":2,"name":"isbn","value":"9780521683913"},{"code":13,"name":"has_cover_image","value":"com_capa"},{"code":3,"name":"language","value":"Inglês"},{"code":8,"name":"author","value":"Jack C. Richards, Chuck Sandy"},{"code":5,"name":"condition","value":"usado"}],"variations":[],"sku":"1U1-9832-000"},{"skuCode":"1U1-9821-000-01","child
 
---- ocorrências de "seller" (5) ---
+["city #3]
+","additionalImages":[],"colorCode":"","colorName":"","secondaryColorName":"","installment":{"numberOfInstallments":1,"amountInCents":5000},"reviewStars":0,"reviewCount":0,"stamps":[],"modalities":[],"city":"","attributes":[{"code":5,"name":"condition","value":"usado"},{"code":13,"name":"has_cover_image","value":"com_capa"},{"code":2,"name":"isbn","value":"9788516082970"},{"code":7,"name":"year","value":"2013"},{"code":4,"name":"publisher","value":"Richmond"},{"code":3,"name":"language","value":"Inglês"},{"code":0,"name":"Contexto","value":"DEFAULT"},{"code":8,"name":"author","value":"Paul Seligson, Camila Abreu"},{"code":6,"name":"has_invoice","value":"false"}],"variations":[],"sku":"1U1-98
+
+--- ocorrências de "state (1) ---
+
+["state #0]
+:00","logoUrl":null,"officialStore":false,"description":null,"active":true,"distributionAddress":{"street":"Rua Filipe Neri Teixeira","number":"200","neighborhood":"Jardim Iracema","city":"São Paulo","state":"SP","zipcode":"05847500","country":"Brasil"},"contacts":[{"type":"PHONE","description":"Comercial","value":"11985932065"},{"type":"PHONE","description":"Comercial","value":"11985932065"},{"type":"EMAIL","description":"Email","value":"dedesouza.d@hotmail.com"}],"takeAways":null,"shipping":null,"attributes":[{"name":"modalidades_fretes","value":"modico,correios,mle"},{"name":"username","value":"books-denise-damasceno"},{"name":"nickname","value":"Books Denise Damasceno"},{"name":"started_
+
+--- ocorrências de companyName (1) ---
+
+[companyName #0]
+ilterError":false,"showFilterMobile":false},"Seller":{"code":"1002344","externalId":"ev-729110","storeId":"L_ESTANTEVIRTUAL","name":"Books Denise Damasceno","nameNormalized":"books-denise-damasceno","companyName":null,"cnpj":null,"startDate":"2010-02-28T00:00:00","logoUrl":null,"officialStore":false,"description":null,"active":true,"distributionAddress":{"street":"Rua Filipe Neri Teixeira","number":"200","neighborhood":"Jardim Iracema","city":"São Paulo","state":"SP","zipcode":"05847500","country":"Brasil"},"contacts":[{"type":"PHONE","description":"Comercial","value":"11985932065"},{"type":"PHONE","description":"Comercial","value":"11985932065"},{"type":"EMAIL","description":"Email","value"
+
+
+
+===== PAGINA DE PRODUTO =====
+url=https://www.estantevirtual.com.br/livro/1U2-1068-000
+
+status=200 tamanho=108386
+
+blocos ld+json encontrados: 0
+
+--- ocorrências de "seller" (4) ---
 
 [seller #0]
- Sem Data","brand":"N/A","promotionFlags":"","class":"Outros Assuntos - livro","category":"Outros Assuntos","list":"Machado de Assis","position":"1","seller":"L_ESTANTEVIRTUAL","skuFather":"RWZ-5880-000","discountPercent":"0%","item_id":"RWZ-5880-000","item_name":"Historias Sem Data","discount":0,"index":0,"item_brand":"N/A","item_category":"outros-assuntos","item_category5":"","item_list_id":"9c8e0d69-ff3a-4d66-9cae-f863a9ed2221","item_list_name":"machado-de-assis","item_variant":"","price":190,"dimension04":4,"dimension30":"","dimension32":0,
+":"30.00","image":"https://static.estantevirtual.com.br/book/00/1U2-1068-000/1U2-1068-000_detail1.jpg?ts=1710445269910","thumbnail":"https://static.estantevirtual.com.br/book/indisponivel_thumb.jpg","seller":"Books Denise Damasceno","netshoesDelivery":false,"szbEligible":false,"dimension111":"boleto:porcento-0.00_nominal-0.00|cartao:porcento-0.00_nominal-0.00"}]}}})
+    </script>
+    
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,
 
 [seller #1]
-av:0"},{"name":"Memórias póstumas de Brás Cubas","brand":"nao-cadastrado","promotionFlags":"","class":" - ","list":"Machado de Assis","position":"2","seller":"L_ESTANTEVIRTUAL","skuFather":"R83-0491-000","discountPercent":"0%","item_id":"R83-0491-000","item_name":"Memórias póstumas de Brás Cubas","discount":0,"index":1,"item_brand":"nao-cadastrado","item_category5":"","item_list_id":"9c8e0d69-ff3a-4d66-9cae-f863a9ed2221","item_list_name":"machado-de-assis","item_variant":"","price":30,"dimension32":0,"dimension33":0,"dimension34":"0%","dimensio
+>
+      Mais vendidos
+    </span></a> <ul class="submenu" data-v-04ea08f8><li id="Administração" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8><a href="/administracao?sort=best-sellers" class="item-menu__title item-menu__title--submenu" data-v-04ea08f8><span data-v-04ea08f8>
+      Administração
+    </span></a> <!----></li><li id="Arquitetura" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8><a href="/arquitetura?sort=best-sellers" class="item-menu__title item-menu__title--submenu" data-v-04ea08f8><span data-v-04ea08f8>
+      Arquitetura
+    </span></a> <!----></li><li id="Direito" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8>
 
 [seller #2]
-brand":"N/A","promotionFlags":"","class":"Literatura Brasileira - livro","category":"Literatura Brasileira","list":"Machado de Assis","position":"3","seller":"L_ESTANTEVIRTUAL","skuFather":"RWX-3230-000","discountPercent":"0%","item_id":"RWX-3230-000","item_name":"Coleção Mini Livros Machado de Assis 4 Volumes Contos Escolhidos","discount":0,"index":2,"item_brand":"N/A","item_category":"literatura-brasileira","item_category5":"","item_list_id":"9c8e0d69-ff3a-4d66-9cae-f863a9ed2221","item_list_name":"machado-de-assis","item_variant":"","price":2
+ea08f8><span data-v-04ea08f8>
+      Administração
+    </span></a> <!----></li><li id="Arquitetura" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8><a href="/arquitetura?sort=best-sellers" class="item-menu__title item-menu__title--submenu" data-v-04ea08f8><span data-v-04ea08f8>
+      Arquitetura
+    </span></a> <!----></li><li id="Direito" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8><a href="/direito?sort=best-sellers" class="item-menu__title item-menu__title--submenu" data-v-04ea08f8><span data-v-04ea08f8>
+      Direito
+    </span></a> <!----></li><li id="Economia" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8><a href="/eco
 
 [seller #3]
-d-av:0|av:0"},{"name":"Dom Casmurro – HQ","brand":"machado-de-ivan-assis","promotionFlags":"","class":" - ","list":"Machado de Assis","position":"4","seller":"L_ESTANTEVIRTUAL","skuFather":"RWX-2888-000","discountPercent":"0%","item_id":"RWX-2888-000","item_name":"Dom Casmurro – HQ","discount":0,"index":3,"item_brand":"machado-de-ivan-assis","item_category5":"","item_list_id":"9c8e0d69-ff3a-4d66-9cae-f863a9ed2221","item_list_name":"machado-de-assis","item_variant":"","price":39.9,"dimension32":0,"dimension33":0,"dimension34":"0%","dimension116"
+ data-v-04ea08f8><span data-v-04ea08f8>
+      Arquitetura
+    </span></a> <!----></li><li id="Direito" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8><a href="/direito?sort=best-sellers" class="item-menu__title item-menu__title--submenu" data-v-04ea08f8><span data-v-04ea08f8>
+      Direito
+    </span></a> <!----></li><li id="Economia" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8><a href="/economia?sort=best-sellers" class="item-menu__title item-menu__title--submenu" data-v-04ea08f8><span data-v-04ea08f8>
+      Economia
+    </span></a> <!----></li><li id="Pedagogia" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8><a href="/ped
 
-[seller #4]
-RAS CUBAS","brand":"N/A","promotionFlags":"","class":"Infanto-juvenis - livro","category":"Infanto-juvenis","list":"Machado de Assis","position":"5","seller":"L_ESTANTEVIRTUAL","skuFather":"RW9-6066-000","discountPercent":"0%","item_id":"RW9-6066-000","item_name":"MEMORIAS POSTUMAS DE BRAS CUBAS","discount":0,"index":4,"item_brand":"N/A","item_category":"infanto-juvenis","item_category5":"","item_list_id":"9c8e0d69-ff3a-4d66-9cae-f863a9ed2221","item_list_name":"machado-de-assis","item_variant":"","price":44,"dimension04":1,"dimension30":"","dim
-
---- ocorrências de "loja" (5) ---
+--- ocorrências de "loja" (4) ---
 
 [loja #0]
-te="off" type="text" name="search" required="required" value="" class="search__input" data-v-8853a3f8> <!----> <button aria-label="buscar produtos na loja" alt="Buscar" class="search__button" data-v-8853a3f8><svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg" class="search__icon" data-v-8853a3f8><path fill-rule="evenodd" clip-rule="evenodd" d="M16.5 33C25.6127 33 33 25.6127 33 16.5C33 7.3873 25.6127 0 16.5 0C7.3873 0 0 7.3873 0 16.5C0 25.6127 7.3873 33 16.5 33ZM16.5 28C22.8513 28 28 22.8513 28 16.5C28 
+o?" label="O que você está procurando?" autocomplete="off" type="text" name="search" required="required" value="" class="search__input" data-v-8853a3f8> <!----> <button aria-label="buscar produtos na loja" alt="Buscar" class="search__button" data-v-8853a3f8><svg width="45" height="45" viewBox="0 0 45 45" fill="none" xmlns="http://www.w3.org/2000/svg" class="search__icon" data-v-8853a3f8><path fill-rule="evenodd" clip-rule="evenodd" d="M16.5 33C25.6127 33 33 25.6127 33 16.5C33 7.3873 25.6127 0 16.5 0C7.3873 0 0 7.3873 0 16.5C0 25.6127 7.3873 33 16.5 33ZM16.5 28C22.8513 28 28 22.8513 28 16.5C28 10.1487 22.8513 5 16.5 5C10.1487 5 5 10.1487 5 16.5C5 22.8513 10.1487 28 16.5 28Z"></path> <path d="
 
 [loja #1]
-<span class="checkbox filter-box__checkbox" data-v-86b6095a data-v-065b4edf><label class="checkbox__label" data-v-86b6095a><input type="checkbox" id="loja-sebo-da-nove" name="" class="checkbox__input" data-v-86b6095a>
-    
-    <p class="filter-box__label" data-v-86b6095a data-v-065b4edf>
-                    Loja Sebo da Nove
-                    <span class="filter-box__label__text" data-v-86b6095a data-v-065b4edf>
-                      (10)
-                    </span></p></label></span></div></li><li class="filter-box__item" data-v-065b4edf><!-
+e propriedade exclusiva da Estante Virtual ou de seus parceiros. É vedada qualquer reprodução sem autorização. Preços e condições de pagamento exclusivos para compras via internet, podendo variar nas lojas físicas. Ofertas válidas na compra de até 5 peças de cada produto por cliente, até o término dos nossos estoques para internet. A inclusão no carrinho não garante o preço e/ou a disponibilidade do produto. Caso os produtos apresentem divergências de valores, o preço válido é o exibido na tela de pagamento. Vendas sujeitas à análise e disponibilidade de estoque. As ações promocionais que envolvam a concessão de brindes são válidas enquanto durarem os estoques e podem ser encerradas sem avis
 
 [loja #2]
-<span class="checkbox filter-box__checkbox" data-v-86b6095a data-v-065b4edf><label class="checkbox__label" data-v-86b6095a><input type="checkbox" id="loja-da-cyntia" name="" class="checkbox__input" data-v-86b6095a>
-    
-    <p class="filter-box__label" data-v-86b6095a data-v-065b4edf>
-                    Loja da Cyntia
-                    <span class="filter-box__label__text" data-v-86b6095a data-v-065b4edf>
-                      (1)
-                    </span></p></label></span></div></li><li class="filter-box__item" data-v-065b4edf><!----> <d
+e propriedade exclusiva da Estante Virtual ou de seus parceiros. É vedada qualquer reprodução sem autorização. Preços e condições de pagamento exclusivos para compras via internet, podendo variar nas lojas físicas. Ofertas válidas na compra de até 5 peças de cada produto por cliente, até o término dos nossos estoques para internet. A inclusão no carrinho não garante o preço e\u002Fou a disponibilidade do produto. Caso os produtos apresentem divergências de valores, o preço válido é o exibido na tela de pagamento. Vendas sujeitas à análise e disponibilidade de estoque. As ações promocionais que envolvam a concessão de brindes são válidas enquanto durarem os estoques e podem ser encerradas sem
 
 [loja #3]
-lass="checkbox filter-box__checkbox" data-v-86b6095a data-v-065b4edf><label class="checkbox__label" data-v-86b6095a><input type="checkbox" id="sebo-e-lojao" name="" class="checkbox__input" data-v-86b6095a>
-    
-    <p class="filter-box__label" data-v-86b6095a data-v-065b4edf>
-                    Sebo e Lojão
-                    <span class="filter-box__label__text" data-v-86b6095a data-v-065b4edf>
-                      (4)
-                    </span></p></label></span></div></li><li class="filter-box__item" data-v-065b4edf><!----> <div data-v-0
+e propriedade exclusiva da Estante Virtual ou de seus parceiros. É vedada qualquer reprodução sem autorização. Preços e condições de pagamento exclusivos para compras via internet, podendo variar nas lojas físicas. Ofertas válidas na compra de até 5 peças de cada produto por cliente, até o término dos nossos estoques para internet. A inclusão no carrinho não garante o preço e\u002Fou a disponibilidade do produto. Caso os produtos apresentem divergências de valores, o preço válido é o exibido na tela de pagamento. Vendas sujeitas à análise e disponibilidade de estoque. As ações promocionais que envolvam a concessão de brindes são válidas enquanto durarem os estoques e podem ser encerradas sem
 
-[loja #4]
-eus parceiros. É vedada qualquer reprodução sem autorização. Preços e condições de pagamento exclusivos para compras via internet, podendo variar nas lojas físicas. Ofertas válidas na compra de até 5 peças de cada produto por cliente, até o término dos nossos estoques para internet. A inclusão no carrinho não garante o preço e/ou a disponibilidade do produto. Caso os produtos apresentem divergências de valores, o preço válido é o exibido na tela de pagamento. Vendas sujeitas à análise e disponibilidade de estoque. As ações promocionais que envo
+--- ocorrências de "Sebo" (4) ---
 
---- ocorrências de "sebo" (5) ---
-
-[sebo #0]
--c1da79f6><div class="topbar__left topbar__left--text" data-v-c1da79f6><p data-v-c1da79f6>Compre aqui livros novos, usados e seminovos de milhares de sebos e livrarias.</p></div> <div class="topbar__left" data-v-c1da79f6><ul class="topbar__links" data-v-c1da79f6></ul></div><div class="topbar__center" data-v-c1da79f6><ul class="topbar__links" data-v-c1da79f6></ul></div><div class="topbar__right" data-v-c1da79f6><ul class="topbar__links" data-v-c1da79f6><li class="topbar__links__item" data-v-c1da79f6><!----> <!----> <a href="https://universo.maga
-
-[sebo #1]
-
+[Sebo #0]
+ref="/ensino-de-idiomas?idioma=frances" class="item-menu__title item-menu__title--submenu" data-v-04ea08f8><span data-v-04ea08f8>
       Livros em Francês
     </span></a> <!----></li></ul></li><li id="Sebos e livreiros" class="item-menu" data-v-04ea08f8 data-v-d1602618><a href="/sebos-e-livreiros" class="item-menu__title" data-v-04ea08f8><span data-v-04ea08f8>
       Sebos e livreiros
     </span></a> <!----></li><li id="Busque por autores" class="item-menu item-menu--children" data-v-04ea08f8 data-v-d1602618><a href="#Busque por autores" class="item-menu__title item-menu__title--children" data-v-04ea08f8><span data-v-04ea08f8>
       Busque por autores
-    </span></a> <ul c
+    </span></a> <ul class="submenu" data-v
 
-[sebo #2]
-lass="checkbox filter-box__checkbox" data-v-86b6095a data-v-065b4edf><label class="checkbox__label" data-v-86b6095a><input type="checkbox" id="acervo-sebo-e-livraria" name="" class="checkbox__input" data-v-86b6095a>
-    
-    <p class="filter-box__label" data-v-86b6095a data-v-065b4edf>
-                    Acervo Sebo e Livraria
-                    <span class="filter-box__label__text" data-v-86b6095a data-v-065b4edf>
-                      (1)
-                    </span></p></label></span></div></li><li class="filter-box__item" data-v-065b4edf><
-
-[sebo #3]
- class="checkbox filter-box__checkbox" data-v-86b6095a data-v-065b4edf><label class="checkbox__label" data-v-86b6095a><input type="checkbox" id="aiky-sebo" name="" class="checkbox__input" data-v-86b6095a>
-    
-    <p class="filter-box__label" data-v-86b6095a data-v-065b4edf>
-                    Aiky Sebo
-                    <span class="filter-box__label__text" data-v-86b6095a data-v-065b4edf>
-                      (7)
-                    </span></p></label></span></div></li><li class="filter-box__item" data-v-065b4edf><!----> <div data-v-065b4
-
-[sebo #4]
-n class="checkbox filter-box__checkbox" data-v-86b6095a data-v-065b4edf><label class="checkbox__label" data-v-86b6095a><input type="checkbox" id="amo-sebo-caieiras" name="" class="checkbox__input" data-v-86b6095a>
-    
-    <p class="filter-box__label" data-v-86b6095a data-v-065b4edf>
-                    Amo Sebo Caieiras
-                    <span class="filter-box__label__text" data-v-86b6095a data-v-065b4edf>
-                      (1)
-                    </span></p></label></span></div></li><li class="filter-box__item" data-v-065b4edf><!----> 
-
-
-
-===== PAGINA DO VENDEDOR =====
-url=https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344
-
-status=200 tamanho=101980
-
---- ocorrências de "cidade" (5) ---
-
-[cidade #0]
-><a href="https://especiais.magazineluiza.com.br/seguranca/" target="_blank" class="footer-menu__label" data-v-77f80d0c>
-            Segurança e Privacidade
-          </a></li><li class="footer-menu__item footer-menu__submenu__item" data-v-77f80d0c><a href="/seguranca-e-privacidade" target="_self" class="footer-menu__label" data-v-77f80d0c>
-            Política de Privacidade
-          </a></li><li class="footer-menu__item footer-menu__submenu__item" data-v-77f80d0c><a href="/termos-de-uso-comprador" target="_self" class="footer-menu__label" da
-
-[cidade #1]
-       Segurança e Privacidade
-          </a></li><li class="footer-menu__item footer-menu__submenu__item" data-v-77f80d0c><a href="/seguranca-e-privacidade" target="_self" class="footer-menu__label" data-v-77f80d0c>
-            Política de Privacidade
-          </a></li><li class="footer-menu__item footer-menu__submenu__item" data-v-77f80d0c><a href="/termos-de-uso-comprador" target="_self" class="footer-menu__label" data-v-77f80d0c>
-            Termos de uso do comprador
-          </a></li><li class="footer-menu__item footer-menu__submenu__it
-
-[cidade #2]
-enu__item" data-v-77f80d0c><a href="/seguranca-e-privacidade" target="_self" class="footer-menu__label" data-v-77f80d0c>
-            Política de Privacidade
-          </a></li><li class="footer-menu__item footer-menu__submenu__item" data-v-77f80d0c><a href="/termos-de-uso-comprador" target="_self" class="footer-menu__label" data-v-77f80d0c>
-            Termos de uso do comprador
-          </a></li><li class="footer-menu__item footer-menu__submenu__item" data-v-77f80d0c><a href="https://pslz.in/estantevirtual" target="_self" class="footer-menu__
-
-[cidade #3]
-visitas para melhorar suas experiência de navegação. Ao continuar, você concorda com nossa","link":{"href":"\u002Finstitucional\u002Fpolitica-de-privacidade","text":"política de privacidade."},"buttonText":"Concordar e Fechar"}},"liveCommerce":{}},"Navigation":{"virtualRoom":{"show":false},"contact":{"show":false},"whatsApp":{"show":false},"tvnsports":{"show":false},"menuInfoLinks":[],"userMenuMobile":{"labels":{"hello":"Olá, ","signin":"ENTRAR","account":"Acesse sua conta"},"links":{"account":"\u002Fcustomer-area","login":"\u002Flogin"}},"menu
-
-[cidade #4]
-ência de navegação. Ao continuar, você concorda com nossa","link":{"href":"\u002Finstitucional\u002Fpolitica-de-privacidade","text":"política de privacidade."},"buttonText":"Concordar e Fechar"}},"liveCommerce":{}},"Navigation":{"virtualRoom":{"show":false},"contact":{"show":false},"whatsApp":{"show":false},"tvnsports":{"show":false},"menuInfoLinks":[],"userMenuMobile":{"labels":{"hello":"Olá, ","signin":"ENTRAR","account":"Acesse sua conta"},"links":{"account":"\u002Fcustomer-area","login":"\u002Flogin"}},"menu":[{"id":"ba9d140c-cf65-492e-a414
-
---- ocorrências de "estado" (5) ---
-
-[estado #0]
-o durarem os estoques e podem ser encerradas sem aviso prévio. Os itens catalogados como "Usados" ou "Seminovos" são produtos singulares e apresentam estados de conservação variáveis. Tais itens podem conter marcas de manuseio, oxidação (páginas amareladas), grifos, assinaturas ou desgastes superficiais. O valor e a descrição são determinados individualmente pelo vendedor, baseados na edição e preservação do exemplar. Por se tratarem de peças únicas e exemplares de acervo, não garantimos a permanência do item em estoque ou a sua reposição, esta
-
-[estado #1]
-rarem os estoques e podem ser encerradas sem aviso prévio. Os itens catalogados como \"Usados\" ou \"Seminovos\" são produtos singulares e apresentam estados de conservação variáveis. Tais itens podem conter marcas de manuseio, oxidação (páginas amareladas), grifos, assinaturas ou desgastes superficiais. O valor e a descrição são determinados individualmente pelo vendedor, baseados na edição e preservação do exemplar. Por se tratarem de peças únicas e exemplares de acervo, não garantimos a permanência do item em estoque ou a sua reposição, esta
-
-[estado #2]
-rarem os estoques e podem ser encerradas sem aviso prévio. Os itens catalogados como \"Usados\" ou \"Seminovos\" são produtos singulares e apresentam estados de conservação variáveis. Tais itens podem conter marcas de manuseio, oxidação (páginas amareladas), grifos, assinaturas ou desgastes superficiais. O valor e a descrição são determinados individualmente pelo vendedor, baseados na edição e preservação do exemplar. Por se tratarem de peças únicas e exemplares de acervo, não garantimos a permanência do item em estoque ou a sua reposição, esta
-
-[estado #3]
-rarem os estoques e podem ser encerradas sem aviso prévio. Os itens catalogados como \"Usados\" ou \"Seminovos\" são produtos singulares e apresentam estados de conservação variáveis. Tais itens podem conter marcas de manuseio, oxidação (páginas amareladas), grifos, assinaturas ou desgastes superficiais. O valor e a descrição são determinados individualmente pelo vendedor, baseados na edição e preservação do exemplar. Por se tratarem de peças únicas e exemplares de acervo, não garantimos a permanência do item em estoque ou a sua reposição, esta
-
-[estado #4]
-,"name":"Touchstone Student’s Book 3b","brand":"N\u002FA","department":"Ensino de Idiomas","gender":"UNISSEX","description":"Livro usado mas em ótimo estado, apenas com algumas marcas de lápis.","productType":"livro","listPrice":3000,"salePrice":3000,"discountPrice":0,"available":true,"image":"\u002Fbook\u002F00\u002F1U2-1068-000\u002F1U2-1068-000_detail1.jpg?ts=1710445269910","imageDetail":"\u002Fbook\u002Findisponivel_zoom.jpg","imageZoom":"\u002Fbook\u002F00\u002F1U2-1068-000\u002F1U2-1068-000_detail1.jpg?ts=1710445269910","additionalImages"
-
---- ocorrências de "uf" (2) ---
-
-[uf #0]
-ei de visitar o produto ","text":"E-mail","icon":"EmailIcon","urlAccess":"mailto:?subject=Acabei de visitar o produto&body="}],"isWebview":false,"pdpSuffix":"\u002Flivro","currency":"BRL","search":{},"freedomAds":{"sdkUrl":"https:\u002F\u002Fstatic.netshoes.com.br\u002Fsponsored-products-sdk\u002F3.0.0\u002Fmagalu-ads.js","sdkCollectorUrl":"https:\u002F\u002Fstatic.netshoes.com.br\u002Fsponsored-products-sdk\u002F3.0.0\u002Fmagalu-ads-collector.js","sdkEventsUrl":"https:\u002F\u002Fstatic.netshoes.com.br\u002Fsponsored-products-sdk\u002F3.0.0\u
-
-[uf #1]
-arget":"_self","icon":"question_white","style":"width: 24px; height: 14px;"}],"theme":""},"UserMenu":{"mainLabel":"Entrar","namePrefix":"Olá, ","nameSufix":"","logoutLabel":"Sair","loginHref":"\u002Flogin","logoutHref":"\u002Flogout","menu":[{"label":"Entrar","href":"\u002Flogin","rule":"NOT_SIGNED"},{"label":"Meus Pedidos","href":"\u002Fcustomer-area\u002Forders"},{"label":"Minha Conta","href":"\u002Fcustomer-area\u002Fpersonal-info"},{"label":"Sair","href":"\u002Flogout","rule":"SIGNED"}],"theme":""},"Header":{"theme":"","menu":[],"display":{
-
---- ocorrências de "sebo" (5) ---
-
-[sebo #0]
-aior acervo de livros do Brasil."/>
-      <meta name="robots" content="index, follow" /><link rel="canonical" href="https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno" />
-      <link rel="icon" href="https://static.estantevirtual.com.br/webstore-seller-view/L_ESTANTEVIRTUAL/images/favicon.ico" type="image/x-icon" /><meta property="og:description" content="Encontre em Books Denise Damasceno lançamentos, livros novos e livros usados com preços reduzidos. São milhares de exemplares disponíveis no maior acervo de livros do B
-
-[sebo #1]
-me","item":"https://www.estantevirtual.com.br"},{"@type":"ListItem","position":2,"name":"Sebos e Livreiros","item":"https://www.estantevirtual.com.br/sebos-e-livreiros"},{"@type":"ListItem","position":3,"name":"Books Denise Damasceno","item":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Books Denise Damasceno","url":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sel
-
-[sebo #2]
-.estantevirtual.com.br/sebos-e-livreiros"},{"@type":"ListItem","position":3,"name":"Books Denise Damasceno","item":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Books Denise Damasceno","url":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344","numberOfItems":"6","itemListElement":[{"@type":"ListItem","position":1,"item":{"@context":"https://schema.org","
-
-[sebo #3]
-pe="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Books Denise Damasceno","url":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344","numberOfItems":"6","itemListElement":[{"@type":"ListItem","position":1,"item":{"@context":"https://schema.org","@type":"Product","url":"https://www.estantevirtual.com.br/livro/1U2-1068-000","sku":"1U2-1068-000","name":"Touchstone Student’s Book 3b","brand":{"@type":"Brand","name":"N/A"},"offers":{"@type":"Offer","price":30,"priceCurrency":
-
-[sebo #4]
--c1da79f6><div class="topbar__left topbar__left--text" data-v-c1da79f6><p data-v-c1da79f6>Compre aqui livros novos, usados e seminovos de milhares de sebos e livrarias.</p></div> <div class="topbar__left" data-v-c1da79f6><ul class="topbar__links" data-v-c1da79f6></ul></div><div class="topbar__center" data-v-c1da79f6><ul class="topbar__links" data-v-c1da79f6></ul></div><div class="topbar__right" data-v-c1da79f6><ul class="topbar__links" data-v-c1da79f6><li class="topbar__links__item" data-v-c1da79f6><!----> <!----> <a href="https://universo.maga
-
---- ocorrências de "livreiro" (5) ---
-
-[livreiro #0]
-rvo de livros do Brasil."/>
-      <meta name="robots" content="index, follow" /><link rel="canonical" href="https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno" />
-      <link rel="icon" href="https://static.estantevirtual.com.br/webstore-seller-view/L_ESTANTEVIRTUAL/images/favicon.ico" type="image/x-icon" /><meta property="og:description" content="Encontre em Books Denise Damasceno lançamentos, livros novos e livros usados com preços reduzidos. São milhares de exemplares disponíveis no maior acervo de livros do Brasil.">
-
-[livreiro #1]
-m":"https://www.estantevirtual.com.br"},{"@type":"ListItem","position":2,"name":"Sebos e Livreiros","item":"https://www.estantevirtual.com.br/sebos-e-livreiros"},{"@type":"ListItem","position":3,"name":"Books Denise Damasceno","item":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Books Denise Damasceno","url":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=100
-
-[livreiro #2]
-virtual.com.br/sebos-e-livreiros"},{"@type":"ListItem","position":3,"name":"Books Denise Damasceno","item":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Books Denise Damasceno","url":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344","numberOfItems":"6","itemListElement":[{"@type":"ListItem","position":1,"item":{"@context":"https://schema.org","@type":"
-
-[livreiro #3]
-ication/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Books Denise Damasceno","url":"https://www.estantevirtual.com.br/sebos-e-livreiros/books-denise-damasceno?sellers=1002344","numberOfItems":"6","itemListElement":[{"@type":"ListItem","position":1,"item":{"@context":"https://schema.org","@type":"Product","url":"https://www.estantevirtual.com.br/livro/1U2-1068-000","sku":"1U2-1068-000","name":"Touchstone Student’s Book 3b","brand":{"@type":"Brand","name":"N/A"},"offers":{"@type":"Offer","price":30,"priceCurrency":"BRL","a
-
-[livreiro #4]
-title item-menu__title--submenu" data-v-04ea08f8><span data-v-04ea08f8>
-      Livros em Francês
-    </span></a> <!----></li></ul></li><li id="Sebos e livreiros" class="item-menu" data-v-04ea08f8 data-v-d1602618><a href="/sebos-e-livreiros" class="item-menu__title" data-v-04ea08f8><span data-v-04ea08f8>
+[Sebo #1]
+> <!----></li></ul></li><li id="Sebos e livreiros" class="item-menu" data-v-04ea08f8 data-v-d1602618><a href="/sebos-e-livreiros" class="item-menu__title" data-v-04ea08f8><span data-v-04ea08f8>
       Sebos e livreiros
-    </span></a> <!----></li><li id="Busque por autores" class="item-menu item-menu--children" data-v-04ea08f8 data-v-d1602618><a href="#Busque por autores" class="item-menu__title item-menu__title--children" data-v-04ea08f
+    </span></a> <!----></li><li id="Busque por autores" class="item-menu item-menu--children" data-v-04ea08f8 data-v-d1602618><a href="#Busque por autores" class="item-menu__title item-menu__title--children" data-v-04ea08f8><span data-v-04ea08f8>
+      Busque por autores
+    </span></a> <ul class="submenu" data-v-04ea08f8><li id="Machado de Assis" class="item-menu item-menu--submenu" data-v-04ea08f8 data-v-04ea08f8><a href="/lst/machado-de-assis" class="item-menu__title item-me
 
---- ocorrências de "profile" (5) ---
+[Sebo #2]
+ Livros
+          </a></li><li class="footer-menu__item footer-menu__submenu__item" data-v-33547c3a><a href="/sebos-e-livreiros" target="_self" class="footer-menu__label" data-v-33547c3a>
+            Sebos e livrarias
+          </a></li><li class="footer-menu__item footer-menu__submenu__item" data-v-33547c3a><a href="/lst/saldao-de-livros" target="_self" class="footer-menu__label" data-v-33547c3a>
+            Saldão de livros
+          </a></li><li class="footer-menu__item footer-menu__submenu__item" data-v-33547c3a><a href="/lst/livros-baratos" target="_self" class="footer-menu__label" data-v-33547c3a>
+            Livros baratos
+          </a></li><li class="footer-menu__item footer-menu__s
 
-[profile #0]
-ivros-de-terror-e-sobrenatural"}]}]],"socialMedia":{"tag":"Acompanhe as nossas redes","links":[{"share":false,"access":true,"socialName":"instagram","profile":"@a.estantevirtual","urlAccess":"https:\u002F\u002Fwww.instagram.com\u002Fa.estantevirtual"},{"share":true,"access":true,"socialName":"facebook","profile":"estantevirtual","urlAccess":"https:\u002F\u002Fwww.facebook.com\u002Festantevirtual"},{"share":true,"access":true,"socialName":"twitter","profile":"@estantevirtual","urlAccess":"https:\u002F\u002Ftwitter.com\u002Festantevirtual"},{"sha
-
-[profile #1]
-le":"@a.estantevirtual","urlAccess":"https:\u002F\u002Fwww.instagram.com\u002Fa.estantevirtual"},{"share":true,"access":true,"socialName":"facebook","profile":"estantevirtual","urlAccess":"https:\u002F\u002Fwww.facebook.com\u002Festantevirtual"},{"share":true,"access":true,"socialName":"twitter","profile":"@estantevirtual","urlAccess":"https:\u002F\u002Ftwitter.com\u002Festantevirtual"},{"share":false,"access":true,"socialName":"linkedin","profile":"estante-virtual","urlAccess":"https:\u002F\u002Fpt.linkedin.com\u002Fcompany\u002Festante-virtua
-
-[profile #2]
-,"profile":"estantevirtual","urlAccess":"https:\u002F\u002Fwww.facebook.com\u002Festantevirtual"},{"share":true,"access":true,"socialName":"twitter","profile":"@estantevirtual","urlAccess":"https:\u002F\u002Ftwitter.com\u002Festantevirtual"},{"share":false,"access":true,"socialName":"linkedin","profile":"estante-virtual","urlAccess":"https:\u002F\u002Fpt.linkedin.com\u002Fcompany\u002Festante-virtual"},{"share":false,"access":true,"socialName":"youtube","profile":"estantevirtual","urlAccess":"https:\u002F\u002Fwww.youtube.com\u002Fuser\u002Fest
-
-[profile #3]
-r","profile":"@estantevirtual","urlAccess":"https:\u002F\u002Ftwitter.com\u002Festantevirtual"},{"share":false,"access":true,"socialName":"linkedin","profile":"estante-virtual","urlAccess":"https:\u002F\u002Fpt.linkedin.com\u002Fcompany\u002Festante-virtual"},{"share":false,"access":true,"socialName":"youtube","profile":"estantevirtual","urlAccess":"https:\u002F\u002Fwww.youtube.com\u002Fuser\u002Festantevirtual"},{"share":false,"access":true,"socialName":"tiktok","profile":"@estantevirtual","urlAccess":"https:\u002F\u002Fwww.tiktok.com\u002F@e
-
-[profile #4]
-ante-virtual","urlAccess":"https:\u002F\u002Fpt.linkedin.com\u002Fcompany\u002Festante-virtual"},{"share":false,"access":true,"socialName":"youtube","profile":"estantevirtual","urlAccess":"https:\u002F\u002Fwww.youtube.com\u002Fuser\u002Festantevirtual"},{"share":false,"access":true,"socialName":"tiktok","profile":"@estantevirtual","urlAccess":"https:\u002F\u002Fwww.tiktok.com\u002F@estantevirtual"}]},"storeLogo":"magalu","certificationFlags":{"title":"Certificações","flags":["ra-indicada","compra-segura"]},"certificates":{"title":"Certificaçõe
-
-title: Livros encontrados em Books Denise Damasceno
-
---- inicio do body ---
-<body>
-    <div id="app">
-      <div data-server-rendered="true" class="main"><header class="header float" data-v-1b000b87><div class="wrapper-topbar header__topBar" data-v-1b000b87><div class="topbar topbar" data-v-c1da79f6><div class="topbar__content" data-v-c1da79f6><div class="topbar__left topbar__left--text" data-v-c1da79f6><p data-v-c1da79f6>Compre aqui livros novos, usados e seminovos de milhares de sebos e livrarias.</p></div> <div class="topbar__left" data-v-c1da79f6><ul class="topbar__links" data-v-c1da79f6></ul></div><div class="topbar__center" data-v-c1da79f6><ul class="topbar__links" data-v-c1da79f6></ul></div><div class="topbar__right" data-v-c1da79f6><ul class="topbar__links" data-v-c1da79f6><li class="topbar__links__item" data-v-c1da79f6><!----> <!----> <a href="https://universo.magalu.com/estante-virtual" target="_blank" class="topbar__links__link" data-v-c1da79f6>Quero Vender</a></li><li class="topbar__links__item" data-v-c1da79f6><!----> <!----> <a href="https://painel.estantevirtual.com.br/login" target="_blank" class="topbar__links__link" data-v-c1da79f6>Painel do Livreiro</a></li><li class="topbar__links__item" data-v-c1da79f6><!----> <a href="https://pslz.in/estantevirtual" target="_blank" class="topbar__links__link" data-v-c1da79f6><i class="ns-icon accessibility_white" style="width:24px;height:14px;" data-v-c1da79f6></i> <span data-v-c1da79f6>Acessibilidade</span></a> <!----></li><li class="topbar__links__item" data-v-c1da79f6><!----> <a href="https://atendimento.estantevirtual.com.br/hc/pt-br" target="_self" class="topbar__links__link" data-v-c1da79f6><i class="ns-icon question_white" style="width:24px;height:14px;" data-v-c1da79f6></i> <span data-v-c1da79f6>Central de ajuda</span></a> <!----></li></ul></div></div></div></div> <div class="header-wrapper header__main" data-v-6ca36afa data-v-1b000b87><div class="main-bar breakpoint main-bar" data-v-2188e835 data-v-6ca36afa><div class="main-bar__content" data-v-2188e835><section class="main-bar__navigation navigation main-bar__component main-bar__component--show-mobile" data-v-2188e835><!----> <div class="navigation" data-v-d1602618 data-v-6ca36afa><div class="navigation__overlay" data-v-d1602618></div> <button class="nav-btn" data-v-d1602618><div class="nav-icon" data-v-d1602618></div></button> <div class="navigation__content" data-v-d1602618><section class="user" data-v-d1602618><a href="/login" class="user__link" data-v-d1602618><i class="user__icon" data-v-d1602618></i> <div class="user__sign" data-v-d1602618><p data-v-d1602618>ENTRAR</p></div></a></section> <ul data-navigation-menu="" class="navigation__menu" data-v-d1602618><li id="Categorias" class="item-menu item-menu--children" data-v-04ea08f8 data-v-d1602618><a href="#Categorias" class="item-menu__title item-menu__title--children" data-v-04ea08f8><span data-v-04ea08f8>
-      Categorias
-    </span></a> <ul class="submenu" data-v-04ea08f8><li id="Antropologia" class="item-menu item-menu--submenu" data-v-04ea08f8 dat
+[Sebo #3]
+ntevirtual"},{"title":"Contrato de compra e venda","href":"\u002Fcontrato-de-compra-e-venda"}]}],[{"tag":"Navegue pelo site","links":[{"title":"\"+\" Livros","href":"\u002Fdicas-de-livros"},{"title":"Sebos e livrarias","href":"\u002Fsebos-e-livreiros"},{"title":"Saldão de livros","href":"\u002Flst\u002Fsaldao-de-livros"},{"title":"Livros baratos","href":"\u002Flst\u002Flivros-baratos"},{"title":"Achados da Estante","href":"\u002Flst\u002Fachados-da-estante"},{"title":"Black Friday","href":"\u002Flst\u002Fblack-friday","hide":false},{"title":"Auto ajuda","href":"\u002Flst\u002Flivros-para-se-conectar-com-voce-mesmo"},{"title":"Literatura brasileira","href":"\u002Flst\u002Fnova-literatura-bras

@@ -1,1 +1,522 @@
-{}
+{
+  "sebo-biblioteca-de-alexandria": {
+    "name": "Sebo Biblioteca de Alexandria",
+    "slug": "sebo-biblioteca-de-alexandria",
+    "code": "1000937",
+    "city": "Brasília",
+    "state": "DF",
+    "checkedAt": "2026-08-08T21:20:32.844Z"
+  },
+  "o-buquineiro": {
+    "name": "O Buquineiro",
+    "slug": "o-buquineiro",
+    "code": "1002099",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:20:39.796Z"
+  },
+  "livraria-virtual-incunabulo": {
+    "name": "Livraria Virtual Incunábulo",
+    "slug": "livraria-virtual-incunabulo",
+    "code": "",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:20:46.129Z"
+  },
+  "letra-viva": {
+    "name": "Letra Viva",
+    "slug": "letra-viva",
+    "code": "1002126",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:20:53.066Z"
+  },
+  "letras-e-letras": {
+    "name": "Letras e Letras",
+    "slug": "letras-e-letras",
+    "code": "",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:21:11.967Z"
+  },
+  "buriti-sebo-literario": {
+    "name": "Buriti Sebo Literário",
+    "slug": "buriti-sebo-literario",
+    "code": "1002183",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:21:19.466Z"
+  },
+  "iluminacoes-livros-e-cds": {
+    "name": "Iluminações Livros e Cds",
+    "slug": "iluminacoes-livros-e-cds",
+    "code": "",
+    "city": "Campinas",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:21:30.133Z"
+  },
+  "o-bibliofilo-frances": {
+    "name": "O Bibliofilo Frances",
+    "slug": "o-bibliofilo-frances",
+    "code": "1011166",
+    "city": "Bragança Paulista",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:21:43.734Z"
+  },
+  "a-livraria-horizonte": {
+    "name": "A Livraria Horizonte",
+    "slug": "a-livraria-horizonte",
+    "code": "1001857",
+    "city": "Belo Horizonte",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:22:04.803Z"
+  },
+  "verso-e-prosa": {
+    "name": "Verso e Prosa",
+    "slug": "verso-e-prosa",
+    "code": "1000298",
+    "city": "Belo Horizonte",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:22:13.849Z"
+  },
+  "livraria-martins": {
+    "name": "Livraria Martins",
+    "slug": "livraria-martins",
+    "code": "1001685",
+    "city": "Porto Alegre",
+    "state": "RS",
+    "checkedAt": "2026-08-08T21:22:21.285Z"
+  },
+  "casa-sebo-da-cris": {
+    "name": "Casa Sebo da Cris",
+    "slug": "casa-sebo-da-cris",
+    "code": "",
+    "city": "Itajubá",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:22:28.428Z"
+  },
+  "santana-sebo": {
+    "name": "Santana Sebo",
+    "slug": "santana-sebo",
+    "code": "",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:22:35.774Z"
+  },
+  "quarup-livraria-antiquaria": {
+    "name": "Quarup Livraria Antiquária",
+    "slug": "quarup-livraria-antiquaria",
+    "code": "1002201",
+    "city": "Juiz de Fora",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:22:45.328Z"
+  },
+  "livraria-jmaoski": {
+    "name": "Livraria Jmaoski",
+    "slug": "livraria-jmaoski",
+    "code": "1002028",
+    "city": "Curitiba",
+    "state": "PR",
+    "checkedAt": "2026-08-08T21:22:53.239Z"
+  },
+  "mata-livros": {
+    "name": "Mata Livros",
+    "slug": "mata-livros",
+    "code": "1001633",
+    "city": "Carpina",
+    "state": "PE",
+    "checkedAt": "2026-08-08T21:23:03.784Z"
+  },
+  "o-livreiro-special-books": {
+    "name": "O Livreiro Special Books",
+    "slug": "o-livreiro-special-books",
+    "code": "1007103",
+    "city": "Jaboatão dos Guararapes",
+    "state": "PE",
+    "checkedAt": "2026-08-08T21:23:19.955Z"
+  },
+  "o-xango-de-xangai": {
+    "name": "O Xango de Xangai",
+    "slug": "o-xango-de-xangai",
+    "code": "1000686",
+    "city": "Salvador",
+    "state": "BA",
+    "checkedAt": "2026-08-08T21:23:27.367Z"
+  },
+  "julian-livros": {
+    "name": "Julian Livros",
+    "slug": "julian-livros",
+    "code": "",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:23:39.097Z"
+  },
+  "a-central-livros": {
+    "name": "A Central Livros",
+    "slug": "a-central-livros",
+    "code": "",
+    "city": "Belo Horizonte",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:23:49.515Z"
+  },
+  "sebo-reboucas": {
+    "name": "Sebo Rebouças",
+    "slug": "sebo-reboucas",
+    "code": "1002092",
+    "city": "Sumaré",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:23:59.338Z"
+  },
+  "livraria-sebo-liberdade": {
+    "name": "Livraria Sebo Liberdade",
+    "slug": "livraria-sebo-liberdade",
+    "code": "1001644",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:24:08.659Z"
+  },
+  "veredas-livros-usados": {
+    "name": "Veredas Livros Usados",
+    "slug": "veredas-livros-usados",
+    "code": "1001008",
+    "city": "Divinópolis",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:24:18.320Z"
+  },
+  "biblioviva": {
+    "name": "Biblioviva",
+    "slug": "biblioviva",
+    "code": "1000363",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:24:24.746Z"
+  },
+  "sebo-paulistano": {
+    "name": "Sebo Paulistano",
+    "slug": "sebo-paulistano",
+    "code": "1001917",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:24:40.147Z"
+  },
+  "livraria-rosaes": {
+    "name": "Livraria Rosaes",
+    "slug": "livraria-rosaes",
+    "code": "1001751",
+    "city": "Belo Horizonte",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:24:49.483Z"
+  },
+  "a-academia-do-saber-7": {
+    "name": "A ACADEMIA DO SABER 7",
+    "slug": "a-academia-do-saber-7",
+    "code": "1005558",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:25:00.231Z"
+  },
+  "sebo-eddye-boiteux": {
+    "name": "Sebo Eddye Boiteux",
+    "slug": "sebo-eddye-boiteux",
+    "code": "1006274",
+    "city": "Camaçari",
+    "state": "BA",
+    "checkedAt": "2026-08-08T21:25:12.669Z"
+  },
+  "amantes-leituras": {
+    "name": "Amantes Leituras",
+    "slug": "amantes-leituras",
+    "code": "1001679",
+    "city": "Maricá",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:25:20.724Z"
+  },
+  "sebo-vagao-literario-taubate": {
+    "name": "Sebo Vagão Literário Taubaté",
+    "slug": "sebo-vagao-literario-taubate",
+    "code": "",
+    "city": "Taubaté",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:25:27.482Z"
+  },
+  "sebo-pereira": {
+    "name": "Sebo Pereira",
+    "slug": "sebo-pereira",
+    "code": "",
+    "city": "Recife",
+    "state": "PE",
+    "checkedAt": "2026-08-08T21:25:34.489Z"
+  },
+  "sebo-esperanca-j-m": {
+    "name": "Sebo Esperança J&M",
+    "slug": "sebo-esperanca-j-m",
+    "code": "1007924",
+    "city": "Salvador",
+    "state": "BA",
+    "checkedAt": "2026-08-08T21:25:42.871Z"
+  },
+  "estrela-livros-portugueses": {
+    "name": "Estrela Livros Portugueses",
+    "slug": "estrela-livros-portugueses",
+    "code": "",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:25:50.158Z"
+  },
+  "livros-brasilia": {
+    "name": "Livros Brasília",
+    "slug": "livros-brasilia",
+    "code": "",
+    "city": "Brasília",
+    "state": "DF",
+    "checkedAt": "2026-08-08T21:25:59.493Z"
+  },
+  "sebo-uniao": {
+    "name": "Sebo União",
+    "slug": "sebo-uniao",
+    "code": "",
+    "city": "Lagoa Santa",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:26:11.027Z"
+  },
+  "sebo-brandao-sao-paulo": {
+    "name": "Sebo Brandão São Paulo",
+    "slug": "sebo-brandao-sao-paulo",
+    "code": "",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:26:22.533Z"
+  },
+  "segunda-mao-livros-usados-2": {
+    "name": "Segunda Mão Livros Usados 2",
+    "slug": "segunda-mao-livros-usados-2",
+    "code": "1001749",
+    "city": "Belo Horizonte",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:26:55.762Z"
+  },
+  "casa-da-cultura": {
+    "name": "Casa da Cultura",
+    "slug": "casa-da-cultura",
+    "code": "1003153",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:27:04.409Z"
+  },
+  "academia-do-saber-constituicao": {
+    "name": "Academia do Saber Constituição",
+    "slug": "academia-do-saber-constituicao",
+    "code": "1001827",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:27:11.975Z"
+  },
+  "sebo-livraria-prazer-de-ler": {
+    "name": "Sebo Livraria Prazer de Ler",
+    "slug": "sebo-livraria-prazer-de-ler",
+    "code": "1002131",
+    "city": "Paço do Lumiar",
+    "state": "MA",
+    "checkedAt": "2026-08-08T21:27:19.273Z"
+  },
+  "alfarrabio-das-aguas": {
+    "name": "Alfarrabio das Aguas",
+    "slug": "alfarrabio-das-aguas",
+    "code": "1002921",
+    "city": "Lambari",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:27:26.789Z"
+  },
+  "jacare-livros": {
+    "name": "Jacaré Livros",
+    "slug": "jacare-livros",
+    "code": "",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:27:46.039Z"
+  },
+  "academia-do-saber": {
+    "name": "Academia do Saber",
+    "slug": "academia-do-saber",
+    "code": "1005558",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:27:57.930Z"
+  },
+  "sebo-nova-floresta": {
+    "name": "Sebo Nova Floresta",
+    "slug": "sebo-nova-floresta",
+    "code": "1001700",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:28:15.063Z"
+  },
+  "sebo-joao-batista": {
+    "name": "Sebo João Batista",
+    "slug": "sebo-joao-batista",
+    "code": "1002089",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:28:21.625Z"
+  },
+  "livraria-oliveira": {
+    "name": "Livraria Oliveira",
+    "slug": "livraria-oliveira",
+    "code": "1001884",
+    "city": "Belo Horizonte",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:28:28.666Z"
+  },
+  "sebo-fulo": {
+    "name": "Sebo Fulô",
+    "slug": "sebo-fulo",
+    "code": "1002018",
+    "city": "Porto Alegre",
+    "state": "RS",
+    "checkedAt": "2026-08-08T21:28:38.405Z"
+  },
+  "sebo-essencial": {
+    "name": "Sebo Essencial",
+    "slug": "sebo-essencial",
+    "code": "1002157",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:28:54.978Z"
+  },
+  "livraria-dom-pedro-ii": {
+    "name": "Livraria Dom Pedro II",
+    "slug": "livraria-dom-pedro-ii",
+    "code": "1001754",
+    "city": "Juiz de Fora",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:29:03.702Z"
+  },
+  "amantes-do-livro": {
+    "name": "Amantes do Livro",
+    "slug": "amantes-do-livro",
+    "code": "1001758",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:29:11.170Z"
+  },
+  "mundo-dos-livros-rs": {
+    "name": "Mundo dos Livros RS",
+    "slug": "mundo-dos-livros-rs",
+    "code": "1006545",
+    "city": "Uruguaiana",
+    "state": "RS",
+    "checkedAt": "2026-08-08T21:29:35.062Z"
+  },
+  "livros-e-luzes": {
+    "name": "Livros e Luzes",
+    "slug": "livros-e-luzes",
+    "code": "",
+    "city": "Curitiba",
+    "state": "PR",
+    "checkedAt": "2026-08-08T21:29:42.140Z"
+  },
+  "arcadia-sebo-e-cafe": {
+    "name": "Arcádia Sebo e Café",
+    "slug": "arcadia-sebo-e-cafe",
+    "code": "1001570",
+    "city": "Curitiba",
+    "state": "PR",
+    "checkedAt": "2026-08-08T21:29:59.041Z"
+  },
+  "livraria-martins-2": {
+    "name": "Livraria Martins 2",
+    "slug": "livraria-martins-2",
+    "code": "1000087",
+    "city": "Porto Alegre",
+    "state": "RS",
+    "checkedAt": "2026-08-08T21:30:18.158Z"
+  },
+  "ler-faz-bem": {
+    "name": "Ler Faz Bem",
+    "slug": "ler-faz-bem",
+    "code": "1000270",
+    "city": "São Vicente",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:30:35.203Z"
+  },
+  "mania-antiga": {
+    "name": "Mania Antiga",
+    "slug": "mania-antiga",
+    "code": "",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:30:42.512Z"
+  },
+  "a-savassi-livros": {
+    "name": "A Savassi Livros",
+    "slug": "a-savassi-livros",
+    "code": "1002072",
+    "city": "Belo Horizonte",
+    "state": "MG",
+    "checkedAt": "2026-08-08T21:31:05.365Z"
+  },
+  "sebo-line": {
+    "name": "Sebo Line",
+    "slug": "sebo-line",
+    "code": "1002572",
+    "city": "Araras",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:31:12.018Z"
+  },
+  "red-star-teodoro-sampaio": {
+    "name": "Red Star Teodoro Sampaio",
+    "slug": "red-star-teodoro-sampaio",
+    "code": "",
+    "city": "São Paulo",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:31:19.364Z"
+  },
+  "das-raizes-aos-frutos": {
+    "name": "Das Raízes aos Frutos",
+    "slug": "das-raizes-aos-frutos",
+    "code": "1000555",
+    "city": "Paty do Alferes",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:31:43.546Z"
+  },
+  "sebolins": {
+    "name": "Sebolins",
+    "slug": "sebolins",
+    "code": "1004331",
+    "city": "Lins",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:31:50.514Z"
+  },
+  "sebo-lima-barreto": {
+    "name": "Sebo Lima Barreto",
+    "slug": "sebo-lima-barreto",
+    "code": "1001871",
+    "city": "Rio de Janeiro",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:32:04.641Z"
+  },
+  "codigo-livraria-juridica-sebo": {
+    "name": "Codigo Livraria Juridica Sebo",
+    "slug": "codigo-livraria-juridica-sebo",
+    "code": "1002464",
+    "city": "Piracicaba",
+    "state": "SP",
+    "checkedAt": "2026-08-08T21:32:16.870Z"
+  },
+  "sebo-caracol": {
+    "name": "Sebo Caracol",
+    "slug": "sebo-caracol",
+    "code": "1002127",
+    "city": "Nova Friburgo",
+    "state": "RJ",
+    "checkedAt": "2026-08-08T21:32:24.661Z"
+  },
+  "sebo-dita-kraus": {
+    "name": "Sebo Dita Kraus",
+    "slug": "sebo-dita-kraus",
+    "code": "1006483",
+    "city": "Porto Alegre",
+    "state": "RS",
+    "checkedAt": "2026-08-08T21:32:31.447Z"
+  }
+}

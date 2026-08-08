@@ -1,12 +1,13 @@
 {
-  "lastRun": "2026-08-07T13:57:50.811Z",
+  "lastRun": "2026-08-08T12:36:55.457Z",
   "authorsSearched": 81,
-  "authorFailures": 4,
+  "authorFailures": 0,
   "foundToday": 2,
-  "newToday": 1,
-  "imagesFetched": 1,
+  "newToday": 0,
+  "imagesFetched": 0,
+  "sellersFetched": 0,
   "totalHistory": 1735,
-  "totalCardsSeen": 319,
-  "totalWithYear": 282,
+  "totalCardsSeen": 346,
+  "totalWithYear": 340,
   "totalEligible": 2
 }

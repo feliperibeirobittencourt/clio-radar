@@ -36,26 +36,39 @@ jobs:
         run: node scripts/backfill-estante-vendedores.mjs
 
       - name: Publicar histórico atualizado
+        env:
+          ESTANTE_BACKFILL_LIMIT: ${{ inputs.limite }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add raw/estante-historico.csv raw/estante-vendedores.json
-
-          if git diff --cached --quiet; then
-            echo "Nada novo para salvar."
-            exit 0
-          fi
-
-          git commit -m "Preenche vendedor no histórico da Estante Virtual"
-
+          # O CSV muda linha a linha (não é só acrescentar no fim), então um
+          # rebase da mesma alteração contra um histórico que mudou por baixo
+          # (ex.: o scrape diário rodando ao mesmo tempo) tende a dar conflito
+          # de conteúdo de verdade — que não se resolve tentando de novo o
+          # mesmo rebase. Em vez disso, a cada tentativa falha, descarta tudo,
+          # parte da versão mais nova do main e roda o script de novo em cima
+          # dela: como ele é idempotente (pula quem já tem vendedor) e rápido,
+          # reprocessar do zero é mais simples e confiável do que tentar
+          # reaplicar um diff velho.
           for i in 1 2 3 4 5; do
+            git add raw/estante-historico.csv raw/estante-vendedores.json
+            if git diff --cached --quiet; then
+              echo "Nada novo para salvar."
+              exit 0
+            fi
+            git commit -m "Preenche vendedor no histórico da Estante Virtual"
+
             if git pull --rebase origin main && git push origin HEAD:main; then
               exit 0
             fi
-            echo "Tentativa $i de publicar falhou (provável conflito com outra atualização em andamento). Tentando novamente…"
+
+            echo "Tentativa $i de publicar falhou (provável atualização concorrente do histórico). Descartando e reprocessando sobre a versão mais recente…"
             git rebase --abort 2>/dev/null || true
-            sleep 10
+            git fetch origin main
+            git reset --hard origin/main
+            node scripts/backfill-estante-vendedores.mjs
+            sleep 5
           done
           echo "Não foi possível publicar após 5 tentativas."
           exit 1

@@ -113,8 +113,14 @@ function startOfToday(){const d=new Date();d.setHours(0,0,0,0);return d}
 function validAuctionDate(r){if(!r.auctionDate)return null;const d=new Date(r.auctionDate);return Number.isNaN(d.getTime())?null:d}
 const CLOSED_STATUSES=new Set(['vendido','encerrado sem dado']);
 function isClosedStatus(r){return CLOSED_STATUSES.has(r.status)}
-function current(r){if(isClosedStatus(r))return false;const d=validAuctionDate(r);return !d||d>=startOfToday()}
-function pastAuction(r){if(isClosedStatus(r))return true;const d=validAuctionDate(r);return !!d&&d<startOfToday()}
+// Enquanto o pregão for hoje (ou no futuro), o lote continua no radar até o
+// dia virar — não importa o que o "status" capturado pelo monitor diga. O
+// texto da página do leiloeiro muda de "encerrado"/"vendido" assim que o
+// horário agendado passa, mesmo quando o pregão real (presencial/por
+// telefone) ainda está rolando pra aquele lote. Só quando não sabemos a data
+// do pregão é que o status vira o critério.
+function current(r){const d=validAuctionDate(r);return d?d>=startOfToday():!isClosedStatus(r)}
+function pastAuction(r){const d=validAuctionDate(r);return d?d<startOfToday():isClosedStatus(r)}
 let ownedEditionCache=new Map();
 // só dígitos: a planilha pode devolver o ano com formatação de milhar
 // ("1.881" em vez de "1881") dependendo do formato da célula — comparar só

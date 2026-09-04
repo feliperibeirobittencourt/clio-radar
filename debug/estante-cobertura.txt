@@ -1,0 +1,27 @@
+=== URL ATUAL (com _preco=3000-10000000) === https://www.estantevirtual.com.br/busca?q=Casimiro%20de%20Abreu&searchField=autor&tipo-de-livro=usado&_preco=3000-10000000&pagina=1&sort=new-releases
+status: 200 tamanho: 428035
+total de resultados encontrado no HTML: 52
+cards na página (contagem bruta de product-item__link): 3
+
+=== SEM _preco === https://www.estantevirtual.com.br/busca?q=Casimiro%20de%20Abreu&searchField=autor&tipo-de-livro=usado&pagina=1&sort=new-releases
+status: 200 tamanho: 576272
+total de resultados encontrado no HTML: 198
+cards na página: 7
+
+=== trecho perto de "ano de publicação" (facetas/filtros) ===
+n><section range="[object Object]" class="filter-box product-list-filters__option" data-v-065b4edf><div class="filter-box__header" data-v-065b4edf><h3 class="filter-box__title" data-v-065b4edf>
+      Ano de Publicação
+    </h3> <span class="filter-box__toggle" data-v-065b4edf>
+      -
+    </span></div> <div class="filter-box__content" data-v-065b4edf data-v-065b4edf><!----> <div class="base-input filter-box__input" data-v-065b4edf><input required="required" value="" class="base-input__input"> <label class="base-input__text">
+    
+  </label> <div class="base-input__icon"></div></div> <ul class="filter-box__list" data-v-065b4edf><li class="filter-box__item" data-v-065b4edf><!----> <div data-v-065b4edf><span class="checkbox filter-box__checkbox" data-v-86b6095a data-v-065b4edf><label class="c
+
+parâmetros de ano encontrados em links da página: []
+
+=== PÁGINA 2 sem preço === https://www.estantevirtual.com.br/busca?q=Casimiro%20de%20Abreu&searchField=autor&tipo-de-livro=usado&pagina=2&sort=new-releases
+status: 200 cards: 7
+anos na página 2: 2008,2004,2007,1967,1982,2014,1999,2008,1982,2002,1955,2024,2026,1952,2008,1895,1871,1961,1969,1985,2009,1895,1925,2000,1875,1940,2010,2014,1978,1955,2003,1983,1969,1979
+
+=== CHUTE range de ano (ano-de-publicacao=-1940) === https://www.estantevirtual.com.br/busca?q=Casimiro%20de%20Abreu&searchField=autor&tipo-de-livro=usado&ano-de-publicacao=-1940&pagina=1
+status: 200 cards: 0

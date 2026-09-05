@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {slugify,fetchSellerName,fetchSellerInfo,skuFromLink} from './lib/estante-vendedor.mjs';
+import {BASE,FETCH_HEADERS,extractYear,price,extractCards,fetchSearchPage} from './lib/estante-busca.mjs';
 
 const ROOT=path.resolve(process.cwd());
 const RAW=path.join(ROOT,'raw');
@@ -23,15 +24,11 @@ const SELLER_DELAY_MS=Number(process.env.ESTANTE_SELLER_DELAY_MS)||2_000;
 // parado; no dia a dia 1 página já cobre o que é publicado de fato novo.
 const PAGES=Math.max(1,Number(process.env.ESTANTE_PAGES)||1);
 const PAGE_DELAY_MS=Number(process.env.ESTANTE_PAGE_DELAY_MS)||8_000;
-const BASE='https://www.estantevirtual.com.br';
 const IMAGE_BASE='https://static.estantevirtual.com.br';
 const HEADERS=['Autor','Grupo','Título','Ano','Preço (R$)','Na janela 1850-1930?','Link','Imagem','Status','Verificado em','Visto em','Vendedor'];
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const norm=v=>String(v??'').normalize('NFD').replace(/\p{Mn}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
-const extractYear=v=>{const m=String(v??'').match(/\b(1[5-9]\d{2}|20\d{2})\b/g);return m?Number(m.at(-1)):null};
-function price(v){if(v==null||v==='')return null;let s=String(v).trim().replace(/[R$\s]/g,'').replace(/[^\d,.\-]/g,'');if(!s)return null;const c=s.lastIndexOf(','),d=s.lastIndexOf('.');if(c>=0&&d>=0)s=d>c?s.replace(/,/g,''):s.replace(/\./g,'').replace(',','.');else if(c>=0)s=(s.length-c-1===2)?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');else if(d>=0&&s.length-d-1!==2)s=s.replace(/\./g,'');const n=Number(s);return Number.isFinite(n)?n:null}
-function decodeEntities(s){return String(s??'').replace(/&quot;/g,'"').replace(/&#0?39;/g,"'").replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')}
 
 function brtStamp(d){const brt=new Date(d.getTime()-3*3600000),pad=n=>String(n).padStart(2,'0');return `${brt.getUTCFullYear()}-${pad(brt.getUTCMonth()+1)}-${pad(brt.getUTCDate())} ${pad(brt.getUTCHours())}:${pad(brt.getUTCMinutes())}`}
 
@@ -39,45 +36,6 @@ function parseDelimitedRows(text){text=String(text||'').replace(/^﻿/,'');const
 function readCSV(text){const rows=parseDelimitedRows(text);if(rows.length<1)return[];const headers=rows[0].map(h=>String(h).trim());return rows.slice(1).map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]??'').trim()])))}
 function csvField(v){const s=String(v??'');return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s}
 function toCSV(rows){return [HEADERS.join(','),...rows.map(r=>HEADERS.map(h=>csvField(r[h])).join(','))].join('\n')+'\n'}
-
-function extractCards(html){
-  const tagRe=/<a\b[^>]*>/g;
-  const productTags=[...html.matchAll(tagRe)].filter(m=>/class="[^"]*product-item__link/.test(m[0]));
-  const seen=new Set(),cards=[];
-  for(let idx=0;idx<productTags.length;idx++){
-    const m=productTags[idx],tag=m[0];
-    const hrefMatch=tag.match(/href="([^"]+)"/);
-    if(!hrefMatch||!hrefMatch[1].startsWith('/livro/'))continue;
-    const href=hrefMatch[1];
-    if(seen.has(href))continue;
-    seen.add(href);
-    const titleMatch=tag.match(/title="([^"]*)"/);
-    const title=titleMatch?decodeEntities(titleMatch[1]).trim():'';
-    const start=m.index,end=idx+1<productTags.length?productTags[idx+1].index:Math.min(html.length,start+4000);
-    const segment=html.slice(start,end);
-    const authorMatch=segment.match(/product-item__author"[^>]*>\s*([\s\S]*?)\s*<\/p>/);
-    const yearMatch=segment.match(/product-item__year"[^>]*>\s*(\d{4})\s*<\/p>/);
-    const priceMatch=segment.match(/data-auto="price"[^>]*>\s*R\$\s*([\d.,]+)/)||segment.match(/A partir de R\$\s*([\d.,]+)/)||segment.match(/R\$\s*([\d.,]+)/);
-    cards.push({href,title,cardAuthor:authorMatch?decodeEntities(authorMatch[1]).trim():'',year:yearMatch?Number(yearMatch[1]):null,price:priceMatch?price(priceMatch[1]):null});
-  }
-  return cards;
-}
-
-const FETCH_HEADERS={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36','Accept-Language':'pt-BR,pt;q=0.9,en;q=0.8'};
-
-async function fetchSearchPage(author,page=1){
-  // searchField=autor restringe a busca ao campo de autor (em vez de busca livre
-  // por qualquer campo do anúncio), evitando ruído de livros que só mencionam o
-  // nome por acaso — mesmo ajuste já validado no monitor Python irmão.
-  // _preco=3000-10000000 é em centavos (R$30,00-R$100.000,00): confirmado com
-  // diagnóstico real no site que exclui só os anúncios abaixo de R$30 (que na
-  // prática são sempre reedição/exemplar sem valor de colecionador, nunca um
-  // achado antigo de verdade) — intencional, não é bug.
-  const url=`${BASE}/busca?q=${encodeURIComponent(author)}&searchField=autor&tipo-de-livro=usado&_preco=3000-10000000&pagina=${page}&sort=new-releases`;
-  const res=await fetch(url,{headers:FETCH_HEADERS});
-  if(!res.ok)throw new Error(`HTTP ${res.status}`);
-  return res.text();
-}
 
 async function fetchCoverImage(productUrl){
   try{
@@ -92,7 +50,12 @@ async function fetchCoverImage(productUrl){
   }catch{return ''}
 }
 
-function searchFallbackLink(author,year){return `${BASE}/busca?nsCat=Natural&q=${encodeURIComponent(author)}&searchField=titulo-autor&ano-de-publicacao=${encodeURIComponent(year)}`}
+// Só usada se um card vier sem link direto (hoje extractCards já exige
+// href "/livro/…", então isso é rede de segurança, não o caminho normal).
+// Levar só o autor (sem o título) faz cair na página com TODOS os livros
+// do autor — o próprio usuário reportou isso como confuso; incluir o
+// título deixa a busca muito mais específica.
+function searchFallbackLink(author,title,year){return `${BASE}/busca?nsCat=Natural&q=${encodeURIComponent(`${author} ${title}`)}&searchField=titulo-autor&ano-de-publicacao=${encodeURIComponent(year)}`}
 function groupLabel(g){return g==='patrons'?'Patrono':'Fundador'}
 function rowKey(r){return r['Link']?norm(r['Link']):norm(`${r['Autor']}|${r['Título']}|${r['Ano']}`)}
 
@@ -130,7 +93,7 @@ async function main(){
     try{
       const cards=[];
       for(let page=1;page<=PAGES;page++){
-        const html=await fetchSearchPage(a.name,page);
+        const html=await fetchSearchPage(a.name,{searchField:'autor',page});
         const pageCards=extractCards(html);
         cards.push(...pageCards);
         // página vazia (ou já repetindo o fim da paginação) — nada mais a
@@ -145,7 +108,7 @@ async function main(){
       for(const c of cards){
         const year=c.year||extractYear(c.title);
         if(!year||year>MAX_YEAR)continue;
-        const link=c.href?`${BASE}${c.href}`:searchFallbackLink(a.name,year);
+        const link=c.href?`${BASE}${c.href}`:searchFallbackLink(a.name,c.title,year);
         // .toFixed(2) evita ambiguidade na releitura: um preço tipo 106.2 (JS
         // derruba o zero à direita) seria mal interpretado como separador de
         // milhar por build-data.mjs e viraria 1062 em vez de 106,20.

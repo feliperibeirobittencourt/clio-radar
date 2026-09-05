@@ -1,0 +1,22 @@
+=== COM filtro _preco=3000-10000000 (pág 1) ===
+preço bruto: R$ 40,00 | ano: 2024 | Meus oito anos
+preço bruto: R$ 30,00 | ano: 2014 | As Primaveras
+preço bruto: R$ 33,60 | ano: 1895 | As primaveras
+
+=== SEM filtro (pág 1) ===
+preço bruto: R$ 23,00 | ano: 2014 | As Primaveras
+preço bruto: R$ 10,00 | ano: 1999 | Primaveras
+preço bruto: R$ 19,00 | ano: 2024 | Meus oito anos
+preço bruto: R$ 26,90 | ano: 2026 | Carolina
+preço bruto: R$ 14,20 | ano: 1952 | As primaveras
+preço bruto: R$ 14,00 | ano: 2009 | 150 anos de primaveras
+preço bruto: R$ 14,40 | ano: 2000 | Melhores Poemas Casimiro de Abreu
+
+=== SÓ faixa 0-2999 (o que o filtro atual EXCLUI) ===
+preço bruto: R$ 23,00 | ano: 2014 | As Primaveras
+preço bruto: R$ 10,00 | ano: 1999 | Primaveras
+preço bruto: R$ 26,90 | ano: 2026 | Carolina
+preço bruto: R$ 19,00 | ano: 2024 | Meus oito anos
+preço bruto: R$ 14,20 | ano: 1961 | As primaveras
+preço bruto: R$ 14,00 | ano: 2009 | 150 anos de primaveras
+preço bruto: R$ 14,40 | ano: 2000 | Melhores Poemas Casimiro de Abreu

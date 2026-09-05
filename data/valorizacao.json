@@ -1,0 +1,17 @@
+[
+  {
+    "mes": "2026-07",
+    "geradoEm": "2026-09-05T03:49:33.719Z",
+    "itensPossuidos": 1111,
+    "itensComCusto": 1045,
+    "itensSemCusto": 66,
+    "itensComComparavelReal": 107,
+    "itensExtrapolados": 938,
+    "multiplicadorMediano": 0.5274994353259698,
+    "totalPagoNominal": 600907.7900000002,
+    "totalPagoCorrigido": 675239.3280913689,
+    "totalEstimadoHoje": 355745.17854604014,
+    "valorizacaoSobreCorrigidoPct": -47.31569034173568,
+    "valorizacaoSobreNominalPct": -40.79870747789107
+  }
+]

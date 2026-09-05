@@ -1,0 +1,47 @@
+name: Estimar valorização do acervo
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Todo dia 15 às 12h UTC (9h BRT) — depois do IPCA do mês anterior sair
+    # (normalmente entre o dia 8 e 10) e depois do acervo/leilões/estante já
+    # terem sido atualizados no mês.
+    - cron: '0 12 15 * *'
+
+permissions:
+  contents: write
+
+jobs:
+  valorizacao:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Calcular valorização do acervo
+        run: node scripts/valorizacao.mjs
+
+      - name: Publicar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/valorizacao.json raw/valorizacao-detalhe.json
+          if git diff --cached --quiet; then
+            echo "Nada novo."
+            exit 0
+          fi
+          git commit -m "Atualiza estimativa de valorização do acervo"
+          for i in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep 5
+          done

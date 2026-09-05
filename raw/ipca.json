@@ -1,0 +1,610 @@
+{
+  "fonte": "BCB SGS série 433 (IPCA mensal)",
+  "atualizadoEm": "2026-09-05T03:41:15.015Z",
+  "serie": [
+    {
+      "mes": "2014-01",
+      "variacaoPct": 0.55
+    },
+    {
+      "mes": "2014-02",
+      "variacaoPct": 0.69
+    },
+    {
+      "mes": "2014-03",
+      "variacaoPct": 0.92
+    },
+    {
+      "mes": "2014-04",
+      "variacaoPct": 0.67
+    },
+    {
+      "mes": "2014-05",
+      "variacaoPct": 0.46
+    },
+    {
+      "mes": "2014-06",
+      "variacaoPct": 0.4
+    },
+    {
+      "mes": "2014-07",
+      "variacaoPct": 0.01
+    },
+    {
+      "mes": "2014-08",
+      "variacaoPct": 0.25
+    },
+    {
+      "mes": "2014-09",
+      "variacaoPct": 0.57
+    },
+    {
+      "mes": "2014-10",
+      "variacaoPct": 0.42
+    },
+    {
+      "mes": "2014-11",
+      "variacaoPct": 0.51
+    },
+    {
+      "mes": "2014-12",
+      "variacaoPct": 0.78
+    },
+    {
+      "mes": "2015-01",
+      "variacaoPct": 1.24
+    },
+    {
+      "mes": "2015-02",
+      "variacaoPct": 1.22
+    },
+    {
+      "mes": "2015-03",
+      "variacaoPct": 1.32
+    },
+    {
+      "mes": "2015-04",
+      "variacaoPct": 0.71
+    },
+    {
+      "mes": "2015-05",
+      "variacaoPct": 0.74
+    },
+    {
+      "mes": "2015-06",
+      "variacaoPct": 0.79
+    },
+    {
+      "mes": "2015-07",
+      "variacaoPct": 0.62
+    },
+    {
+      "mes": "2015-08",
+      "variacaoPct": 0.22
+    },
+    {
+      "mes": "2015-09",
+      "variacaoPct": 0.54
+    },
+    {
+      "mes": "2015-10",
+      "variacaoPct": 0.82
+    },
+    {
+      "mes": "2015-11",
+      "variacaoPct": 1.01
+    },
+    {
+      "mes": "2015-12",
+      "variacaoPct": 0.96
+    },
+    {
+      "mes": "2016-01",
+      "variacaoPct": 1.27
+    },
+    {
+      "mes": "2016-02",
+      "variacaoPct": 0.9
+    },
+    {
+      "mes": "2016-03",
+      "variacaoPct": 0.43
+    },
+    {
+      "mes": "2016-04",
+      "variacaoPct": 0.61
+    },
+    {
+      "mes": "2016-05",
+      "variacaoPct": 0.78
+    },
+    {
+      "mes": "2016-06",
+      "variacaoPct": 0.35
+    },
+    {
+      "mes": "2016-07",
+      "variacaoPct": 0.52
+    },
+    {
+      "mes": "2016-08",
+      "variacaoPct": 0.44
+    },
+    {
+      "mes": "2016-09",
+      "variacaoPct": 0.08
+    },
+    {
+      "mes": "2016-10",
+      "variacaoPct": 0.26
+    },
+    {
+      "mes": "2016-11",
+      "variacaoPct": 0.18
+    },
+    {
+      "mes": "2016-12",
+      "variacaoPct": 0.3
+    },
+    {
+      "mes": "2017-01",
+      "variacaoPct": 0.38
+    },
+    {
+      "mes": "2017-02",
+      "variacaoPct": 0.33
+    },
+    {
+      "mes": "2017-03",
+      "variacaoPct": 0.25
+    },
+    {
+      "mes": "2017-04",
+      "variacaoPct": 0.14
+    },
+    {
+      "mes": "2017-05",
+      "variacaoPct": 0.31
+    },
+    {
+      "mes": "2017-06",
+      "variacaoPct": -0.23
+    },
+    {
+      "mes": "2017-07",
+      "variacaoPct": 0.24
+    },
+    {
+      "mes": "2017-08",
+      "variacaoPct": 0.19
+    },
+    {
+      "mes": "2017-09",
+      "variacaoPct": 0.16
+    },
+    {
+      "mes": "2017-10",
+      "variacaoPct": 0.42
+    },
+    {
+      "mes": "2017-11",
+      "variacaoPct": 0.28
+    },
+    {
+      "mes": "2017-12",
+      "variacaoPct": 0.44
+    },
+    {
+      "mes": "2018-01",
+      "variacaoPct": 0.29
+    },
+    {
+      "mes": "2018-02",
+      "variacaoPct": 0.32
+    },
+    {
+      "mes": "2018-03",
+      "variacaoPct": 0.09
+    },
+    {
+      "mes": "2018-04",
+      "variacaoPct": 0.22
+    },
+    {
+      "mes": "2018-05",
+      "variacaoPct": 0.4
+    },
+    {
+      "mes": "2018-06",
+      "variacaoPct": 1.26
+    },
+    {
+      "mes": "2018-07",
+      "variacaoPct": 0.33
+    },
+    {
+      "mes": "2018-08",
+      "variacaoPct": -0.09
+    },
+    {
+      "mes": "2018-09",
+      "variacaoPct": 0.48
+    },
+    {
+      "mes": "2018-10",
+      "variacaoPct": 0.45
+    },
+    {
+      "mes": "2018-11",
+      "variacaoPct": -0.21
+    },
+    {
+      "mes": "2018-12",
+      "variacaoPct": 0.15
+    },
+    {
+      "mes": "2019-01",
+      "variacaoPct": 0.32
+    },
+    {
+      "mes": "2019-02",
+      "variacaoPct": 0.43
+    },
+    {
+      "mes": "2019-03",
+      "variacaoPct": 0.75
+    },
+    {
+      "mes": "2019-04",
+      "variacaoPct": 0.57
+    },
+    {
+      "mes": "2019-05",
+      "variacaoPct": 0.13
+    },
+    {
+      "mes": "2019-06",
+      "variacaoPct": 0.01
+    },
+    {
+      "mes": "2019-07",
+      "variacaoPct": 0.19
+    },
+    {
+      "mes": "2019-08",
+      "variacaoPct": 0.11
+    },
+    {
+      "mes": "2019-09",
+      "variacaoPct": -0.04
+    },
+    {
+      "mes": "2019-10",
+      "variacaoPct": 0.1
+    },
+    {
+      "mes": "2019-11",
+      "variacaoPct": 0.51
+    },
+    {
+      "mes": "2019-12",
+      "variacaoPct": 1.15
+    },
+    {
+      "mes": "2020-01",
+      "variacaoPct": 0.21
+    },
+    {
+      "mes": "2020-02",
+      "variacaoPct": 0.25
+    },
+    {
+      "mes": "2020-03",
+      "variacaoPct": 0.07
+    },
+    {
+      "mes": "2020-04",
+      "variacaoPct": -0.31
+    },
+    {
+      "mes": "2020-05",
+      "variacaoPct": -0.38
+    },
+    {
+      "mes": "2020-06",
+      "variacaoPct": 0.26
+    },
+    {
+      "mes": "2020-07",
+      "variacaoPct": 0.36
+    },
+    {
+      "mes": "2020-08",
+      "variacaoPct": 0.24
+    },
+    {
+      "mes": "2020-09",
+      "variacaoPct": 0.64
+    },
+    {
+      "mes": "2020-10",
+      "variacaoPct": 0.86
+    },
+    {
+      "mes": "2020-11",
+      "variacaoPct": 0.89
+    },
+    {
+      "mes": "2020-12",
+      "variacaoPct": 1.35
+    },
+    {
+      "mes": "2021-01",
+      "variacaoPct": 0.25
+    },
+    {
+      "mes": "2021-02",
+      "variacaoPct": 0.86
+    },
+    {
+      "mes": "2021-03",
+      "variacaoPct": 0.93
+    },
+    {
+      "mes": "2021-04",
+      "variacaoPct": 0.31
+    },
+    {
+      "mes": "2021-05",
+      "variacaoPct": 0.83
+    },
+    {
+      "mes": "2021-06",
+      "variacaoPct": 0.53
+    },
+    {
+      "mes": "2021-07",
+      "variacaoPct": 0.96
+    },
+    {
+      "mes": "2021-08",
+      "variacaoPct": 0.87
+    },
+    {
+      "mes": "2021-09",
+      "variacaoPct": 1.16
+    },
+    {
+      "mes": "2021-10",
+      "variacaoPct": 1.25
+    },
+    {
+      "mes": "2021-11",
+      "variacaoPct": 0.95
+    },
+    {
+      "mes": "2021-12",
+      "variacaoPct": 0.73
+    },
+    {
+      "mes": "2022-01",
+      "variacaoPct": 0.54
+    },
+    {
+      "mes": "2022-02",
+      "variacaoPct": 1.01
+    },
+    {
+      "mes": "2022-03",
+      "variacaoPct": 1.62
+    },
+    {
+      "mes": "2022-04",
+      "variacaoPct": 1.06
+    },
+    {
+      "mes": "2022-05",
+      "variacaoPct": 0.47
+    },
+    {
+      "mes": "2022-06",
+      "variacaoPct": 0.67
+    },
+    {
+      "mes": "2022-07",
+      "variacaoPct": -0.68
+    },
+    {
+      "mes": "2022-08",
+      "variacaoPct": -0.36
+    },
+    {
+      "mes": "2022-09",
+      "variacaoPct": -0.29
+    },
+    {
+      "mes": "2022-10",
+      "variacaoPct": 0.59
+    },
+    {
+      "mes": "2022-11",
+      "variacaoPct": 0.41
+    },
+    {
+      "mes": "2022-12",
+      "variacaoPct": 0.62
+    },
+    {
+      "mes": "2023-01",
+      "variacaoPct": 0.53
+    },
+    {
+      "mes": "2023-02",
+      "variacaoPct": 0.84
+    },
+    {
+      "mes": "2023-03",
+      "variacaoPct": 0.71
+    },
+    {
+      "mes": "2023-04",
+      "variacaoPct": 0.61
+    },
+    {
+      "mes": "2023-05",
+      "variacaoPct": 0.23
+    },
+    {
+      "mes": "2023-06",
+      "variacaoPct": -0.08
+    },
+    {
+      "mes": "2023-07",
+      "variacaoPct": 0.12
+    },
+    {
+      "mes": "2023-08",
+      "variacaoPct": 0.23
+    },
+    {
+      "mes": "2023-09",
+      "variacaoPct": 0.26
+    },
+    {
+      "mes": "2023-10",
+      "variacaoPct": 0.24
+    },
+    {
+      "mes": "2023-11",
+      "variacaoPct": 0.28
+    },
+    {
+      "mes": "2023-12",
+      "variacaoPct": 0.56
+    },
+    {
+      "mes": "2024-01",
+      "variacaoPct": 0.42
+    },
+    {
+      "mes": "2024-02",
+      "variacaoPct": 0.83
+    },
+    {
+      "mes": "2024-03",
+      "variacaoPct": 0.16
+    },
+    {
+      "mes": "2024-04",
+      "variacaoPct": 0.38
+    },
+    {
+      "mes": "2024-05",
+      "variacaoPct": 0.46
+    },
+    {
+      "mes": "2024-06",
+      "variacaoPct": 0.21
+    },
+    {
+      "mes": "2024-07",
+      "variacaoPct": 0.38
+    },
+    {
+      "mes": "2024-08",
+      "variacaoPct": -0.02
+    },
+    {
+      "mes": "2024-09",
+      "variacaoPct": 0.44
+    },
+    {
+      "mes": "2024-10",
+      "variacaoPct": 0.56
+    },
+    {
+      "mes": "2024-11",
+      "variacaoPct": 0.39
+    },
+    {
+      "mes": "2024-12",
+      "variacaoPct": 0.52
+    },
+    {
+      "mes": "2025-01",
+      "variacaoPct": 0.16
+    },
+    {
+      "mes": "2025-02",
+      "variacaoPct": 1.31
+    },
+    {
+      "mes": "2025-03",
+      "variacaoPct": 0.56
+    },
+    {
+      "mes": "2025-04",
+      "variacaoPct": 0.43
+    },
+    {
+      "mes": "2025-05",
+      "variacaoPct": 0.26
+    },
+    {
+      "mes": "2025-06",
+      "variacaoPct": 0.24
+    },
+    {
+      "mes": "2025-07",
+      "variacaoPct": 0.26
+    },
+    {
+      "mes": "2025-08",
+      "variacaoPct": -0.11
+    },
+    {
+      "mes": "2025-09",
+      "variacaoPct": 0.48
+    },
+    {
+      "mes": "2025-10",
+      "variacaoPct": 0.09
+    },
+    {
+      "mes": "2025-11",
+      "variacaoPct": 0.18
+    },
+    {
+      "mes": "2025-12",
+      "variacaoPct": 0.33
+    },
+    {
+      "mes": "2026-01",
+      "variacaoPct": 0.33
+    },
+    {
+      "mes": "2026-02",
+      "variacaoPct": 0.7
+    },
+    {
+      "mes": "2026-03",
+      "variacaoPct": 0.88
+    },
+    {
+      "mes": "2026-04",
+      "variacaoPct": 0.67
+    },
+    {
+      "mes": "2026-05",
+      "variacaoPct": 0.58
+    },
+    {
+      "mes": "2026-06",
+      "variacaoPct": 0.16
+    },
+    {
+      "mes": "2026-07",
+      "variacaoPct": 0.07
+    }
+  ]
+}

@@ -15,6 +15,14 @@ const MAX_YEAR=Number(process.env.ESTANTE_MAX_YEAR)||1940;
 const DELAY_MS=Number(process.env.ESTANTE_DELAY_MS)||60_000;
 const IMAGE_DELAY_MS=Number(process.env.ESTANTE_IMAGE_DELAY_MS)||3_000;
 const SELLER_DELAY_MS=Number(process.env.ESTANTE_SELLER_DELAY_MS)||2_000;
+// A busca ordena por "anunciado mais recentemente", não pelo ano do livro —
+// reedições modernas (muito mais anunciadas que exemplares antigos de
+// verdade) enchem a página 1 e empurram achados elegíveis pra páginas
+// seguintes, que a rodada diária (PAGES=1) nunca revisita. ESTANTE_PAGES>1
+// serve só pra uma varredura pontual (backfill) desencalhar esse estoque
+// parado; no dia a dia 1 página já cobre o que é publicado de fato novo.
+const PAGES=Math.max(1,Number(process.env.ESTANTE_PAGES)||1);
+const PAGE_DELAY_MS=Number(process.env.ESTANTE_PAGE_DELAY_MS)||8_000;
 const BASE='https://www.estantevirtual.com.br';
 const IMAGE_BASE='https://static.estantevirtual.com.br';
 const HEADERS=['Autor','Grupo','Título','Ano','Preço (R$)','Na janela 1850-1930?','Link','Imagem','Status','Verificado em','Visto em','Vendedor'];
@@ -57,11 +65,15 @@ function extractCards(html){
 
 const FETCH_HEADERS={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36','Accept-Language':'pt-BR,pt;q=0.9,en;q=0.8'};
 
-async function fetchSearchPage(author){
+async function fetchSearchPage(author,page=1){
   // searchField=autor restringe a busca ao campo de autor (em vez de busca livre
   // por qualquer campo do anúncio), evitando ruído de livros que só mencionam o
   // nome por acaso — mesmo ajuste já validado no monitor Python irmão.
-  const url=`${BASE}/busca?q=${encodeURIComponent(author)}&searchField=autor&tipo-de-livro=usado&_preco=3000-10000000&pagina=1&sort=new-releases`;
+  // _preco=3000-10000000 é em centavos (R$30,00-R$100.000,00): confirmado com
+  // diagnóstico real no site que exclui só os anúncios abaixo de R$30 (que na
+  // prática são sempre reedição/exemplar sem valor de colecionador, nunca um
+  // achado antigo de verdade) — intencional, não é bug.
+  const url=`${BASE}/busca?q=${encodeURIComponent(author)}&searchField=autor&tipo-de-livro=usado&_preco=3000-10000000&pagina=${page}&sort=new-releases`;
   const res=await fetch(url,{headers:FETCH_HEADERS});
   if(!res.ok)throw new Error(`HTTP ${res.status}`);
   return res.text();
@@ -116,8 +128,16 @@ async function main(){
   for(let i=0;i<authors.length;i++){
     const a=authors[i];
     try{
-      const html=await fetchSearchPage(a.name);
-      const cards=extractCards(html);
+      const cards=[];
+      for(let page=1;page<=PAGES;page++){
+        const html=await fetchSearchPage(a.name,page);
+        const pageCards=extractCards(html);
+        cards.push(...pageCards);
+        // página vazia (ou já repetindo o fim da paginação) — nada mais a
+        // buscar pra esse autor, mesma lógica do backfill de leilão irmão.
+        if(!pageCards.length)break;
+        if(page<PAGES)await sleep(PAGE_DELAY_MS);
+      }
       const years=cards.map(c=>c.year||extractYear(c.title)).filter(Boolean);
       const eligible=years.filter(y=>y<=MAX_YEAR);
       totalCards+=cards.length;totalWithYear+=years.length;totalEligible+=eligible.length;

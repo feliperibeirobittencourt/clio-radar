@@ -1,0 +1,71 @@
+name: Desencalhar estoque parado na Estante Virtual (varredura de páginas)
+
+on:
+  workflow_dispatch:
+    inputs:
+      paginas:
+        description: 'Quantas páginas buscar por autor nesta rodada'
+        required: false
+        default: '5'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: clio-estante-scrape
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Publicar histórico atualizado
+        env:
+          ESTANTE_PAGES: ${{ inputs.paginas }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Mesmo raciocínio do backfill de vendedor: se der conflito de
+          # publicação (ex.: scrape diário rodando por baixo), refazer o
+          # mesmo rebase não resolve um conflito de conteúdo de verdade —
+          # descarta tudo e reprocessa do zero sobre a versão mais nova do
+          # main antes de tentar publicar de novo.
+          for i in 1 2 3 4 5; do
+            node scripts/scrape-estante.mjs
+
+            git add raw/estante-hoje.csv raw/estante-historico.csv raw/estante-status.json raw/estante-vendedores.json
+            if git diff --cached --quiet; then
+              echo "Nada novo pra salvar."
+              exit 0
+            fi
+            git commit -m "Varredura de páginas: desencalha estoque parado da Estante Virtual"
+
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Tentativa $i de publicar falhou (provável atualização concorrente do histórico). Descartando e reprocessando sobre a versão mais recente…"
+            git rebase --abort 2>/dev/null || true
+            git fetch origin main
+            git reset --hard origin/main
+            sleep 5
+          done
+          echo "Não foi possível publicar após 5 tentativas."
+          exit 1
+
+      - name: Acionar reconstrução dos dados do CLIO (leilões + Estante Virtual)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-clio-data.yml --ref main

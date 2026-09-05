@@ -1,0 +1,46 @@
+name: Atualizar índice IPCA (inflação)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Todo dia 10 às 12h UTC (9h BRT) — o IPCA do mês anterior costuma sair
+    # entre o dia 8 e 10 do mês seguinte.
+    - cron: '0 12 10 * *'
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Buscar série do IPCA
+        run: node scripts/fetch-ipca.mjs
+
+      - name: Publicar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add raw/ipca.json
+          if git diff --cached --quiet; then
+            echo "Nada novo."
+            exit 0
+          fi
+          git commit -m "Atualiza série do IPCA"
+          for i in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep 5
+          done

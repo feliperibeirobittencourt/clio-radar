@@ -6781,7 +6781,7 @@
     "acquired": "2024-04-29T00:00:00.000Z",
     "custoCorrigido": 291.849904082167,
     "valorMercadoReal": null,
-    "nComps": 0,
+    "nComps": 1,
     "valorEstimado": 153.9506596032815,
     "confianca": "extrapolado"
   },

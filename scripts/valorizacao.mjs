@@ -142,11 +142,18 @@ async function main(){
     itensComComparavelReal:nReal,
     itensExtrapolados:nExtrapolado,
     multiplicadorMediano,
-    totalPagoNominal,
-    totalPagoCorrigido,
-    totalEstimadoHoje,
-    valorizacaoSobreCorrigidoPct:totalPagoCorrigido?(totalEstimadoHoje/totalPagoCorrigido-1)*100:null,
-    valorizacaoSobreNominalPct:totalPagoNominal?(totalEstimadoHoje/totalPagoNominal-1)*100:null,
+    modelo1CustoCorrigidoPelaInflacao:{
+      totalPagoNominal,
+      totalPagoCorrigido,
+      descricao:'Quanto valeria hoje, em poder de compra, o total pago — corrigido só pelo IPCA (inflação geral). Não pressupõe nada sobre o mercado de livros raros. É a referência mais realista pra avaliar se o preço pago foi razoável.',
+    },
+    modelo2ValorDeRevendaEstimado:{
+      total:totalEstimadoHoje,
+      variacaoSobreCorrigidoPct:totalPagoCorrigido?(totalEstimadoHoje/totalPagoCorrigido-1)*100:null,
+      variacaoSobreNominalPct:totalPagoNominal?(totalEstimadoHoje/totalPagoNominal-1)*100:null,
+      descricao:'Quanto a coleção renderia hoje se revendida no mesmo mercado (leilão + Estante Virtual) de onde vieram os comparáveis — baseado em vendas reais de mesma edição/ano (extrapolado pros itens sem comparável direto). NÃO é uma medida de "prejuízo": ver leituraRecomendada.',
+    },
+    leituraRecomendada:'Um número abaixo de 100% aqui não significa mercado em queda nem erro de conta — é esperado quando se compra pra completar uma coleção específica (fechar um autor que falta no conjunto). Nesse tipo de compra você compete e arremata acima da mediana de quem só está revendendo um exemplar qualquer daquele livro, porque não dá pra esperar a oferta mais barata aparecer quando falta só aquele título. Confirmado nos dados (2026-09): a queda aparece igual em qualquer ano de compra (2020-2026) e em qualquer nível de raridade/edição — não piora nos anos de compra mais intensos nem se concentra num grupo específico de itens. Use o Modelo 1 (custo corrigido) como referência de "paguei um preço razoável?"; o Modelo 2 serve pra "quanto isso renderia se eu revendesse tudo agora?", não pra medir se a compra foi um bom negócio.',
   };
 
   let historico=[];
@@ -159,7 +166,7 @@ async function main(){
   await fs.writeFile(OUT_HISTORICO,JSON.stringify(historico,null,2));
   await fs.writeFile(OUT_DETALHE,JSON.stringify(results,null,2));
 
-  console.log(`Snapshot ${snapshot.mes}: ${comCusto.length} itens com custo (${nReal} com comparável real, ${nExtrapolado} extrapolados) · pago corrigido R$ ${totalPagoCorrigido.toFixed(2)} · estimado hoje R$ ${totalEstimadoHoje.toFixed(2)} (${snapshot.valorizacaoSobreCorrigidoPct.toFixed(1)}%).`);
+  console.log(`Snapshot ${snapshot.mes}: ${comCusto.length} itens com custo (${nReal} com comparável real, ${nExtrapolado} extrapolados) · pago corrigido R$ ${totalPagoCorrigido.toFixed(2)} · valor de revenda estimado R$ ${totalEstimadoHoje.toFixed(2)} (${snapshot.modelo2ValorDeRevendaEstimado.variacaoSobreCorrigidoPct.toFixed(1)}%).`);
 }
 
 await main();

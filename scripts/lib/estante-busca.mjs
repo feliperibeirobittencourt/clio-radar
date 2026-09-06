@@ -35,8 +35,9 @@ export function extractCards(html){
   return cards;
 }
 
-export async function fetchSearchPage(query,{searchField='autor',page=1}={}){
-  const url=`${BASE}/busca?q=${encodeURIComponent(query)}&searchField=${searchField}&tipo-de-livro=usado&_preco=3000-10000000&pagina=${page}&sort=new-releases`;
+export async function fetchSearchPage(query,{searchField='autor',page=1,ano=null}={}){
+  const anoParam=ano?`&ano-de-publicacao=${encodeURIComponent(ano)}`:'';
+  const url=`${BASE}/busca?q=${encodeURIComponent(query)}&searchField=${searchField}&tipo-de-livro=usado&_preco=3000-10000000${anoParam}&pagina=${page}&sort=new-releases`;
   const res=await fetch(url,{headers:FETCH_HEADERS});
   if(!res.ok)throw new Error(`HTTP ${res.status}`);
   return res.text();

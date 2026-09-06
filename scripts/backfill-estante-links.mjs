@@ -30,7 +30,7 @@ function fallbackLink(author,title,year){return `${BASE}/busca?nsCat=Natural&q=$
 
 async function acharLinkDireto(row){
   const author=row['Autor'],title=row['Título'],year=Number(row['Ano'])||null;
-  const html=await fetchSearchPage(`${author} ${title}`,{searchField:'titulo-autor',page:1});
+  const html=await fetchSearchPage(`${author} ${title}`,{searchField:'titulo-autor',page:1,ano:year});
   const cards=extractCards(html);
   const titleTokens=canon(title).split(' ').filter(x=>x.length>3);
   const authorKey=norm(author);

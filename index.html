@@ -146,13 +146,31 @@ function linkedCollectionRows(r){const a=aliasForMarket(r);if(a){if(a.type==='BL
 function stripListingNoise(s){return s.replace(/^livro\s*/,'').replace(/^raro\s*-?\s*/,'').replace(/\b\d+\s*[aoªº]?\s*edicao\b/g,' ').replace(/\bvolume\s+[ivxlcdm\d]+\b/g,' ').replace(/\b\d+\s+volumes?\b/g,' ').replace(/\s+/g,' ').trim()}
 function archaicSpelling(s){return s.replace(/ph/g,'f').replace(/th/g,'t').replace(/(ll|tt|pp|cc|mm|nn|bb|dd|ff|gg)/g,m=>m[0]).replace(/pt/g,'t').replace(/ct/g,'t').replace(/y/g,'i').replace(/z/g,'s')}
 function canon(v){return archaicSpelling(stripListingNoise(norm(v)))}
+// Quando o leilão não preenche "Título" (~29% dos lotes), o build usa a
+// descrição completa como título (ex.: "COELHO NETTO. Canteiro de saudades.
+// Porto: Livraria Chardron de Lello & Irmão, 1927. 250p. Enc. em couro...").
+// Duas coisas nessas descrições inflam sobreposição de título por coincidência:
+// palavras bibliográficas genéricas (editora, cidade, encadernação), e o
+// PRÓPRIO NOME DO AUTOR aparecendo dentro do texto do título (comum em
+// entradas de coautoria/prefácio, ex.: "Contos Pátrios..., Olavo Bilac e
+// Coelho Netto") — esse segundo caso foi o principal: "Coelho"+"Netto" sozinho
+// já batia os 2 tokens exigidos com QUALQUER outro item do mesmo autor, sem
+// nenhuma palavra do título de verdade em comum (confirmado com dado real:
+// "Canteiro de saudades" "vinculado" a 6 livros distintos do Coelho Netto).
+// Autor já é conferido separadamente (authorKey acima) — repetir o nome no
+// título não deveria contar de novo como evidência de título.
+const PALAVRAS_RUIDO_TITULO=new Set(['livro','livraria','editora','edicao','encadernado','encadernada','encadernacao','capa','dura','brochura','pagina','paginas','bom','boa','otimo','otima','raro','rara','antigo','antiga','exemplar','completo','completa','ilustrado','ilustrada','conservado','conservada','original','marca','marcas','tempo','mancha','manchas','titulo','autor','documento','impresso','impressa','tomo','volume','rio','janeiro','paulo','sao','porto','lisboa','brasil','estado','ano']);
+function tokensRelevantesTitulo(v,autor){
+  const autorTokens=autor?new Set(norm(autor).split(' ').filter(x=>x.length>3)):null;
+  return canon(v).split(' ').filter(x=>x.length>3&&!PALAVRAS_RUIDO_TITULO.has(x)&&!(autorTokens&&autorTokens.has(x)));
+}
 function ownedEditionsFor(r){
   const cacheKey=`${norm(r.author)}|${norm(r.title)}`;
   if(ownedEditionCache.has(cacheKey))return ownedEditionCache.get(cacheKey);
   const manual=linkedCollectionRows(r);
-  const authorKey=norm(r.author),titleTokens=canon(r.title).split(' ').filter(x=>x.length>3).slice(0,8);
+  const authorKey=norm(r.author),titleTokens=tokensRelevantesTitulo(r.title,r.author).slice(0,8);
   const rows=manual!==null?manual:state.collection.filter(c=>c.owned&&norm(c.author)&&authorKey&&(norm(c.author).includes(authorKey)||authorKey.includes(norm(c.author)))).filter(c=>{
-    const ct=canon(c.title),overlap=titleTokens.filter(t=>ct.includes(t)).length;
+    const ctTokens=tokensRelevantesTitulo(c.title,c.author),overlap=titleTokens.filter(t=>ctTokens.includes(t)).length;
     return titleTokens.length?overlap>=Math.min(2,titleTokens.length):false;
   });
   const years=[...new Set(rows.map(c=>c.year).filter(Boolean))].sort((a,b)=>a-b);
@@ -171,7 +189,7 @@ function effectiveOwnership(r){
   if(r.year&&own.rows.some(c=>c.year===r.year))return 'same';
   return 'other';
 }
-function desiredCollectionMatch(r){const a=norm(r.author),tokens=canon(r.title).split(' ').filter(x=>x.length>3);return state.collection.some(c=>c.desire&&norm(c.author)===a&&tokens.length&&tokens.filter(t=>canon(c.title).includes(t)).length>=Math.min(2,tokens.length))}
+function desiredCollectionMatch(r){const a=norm(r.author),tokens=tokensRelevantesTitulo(r.title,r.author);return state.collection.some(c=>c.desire&&norm(c.author)===a&&tokens.length&&tokens.filter(t=>tokensRelevantesTitulo(c.title,c.author).includes(t)).length>=Math.min(2,tokens.length))}
 function score(r){let s=0;const ownership=effectiveOwnership(r);if(ownership==='missing')s+=35;else if(ownership==='other'){s+=18;const own=ownedEditionsFor(r);if(r.year&&own.oldest&&r.year<own.oldest){const gap=own.oldest-r.year;s+=gap>=30?25:gap>=10?20:15}}else s-=30;if(r.first)s+=25;if(r.signed)s+=18;if(r.type==='documento')s+=20;if(r.year&&r.year<=1900)s+=10;if(state.hunt.some(h=>r.search.includes(norm(h)))||desiredCollectionMatch(r))s+=30;if(['machado de assis','jose de alencar','olavo bilac','julia lopes'].some(x=>norm(r.author).includes(x)))s+=12;if(r.type==='outro')s-=55;return Math.max(0,Math.min(100,s))}
 function scoreClass(n){return n>=85?'hot':n>=60?'mid':''}
 function ownershipLabel(r){const ownership=effectiveOwnership(r);if(ownership==='same'){const own=ownedEditionsFor(r);return`<span class="tag good">✓ Mesma edição</span>${own.years.length?`<div class="owned-edition-years">Tenho: ${own.years.join(' · ')}</div>`:''}`}if(ownership==='other'){const own=ownedEditionsFor(r),years=own.years;if(!years.length)return'<span class="tag gold">Outra edição</span>';const older=r.year&&own.oldest&&r.year<own.oldest;return`<span class="tag gold">${older?'↑ ':''}Outra edição</span><div class="owned-edition-years">Tenho: ${years.join(' · ')}</div>`}return'<span class="tag bad">✕ Não tenho</span>'}

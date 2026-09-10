@@ -162,16 +162,29 @@ function canon(v){return archaicSpelling(stripListingNoise(norm(v)))}
 const PALAVRAS_RUIDO_TITULO=new Set(['livro','livraria','editora','edicao','encadernado','encadernada','encadernacao','capa','dura','brochura','pagina','paginas','bom','boa','otimo','otima','raro','rara','antigo','antiga','exemplar','completo','completa','ilustrado','ilustrada','conservado','conservada','original','marca','marcas','tempo','mancha','manchas','titulo','autor','documento','impresso','impressa','tomo','volume','rio','janeiro','paulo','sao','porto','lisboa','brasil','estado','ano']);
 function tokensRelevantesTitulo(v,autor){
   const autorTokens=autor?new Set(norm(autor).split(' ').filter(x=>x.length>3)):null;
-  return canon(v).split(' ').filter(x=>x.length>3&&!PALAVRAS_RUIDO_TITULO.has(x)&&!(autorTokens&&autorTokens.has(x)));
+  // Sem dedupe, uma palavra repetida no texto (ex.: "(RARO - DIREITO) - ...
+  // DE DIREITO INTERNACIONAL PRIVADO") contava como 2 sobreposições por
+  // conta própria — inflando o "overlap" sem nenhuma palavra a mais de
+  // verdade em comum.
+  return [...new Set(canon(v).split(' ').filter(x=>x.length>3&&!PALAVRAS_RUIDO_TITULO.has(x)&&!(autorTokens&&autorTokens.has(x))))];
 }
 function ownedEditionsFor(r){
   const cacheKey=`${norm(r.author)}|${norm(r.title)}`;
   if(ownedEditionCache.has(cacheKey))return ownedEditionCache.get(cacheKey);
   const manual=linkedCollectionRows(r);
   const authorKey=norm(r.author),titleTokens=tokensRelevantesTitulo(r.title,r.author).slice(0,8);
+  // Math.min(2,titleTokens.length) parecia razoável, mas com só 1 token
+  // sobrando (ex.: "Poesias", "Direito") a exigência caía pra 1 — e uma
+  // palavra assim genérica se repete em quase todo o catálogo de um
+  // poeta/jurista, vinculando com TUDO (confirmado com dado real: "Poesias"
+  // batendo com as 6 séries diferentes de poesia do mesmo autor). 1 palavra
+  // em comum nunca é evidência suficiente por si só, então exige sempre 2,
+  // mesmo quando o título só tem 1 palavra significativa disponível (nesse
+  // caso, nunca bate sozinho — fica pra revisão manual, não é regressão:
+  // "só 1 palavra genérica em comum" nunca foi uma correspondência confiável).
   const rows=manual!==null?manual:state.collection.filter(c=>c.owned&&norm(c.author)&&authorKey&&(norm(c.author).includes(authorKey)||authorKey.includes(norm(c.author)))).filter(c=>{
     const ctTokens=tokensRelevantesTitulo(c.title,c.author),overlap=titleTokens.filter(t=>ctTokens.includes(t)).length;
-    return titleTokens.length?overlap>=Math.min(2,titleTokens.length):false;
+    return titleTokens.length>=2&&overlap>=2;
   });
   const years=[...new Set(rows.map(c=>c.year).filter(Boolean))].sort((a,b)=>a-b);
   const result={rows,years,oldest:years[0]||null,newest:years.at(-1)||null};
@@ -189,7 +202,7 @@ function effectiveOwnership(r){
   if(r.year&&own.rows.some(c=>c.year===r.year))return 'same';
   return 'other';
 }
-function desiredCollectionMatch(r){const a=norm(r.author),tokens=tokensRelevantesTitulo(r.title,r.author);return state.collection.some(c=>c.desire&&norm(c.author)===a&&tokens.length&&tokens.filter(t=>tokensRelevantesTitulo(c.title,c.author).includes(t)).length>=Math.min(2,tokens.length))}
+function desiredCollectionMatch(r){const a=norm(r.author),tokens=tokensRelevantesTitulo(r.title,r.author);return state.collection.some(c=>c.desire&&norm(c.author)===a&&tokens.length>=2&&tokens.filter(t=>tokensRelevantesTitulo(c.title,c.author).includes(t)).length>=2)}
 function score(r){let s=0;const ownership=effectiveOwnership(r);if(ownership==='missing')s+=35;else if(ownership==='other'){s+=18;const own=ownedEditionsFor(r);if(r.year&&own.oldest&&r.year<own.oldest){const gap=own.oldest-r.year;s+=gap>=30?25:gap>=10?20:15}}else s-=30;if(r.first)s+=25;if(r.signed)s+=18;if(r.type==='documento')s+=20;if(r.year&&r.year<=1900)s+=10;if(state.hunt.some(h=>r.search.includes(norm(h)))||desiredCollectionMatch(r))s+=30;if(['machado de assis','jose de alencar','olavo bilac','julia lopes'].some(x=>norm(r.author).includes(x)))s+=12;if(r.type==='outro')s-=55;return Math.max(0,Math.min(100,s))}
 function scoreClass(n){return n>=85?'hot':n>=60?'mid':''}
 function ownershipLabel(r){const ownership=effectiveOwnership(r);if(ownership==='same'){const own=ownedEditionsFor(r);return`<span class="tag good">✓ Mesma edição</span>${own.years.length?`<div class="owned-edition-years">Tenho: ${own.years.join(' · ')}</div>`:''}`}if(ownership==='other'){const own=ownedEditionsFor(r),years=own.years;if(!years.length)return'<span class="tag gold">Outra edição</span>';const older=r.year&&own.oldest&&r.year<own.oldest;return`<span class="tag gold">${older?'↑ ':''}Outra edição</span><div class="owned-edition-years">Tenho: ${years.join(' · ')}</div>`}return'<span class="tag bad">✕ Não tenho</span>'}
